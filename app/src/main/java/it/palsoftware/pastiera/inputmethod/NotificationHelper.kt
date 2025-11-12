@@ -36,16 +36,20 @@ object NotificationHelper {
     
     /**
      * Crea il canale di notifica (richiesto per Android 8.0+).
+     * Usa IMPORTANCE_HIGH per cercare di posizionare la notifica più in alto nella barra di stato.
      */
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_LOW // Notifica discreta
+                NotificationManager.IMPORTANCE_HIGH // Priorità alta per visibilità migliore
             ).apply {
                 description = "Notifiche per il nav mode di Pastiera"
                 setShowBadge(false)
+                // Su Android 8.0+, le notifiche con importanza alta possono apparire più in alto
+                enableLights(true)
+                enableVibration(false)
             }
             
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -75,9 +79,11 @@ object NotificationHelper {
             .setContentTitle("Nav Mode Activated")
             .setContentText("Nav mode activated")
             .setSmallIcon(android.R.drawable.ic_dialog_info) // Icona di sistema
-            .setPriority(NotificationCompat.PRIORITY_LOW) // Priorità bassa
+            .setPriority(NotificationCompat.PRIORITY_HIGH) // Priorità alta per visibilità migliore
             .setAutoCancel(true) // Si chiude automaticamente quando viene toccata
-            .setOngoing(false) // Non persistente
+            .setOngoing(true) // Persistente per rimanere visibile
+            .setCategory(NotificationCompat.CATEGORY_STATUS) // Categoria status per barra di stato
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) // Visibile anche su schermo bloccato
             .build()
         
         notificationManager.notify(NOTIFICATION_ID, notification)

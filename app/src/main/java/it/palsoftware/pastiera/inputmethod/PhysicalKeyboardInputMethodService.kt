@@ -187,6 +187,11 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
             ctrlLatchActive = true
             Log.d(TAG, "resetModifierStates() - preservato Ctrl latch nel nav mode")
         } else {
+            // Se il nav mode era attivo, cancellalo e la notifica
+            if (ctrlLatchFromNavMode || ctrlLatchActive) {
+                Log.d(TAG, "resetModifierStates() - disattivato nav mode, cancello notifica")
+                NotificationHelper.cancelNavModeNotification(this)
+            }
             ctrlLatchActive = false
             ctrlLatchFromNavMode = false // Reset anche il flag del nav mode
         }
@@ -450,9 +455,12 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
                 
                 if (isReallyEditable && hasValidInputConnection) {
                     // Disattiva il nav mode SOLO quando si entra in un campo di testo realmente editabile
+                    if (ctrlLatchFromNavMode || ctrlLatchActive) {
+                        Log.d(TAG, "onStartInput() - disattivato nav mode perché entrato in campo di testo realmente editabile")
+                        NotificationHelper.cancelNavModeNotification(this)
+                    }
                     ctrlLatchFromNavMode = false
                     ctrlLatchActive = false
-                    Log.d(TAG, "onStartInput() - disattivato nav mode perché entrato in campo di testo realmente editabile")
                     resetModifierStates(preserveNavMode = false)
                 } else {
                     // Non è un campo realmente editabile o non c'è input connection - mantieni il nav mode
@@ -770,6 +778,9 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
                     } else {
                         // Ctrl latch dal nav mode ma siamo in un campo di testo - non dovrebbe succedere
                         // ma se succede, disattiva comunque
+                        if (ctrlLatchFromNavMode) {
+                            NotificationHelper.cancelNavModeNotification(this)
+                        }
                         ctrlLatchActive = false
                         ctrlLatchFromNavMode = false
                         updateStatusBarText()

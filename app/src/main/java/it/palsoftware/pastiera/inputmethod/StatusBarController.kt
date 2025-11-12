@@ -787,18 +787,14 @@ class StatusBarController(
         val emojiKeyboardView = emojiKeyboardContainer ?: return
 
         if (snapshot.navModeActive) {
-            layout.setBackgroundColor(NAV_MODE_BACKGROUND)
-            modifiersContainerView.visibility = View.GONE
-            emojiView.visibility = View.GONE
-            emojiKeyboardView.visibility = View.GONE
-            variationsContainerView.visibility = View.GONE
-            // Aggiorna i LED anche nel nav mode
-            updateLed(shiftLed, false, false)
-            updateLed(ctrlLed, snapshot.ctrlLatchActive, false) // Rosso se lockato nel nav mode
-            updateLed(altLed, false, false)
-            updateLed(symLed, false, false)
+            // Nascondi completamente la barra di stato nel nav mode
+            // La notifica è sufficiente per indicare che il nav mode è attivo
+            layout.visibility = View.GONE
             return
         }
+        
+        // Mostra la barra quando non siamo in nav mode
+        layout.visibility = View.VISIBLE
 
         layout.setBackgroundColor(DEFAULT_BACKGROUND)
         
