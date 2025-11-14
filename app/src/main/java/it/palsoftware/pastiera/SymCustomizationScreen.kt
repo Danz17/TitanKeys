@@ -24,7 +24,7 @@ import it.palsoftware.pastiera.R
 import it.palsoftware.pastiera.inputmethod.StatusBarController
 
 /**
- * Schermata per personalizzare le mappature SYM.
+ * Screen for customizing SYM mappings.
  */
 @Composable
 fun SymCustomizationScreen(
@@ -33,11 +33,13 @@ fun SymCustomizationScreen(
 ) {
     val context = LocalContext.current
     
-    // Carica le mappature esistenti o usa quelle di default
-    val defaultMappings = remember {
-        // Carica le mappature di default dal JSON
-        try {
-            val inputStream = context.assets.open("common/sym/sym_key_mappings.json")
+    // Selected tab (0 = Emoji, 1 = Characters)
+    var selectedTab by remember { mutableStateOf(0) }
+    
+    // Helper to load mappings from JSON
+    fun loadMappingsFromJson(filePath: String): Map<Int, String> {
+        return try {
+            val inputStream = context.assets.open(filePath)
             val jsonString = inputStream.bufferedReader().use { it.readText() }
             val jsonObject = org.json.JSONObject(jsonString)
             val mappingsObject = jsonObject.getJSONObject("mappings")
@@ -61,9 +63,9 @@ fun SymCustomizationScreen(
             while (keys.hasNext()) {
                 val keyName = keys.next()
                 val keyCode = keyCodeMap[keyName]
-                val emoji = mappingsObject.getString(keyName)
+                val content = mappingsObject.getString(keyName)
                 if (keyCode != null) {
-                    result[keyCode] = emoji
+                    result[keyCode] = content
                 }
             }
             result
@@ -72,24 +74,43 @@ fun SymCustomizationScreen(
         }
     }
     
-    // Carica mappature personalizzate o usa quelle di default
-    var symMappings by remember {
+    // Load default mappings for page 1 (emoji)
+    val defaultMappingsPage1 = remember {
+        loadMappingsFromJson("common/sym/sym_key_mappings.json")
+    }
+    
+    // Load default mappings for page 2 (characters)
+    val defaultMappingsPage2 = remember {
+        loadMappingsFromJson("common/sym/sym_key_mappings_page2.json")
+    }
+    
+    // Load custom mappings or fallback to defaults for page 1
+    var symMappingsPage1 by remember {
         mutableStateOf(
             SettingsManager.getSymMappings(context).takeIf { it.isNotEmpty() }
-                ?: defaultMappings
+                ?: defaultMappingsPage1
         )
     }
     
-    // Stato per il dialog emoji picker
+    // Load custom mappings or fallback to defaults for page 2
+    var symMappingsPage2 by remember {
+        mutableStateOf(
+            SettingsManager.getSymMappingsPage2(context).takeIf { it.isNotEmpty() }
+                ?: defaultMappingsPage2
+        )
+    }
+    
+    // State for picker dialogs
     var showEmojiPicker by remember { mutableStateOf(false) }
+    var showCharacterPicker by remember { mutableStateOf(false) }
     var selectedKeyCode by remember { mutableStateOf<Int?>(null) }
     
-    // Gestisci il back button di sistema
+    // Handle the system back button
     BackHandler {
         onBack()
     }
     
-    // Funzione helper per convertire keycode in lettera
+    // Helper function to convert keycode to letter
     fun getLetterFromKeyCode(keyCode: Int): String {
         return when (keyCode) {
             KeyEvent.KEYCODE_Q -> "Q"
@@ -135,7 +156,7 @@ fun SymCustomizationScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-        // Header con pulsante back
+        // Header with back button
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -158,81 +179,126 @@ fun SymCustomizationScreen(
         
         HorizontalDivider()
         
-        // Info card
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
+        // Tab selector
+        TabRow(selectedTabIndex = selectedTab) {
+            Tab(
+                selected = selectedTab == 0,
+                onClick = { selectedTab = 0 },
+                text = { Text("Emoji") }
             )
-        ) {
-            Column(
-                modifier = Modifier.padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.sym_instructions_title),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = stringResource(R.string.sym_instructions_text),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Tab(
+                selected = selectedTab == 1,
+                onClick = { selectedTab = 1 },
+                text = { Text("Caratteri") }
+            )
+        }
+        
+        // Customizable keyboard grid - uses the same layout as the real keyboard
+        val statusBarController = remember { StatusBarController(context) }
+        
+        // Show the grid based on the selected tab
+        when (selectedTab) {
+            0 -> {
+                // Emoji tab
+                key(symMappingsPage1) {
+                    AndroidView(
+                        factory = { ctx ->
+                            statusBarController.createCustomizableEmojiKeyboard(symMappingsPage1, { keyCode, emoji ->
+                                selectedKeyCode = keyCode
+                                showEmojiPicker = true
+                            }, page = 1)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Reset button for page 1
+                Button(
+                    onClick = {
+                        symMappingsPage1 = defaultMappingsPage1.toMutableMap()
+                        SettingsManager.resetSymMappings(context)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(stringResource(R.string.sym_reset_to_default), style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            1 -> {
+                // Characters tab
+                key(symMappingsPage2) {
+                    AndroidView(
+                        factory = { ctx ->
+                            statusBarController.createCustomizableEmojiKeyboard(symMappingsPage2, { keyCode, character ->
+                                selectedKeyCode = keyCode
+                                showCharacterPicker = true
+                            }, page = 2)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Reset button for page 2
+                Button(
+                    onClick = {
+                        symMappingsPage2 = defaultMappingsPage2.toMutableMap()
+                        SettingsManager.resetSymMappingsPage2(context)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(stringResource(R.string.sym_reset_to_default), style = MaterialTheme.typography.bodyMedium)
+                }
             }
         }
         
-        // Griglia tastiera personalizzabile - usa la stessa visualizzazione della tastiera reale
-        val statusBarController = remember { StatusBarController(context) }
-        
-        // Usa key() per forzare la ricreazione quando cambiano le mappature
-        key(symMappings) {
-            AndroidView(
-                factory = { ctx ->
-                    statusBarController.createCustomizableEmojiKeyboard(symMappings) { keyCode, emoji ->
-                        selectedKeyCode = keyCode
-                        showEmojiPicker = true
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Pulsante Reset
-        Button(
-            onClick = {
-                symMappings = defaultMappings.toMutableMap()
-                SettingsManager.resetSymMappings(context)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer
-            )
-        ) {
-            Text(stringResource(R.string.sym_reset_to_default), style = MaterialTheme.typography.bodyMedium)
-        }
-        
-        // Dialog emoji picker
+        // Emoji picker dialog
         if (showEmojiPicker && selectedKeyCode != null) {
             val selectedLetter = getLetterFromKeyCode(selectedKeyCode!!)
             EmojiPickerDialog(
                 selectedLetter = selectedLetter,
                 onEmojiSelected = { emoji ->
-                    symMappings = symMappings.toMutableMap().apply {
+                    symMappingsPage1 = symMappingsPage1.toMutableMap().apply {
                         put(selectedKeyCode!!, emoji)
                     }
-                    SettingsManager.saveSymMappings(context, symMappings)
+                    SettingsManager.saveSymMappings(context, symMappingsPage1)
                     showEmojiPicker = false
                     selectedKeyCode = null
                 },
                 onDismiss = {
                     showEmojiPicker = false
+                    selectedKeyCode = null
+                }
+            )
+        }
+        
+        // Unicode character picker dialog
+        if (showCharacterPicker && selectedKeyCode != null) {
+            val selectedLetter = getLetterFromKeyCode(selectedKeyCode!!)
+            UnicodeCharacterPickerDialog(
+                selectedLetter = selectedLetter,
+                onCharacterSelected = { character ->
+                    symMappingsPage2 = symMappingsPage2.toMutableMap().apply {
+                        put(selectedKeyCode!!, character)
+                    }
+                    SettingsManager.saveSymMappingsPage2(context, symMappingsPage2)
+                    showCharacterPicker = false
+                    selectedKeyCode = null
+                },
+                onDismiss = {
+                    showCharacterPicker = false
                     selectedKeyCode = null
                 }
             )

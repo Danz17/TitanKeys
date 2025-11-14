@@ -4,27 +4,41 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
+import androidx.core.content.ContextCompat
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ImageView
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatImageButton
+import android.util.Log
 import android.util.TypedValue
+import it.palsoftware.pastiera.R
+import it.palsoftware.pastiera.MainActivity
+import kotlin.math.max
 
 /**
- * Gestisce la status bar visualizzata dall'IME, occupandosi della creazione della view
- * e dell'aggiornamento del testo/stile in base allo stato dei modificatori.
+ * Manages the status bar shown by the IME, handling view creation
+ * and updating text/style based on modifier states.
  */
 class StatusBarController(
     private val context: Context
 ) {
-    // Listener per la selezione delle variazioni
+    // Listener for variation selection
     var onVariationSelectedListener: VariationButtonHandler.OnVariationSelectedListener? = null
+    
+    // Listener for speech recognition results
+    var onSpeechResultListener: ((String) -> Unit)? = null
 
     companion object {
+        private const val TAG = "StatusBarController"
         private const val NAV_MODE_LABEL = "NAV MODE"
         private val DEFAULT_BACKGROUND = Color.parseColor("#000000")
         private val NAV_MODE_BACKGROUND = Color.argb(100, 0, 0, 0)
@@ -41,7 +55,7 @@ class StatusBarController(
         val altLatchActive: Boolean,
         val altPhysicallyPressed: Boolean,
         val altOneShot: Boolean,
-        val symKeyActive: Boolean,
+        val symPage: Int, // 0=disattivato, 1=pagina1 emoji, 2=pagina2 caratteri
         val variations: List<String> = emptyList(),
         val lastInsertedChar: Char? = null
     ) {
@@ -61,6 +75,9 @@ class StatusBarController(
     private var altLed: View? = null
     private var symLed: View? = null
     private var emojiKeyButtons: MutableList<View> = mutableListOf()
+    private var currentVariationsRow: LinearLayout? = null
+    private var microphoneButtonView: AppCompatImageButton? = null
+    private var lastDisplayedVariations: List<String> = emptyList()
 
     fun getLayout(): LinearLayout? = statusBarLayout
 
@@ -75,8 +92,8 @@ class StatusBarController(
                 setBackgroundColor(DEFAULT_BACKGROUND)
             }
 
-            // Container per gli indicatori dei modificatori (orizzontale, allineato a sinistra)
-            // Aggiungiamo padding a sinistra per evitare il tasto di collapse della tastiera IME
+            // Container for modifier indicators (horizontal, left-aligned).
+            // Add left padding to avoid the IME collapse button.
             val leftPadding = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 
                 64f, 
@@ -104,7 +121,7 @@ class StatusBarController(
                 visibility = View.GONE
             }
 
-            // Container per la griglia emoji (quando SYM è attivo) - posizionato in fondo
+            // Container for emoji grid (when SYM is active) - placed at the bottom
             val emojiKeyboardHorizontalPadding = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 8f,
@@ -118,7 +135,7 @@ class StatusBarController(
             
             emojiKeyboardContainer = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                // Nessun padding in alto, solo laterale e in basso
+                // No top padding, only horizontal and bottom
                 setPadding(emojiKeyboardHorizontalPadding, 0, emojiKeyboardHorizontalPadding, emojiKeyboardBottomPadding)
                 layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -127,13 +144,13 @@ class StatusBarController(
                 visibility = View.GONE
             }
             
-            // Manteniamo il TextView per retrocompatibilità (nascosto)
+            // Keep the TextView for backward compatibility (hidden)
             emojiMapTextView = TextView(context).apply {
                 visibility = View.GONE
             }
 
-            // Container per i pulsanti delle variazioni (orizzontale, allineato a sinistra)
-            // Altezza fissa per mantenere la barra sempre della stessa altezza (aumentata del 10%)
+            // Container for variation buttons (horizontal, left-aligned).
+            // Fixed height to keep the bar height consistent (increased by 10%).
             val variationsContainerHeight = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 
                 55f, // 50f * 1.1 (aumentata del 10%)
@@ -154,10 +171,10 @@ class StatusBarController(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     variationsContainerHeight // Altezza fissa invece di WRAP_CONTENT
                 )
-                visibility = View.INVISIBLE  // INVISIBLE invece di GONE per mantenere lo spazio
+                visibility = View.GONE
             }
 
-            // Container per i LED nel bordo inferiore
+            // Container for LEDs along the bottom edge
             val ledHeight = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 4f,
@@ -179,8 +196,8 @@ class StatusBarController(
                 )
             }
             
-            // Crea i LED per ogni modificatore nell'ordine: SHIFT - SYM - unused - unused - CONTROL - ALT
-            // Dividiamo la larghezza in 6 parti uguali
+            // Create LEDs for each modifier in order: SHIFT - SYM - unused - unused - CONTROL - ALT.
+            // We split the width into 6 equal parts.
             shiftLed = createFlatLed(0, ledHeight, false) // Parte 1
             symLed = createFlatLed(0, ledHeight, false)   // Parte 2
             val unused1 = createFlatLed(0, ledHeight, false) // Parte 3 (unused)
@@ -188,12 +205,12 @@ class StatusBarController(
             ctrlLed = createFlatLed(0, ledHeight, false)  // Parte 5
             altLed = createFlatLed(0, ledHeight, false)   // Parte 6
             
-            // Nascondi le parti unused (rendile completamente trasparenti)
+            // Hide unused parts (make them fully transparent)
             unused1.visibility = View.INVISIBLE
             unused2.visibility = View.INVISIBLE
             
             ledContainer?.apply {
-                // Aggiungi i LED nell'ordine corretto, ognuno occupa 1/6 della larghezza
+                // Add LEDs in the correct order, each occupying 1/6 of the width
                 addView(shiftLed, LinearLayout.LayoutParams(0, ledHeight, 1f))
                 addView(symLed, LinearLayout.LayoutParams(0, ledHeight, 1f))
                 addView(unused1, LinearLayout.LayoutParams(0, ledHeight, 1f))
@@ -283,14 +300,72 @@ class StatusBarController(
     }
     
     /**
-     * Aggiorna la griglia emoji con le mappature SYM.
+     * Aggiorna la griglia emoji/caratteri con le mappature SYM.
+     * @param symMappings Le mappature da visualizzare
+     * @param page La pagina attiva (1=emoji, 2=caratteri)
      */
-    private fun updateEmojiKeyboard(symMappings: Map<Int, String>) {
+    private fun updateEmojiKeyboard(symMappings: Map<Int, String>, page: Int) {
         val container = emojiKeyboardContainer ?: return
         
         // Rimuovi tutti i tasti esistenti
         container.removeAllViews()
         emojiKeyButtons.clear()
+        
+        // Aggiungi indicatore visivo delle pagine (due piccole linee orizzontali)
+        val indicatorHeight = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            2f,
+            context.resources.displayMetrics
+        ).toInt()
+        val indicatorSpacing = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            4f,
+            context.resources.displayMetrics
+        ).toInt()
+        val indicatorWidth = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            20f,
+            context.resources.displayMetrics
+        ).toInt()
+        
+        val indicatorContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    4f,
+                    context.resources.displayMetrics
+                ).toInt()
+            }
+        }
+        
+        // Linea sinistra (pagina 1)
+        val line1 = View(context).apply {
+            background = GradientDrawable().apply {
+                setColor(if (page == 1) Color.WHITE else Color.argb(80, 255, 255, 255))
+                cornerRadius = 0f
+            }
+            layoutParams = LinearLayout.LayoutParams(indicatorWidth, indicatorHeight).apply {
+                marginEnd = indicatorSpacing
+            }
+        }
+        
+        // Linea destra (pagina 2)
+        val line2 = View(context).apply {
+            background = GradientDrawable().apply {
+                setColor(if (page == 2) Color.WHITE else Color.argb(80, 255, 255, 255))
+                cornerRadius = 0f
+            }
+            layoutParams = LinearLayout.LayoutParams(indicatorWidth, indicatorHeight)
+        }
+        
+        indicatorContainer.addView(line1)
+        indicatorContainer.addView(line2)
+        container.addView(indicatorContainer)
         
         // Definizione delle righe della tastiera
         val keyboardRows = listOf(
@@ -360,9 +435,9 @@ class StatusBarController(
             
             for ((index, keyCode) in row.withIndex()) {
                 val label = keyLabels[keyCode] ?: ""
-                val emoji = symMappings[keyCode] ?: ""
+                val content = symMappings[keyCode] ?: ""
                 
-                val keyButton = createEmojiKeyButton(label, emoji, keyHeight)
+                val keyButton = createEmojiKeyButton(label, content, keyHeight, page)
                 emojiKeyButtons.add(keyButton)
                 
                 // Usa larghezza fissa invece di weight
@@ -374,103 +449,148 @@ class StatusBarController(
                 })
             }
             
+            // Aggiungi il pulsante ingranaggio alla fine della terza riga (a destra della M)
+            if (rowIndex == 2) {
+                val settingsButton = createSettingsButton(keyHeight)
+                val iconSize = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    24f, // Aumentato del 20% (20f * 1.2 = 24f)
+                    context.resources.displayMetrics
+                ).toInt()
+                rowLayout.addView(settingsButton, LinearLayout.LayoutParams(iconSize, iconSize).apply {
+                    marginStart = keySpacing
+                    gravity = Gravity.CENTER_VERTICAL
+                })
+            }
+            
             container.addView(rowLayout)
         }
     }
     
     /**
-     * Crea un tasto della griglia emoji.
+     * Crea il pulsante ingranaggio per aprire la schermata di personalizzazione SYM.
      */
-    private fun createEmojiKeyButton(label: String, emoji: String, height: Int): View {
-        val keyPadding = TypedValue.applyDimension(
+    private fun createSettingsButton(height: Int): View {
+        // Dimensione aumentata del 20% per l'icona
+        val iconSize = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
-            4f,
-            context.resources.displayMetrics
-        ).toInt()
-        val cornerRadius = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            8f,
-            context.resources.displayMetrics
-        )
-        val borderWidth = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            1f,
+            14.4f, // Aumentato del 20% (12f * 1.2 = 14.4f)
             context.resources.displayMetrics
         ).toInt()
         
-        val keyLayout = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setPadding(keyPadding, keyPadding, keyPadding, keyPadding)
+        val button = AppCompatImageButton(context).apply {
+            background = null // Nessuno sfondo
+            setImageResource(R.drawable.ic_settings_24)
+            // Grigio quasi nero invece di bianco
+            setColorFilter(Color.rgb(40, 40, 40)) // Grigio molto scuro, quasi nero
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            adjustViewBounds = true // Permette il ridimensionamento
+            maxWidth = iconSize // Limita la larghezza massima
+            maxHeight = iconSize // Limita l'altezza massima
+            setPadding(0, 0, 0, 0) // Nessun padding
             layoutParams = LinearLayout.LayoutParams(
+                iconSize, // Larghezza fissa basata sulla dimensione dell'icona
+                iconSize  // Altezza fissa basata sulla dimensione dell'icona
+            ).apply {
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            isClickable = true
+            isFocusable = true
+        }
+        
+        button.setOnClickListener {
+            // Apri MainActivity con l'extra per aprire la schermata di personalizzazione SYM
+            val intent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("open_sym_customization", true)
+            }
+            try {
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                Log.e(TAG, "Errore nell'apertura della schermata di personalizzazione SYM", e)
+            }
+        }
+        
+        return button
+    }
+    
+    /**
+     * Crea un tasto della griglia emoji/caratteri.
+     * @param label La lettera del tasto
+     * @param content L'emoji o carattere da mostrare
+     * @param height L'altezza del tasto
+     * @param page La pagina attiva (1=emoji, 2=caratteri)
+     */
+    private fun createEmojiKeyButton(label: String, content: String, height: Int, page: Int): View {
+        val keyLayout = FrameLayout(context).apply {
+            setPadding(0, 0, 0, 0) // Nessun padding per permettere all'emoji di occupare tutto lo spazio
+            layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 height
             )
         }
         
-        // Background del tasto
+        // Background del tasto senza angoli arrotondati e senza bordi
         val drawable = GradientDrawable().apply {
             setColor(Color.argb(40, 255, 255, 255)) // Bianco semi-trasparente
-            setCornerRadius(cornerRadius)
-            setStroke(borderWidth, Color.argb(100, 255, 255, 255)) // Bordo bianco semi-trasparente
+            setCornerRadius(0f) // Nessun angolo arrotondato
+            // Nessun bordo
         }
         keyLayout.background = drawable
         
-        // Emoji (grande) - larghezza fissa per uniformità
-        // Usa una dimensione fissa in dp che non dipende dalla larghezza del tasto
-        val emojiSize = TypedValue.applyDimension(
+        // Emoji/carattere deve occupare tutto il tasto, centrata
+        // Calcola textSize in base all'altezza disponibile (convertendo da pixel a sp)
+        val heightInDp = height / context.resources.displayMetrics.density
+        val contentTextSize = if (page == 2) {
+            // Per caratteri unicode, usa una dimensione più piccola
+            (heightInDp * 0.5f)
+        } else {
+            // Per emoji, usa la dimensione normale
+            (heightInDp * 0.75f)
+        }
+        
+        val contentText = TextView(context).apply {
+            text = content
+            textSize = contentTextSize // textSize è in sp
+            gravity = Gravity.CENTER
+            // Per pagina 2 (caratteri), rendi bianco e in grassetto
+            if (page == 2) {
+                setTextColor(Color.WHITE)
+                setTypeface(null, android.graphics.Typeface.BOLD)
+            }
+            // Larghezza e altezza per occupare tutto lo spazio disponibile
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            ).apply {
+                gravity = Gravity.CENTER
+            }
+        }
+        
+        // Label (lettera) - posizionato in basso a destra, davanti all'emoji
+        val labelPadding = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
-            32f,
+            2f, // Pochissimo margine
             context.resources.displayMetrics
         ).toInt()
         
-        // Container per l'emoji con larghezza fissa
-        val emojiContainer = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(
-                emojiSize,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                gravity = Gravity.CENTER_HORIZONTAL
-            }
-        }
-        
-        val emojiText = TextView(context).apply {
-            text = emoji
-            textSize = 28f
-            gravity = Gravity.CENTER
-            // Larghezza e altezza fisse per rendere tutte le emoji della stessa dimensione
-            layoutParams = LinearLayout.LayoutParams(
-                emojiSize,
-                emojiSize
-            )
-            // Forza la larghezza minima e massima per mantenere uniformità
-            minimumWidth = emojiSize
-            maxWidth = emojiSize
-        }
-        
-        emojiContainer.addView(emojiText)
-        
-        // Label (lettera)
         val labelText = TextView(context).apply {
             text = label
             textSize = 12f
-            setTextColor(Color.argb(180, 255, 255, 255))
-            gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(
+            setTextColor(Color.WHITE) // Bianco 100% opaco
+            gravity = Gravity.END or Gravity.BOTTOM
+            layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
-                topMargin = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    2f,
-                    context.resources.displayMetrics
-                ).toInt()
+                gravity = Gravity.BOTTOM or Gravity.END
+                rightMargin = labelPadding
+                bottomMargin = labelPadding
             }
         }
         
-        keyLayout.addView(emojiContainer)
+        // Aggiungi prima il contenuto (dietro) poi il testo (davanti)
+        keyLayout.addView(contentText)
         keyLayout.addView(labelText)
         
         return keyLayout
@@ -485,7 +605,8 @@ class StatusBarController(
      */
     fun createCustomizableEmojiKeyboard(
         symMappings: Map<Int, String>,
-        onKeyClick: (Int, String) -> Unit
+        onKeyClick: (Int, String) -> Unit,
+        page: Int = 1 // Default a pagina 1 (emoji)
     ): View {
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -599,7 +720,7 @@ class StatusBarController(
                 val emoji = symMappings[keyCode] ?: ""
                 
                 // Usa la stessa funzione createEmojiKeyButton della tastiera reale
-                val keyButton = createEmojiKeyButton(label, emoji, keyHeight)
+                val keyButton = createEmojiKeyButton(label, emoji, keyHeight, page)
                 
                 // Aggiungi click listener
                 keyButton.setOnClickListener {
@@ -622,8 +743,9 @@ class StatusBarController(
     
     /**
      * Anima l'apparizione della griglia emoji (slide up + fade in).
+     * @param backgroundView Il view dello sfondo da animare insieme
      */
-    private fun animateEmojiKeyboardIn(view: View) {
+    private fun animateEmojiKeyboardIn(view: View, backgroundView: View? = null) {
         val height = view.height
         if (height == 0) {
             // Se l'altezza non è ancora disponibile, usa una stima
@@ -640,8 +762,11 @@ class StatusBarController(
         view.translationY = measuredHeight.toFloat()
         view.visibility = View.VISIBLE
         
+        // Anima anche lo sfondo se fornito
+        backgroundView?.let { animateBackgroundIn(it) }
+        
         val animator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 250
+            duration = 125
             interpolator = AccelerateDecelerateInterpolator()
             addUpdateListener { animation ->
                 val progress = animation.animatedValue as Float
@@ -660,16 +785,24 @@ class StatusBarController(
     
     /**
      * Anima la scomparsa della griglia emoji (slide down + fade out).
+     * @param backgroundView Il view dello sfondo da animare insieme
+     * @param onAnimationEnd Callback chiamato quando l'animazione è completata
      */
-    private fun animateEmojiKeyboardOut(view: View) {
+    private fun animateEmojiKeyboardOut(view: View, backgroundView: View? = null, onAnimationEnd: (() -> Unit)? = null) {
         val height = view.height
         if (height == 0) {
             view.visibility = View.GONE
+            onAnimationEnd?.invoke()
             return
         }
-        
+
+        // Anima anche lo sfondo se fornito
+        backgroundView?.let { bgView ->
+            animateBackgroundOut(bgView, null)
+        }
+
         val animator = ValueAnimator.ofFloat(1f, 0f).apply {
-            duration = 200
+            duration = 100
             interpolator = AccelerateDecelerateInterpolator()
             addUpdateListener { animation ->
                 val progress = animation.animatedValue as Float
@@ -681,6 +814,133 @@ class StatusBarController(
                     view.visibility = View.GONE
                     view.translationY = 0f
                     view.alpha = 1f
+                    onAnimationEnd?.invoke()
+                }
+            })
+        }
+        animator.start()
+    }
+
+    /**
+     * Anima l'apparizione dei suggerimenti (fade in).
+     */
+    private fun animateVariationsIn(view: View) {
+        view.alpha = 0f
+        view.visibility = View.VISIBLE
+
+        val animator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 75
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener { animation ->
+                val progress = animation.animatedValue as Float
+                view.alpha = progress
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    view.alpha = 1f
+                }
+            })
+        }
+        animator.start()
+    }
+
+    /**
+     * Anima la scomparsa dei suggerimenti (fade out).
+     * @param onAnimationEnd Callback chiamato quando l'animazione è completata
+     */
+    private fun animateVariationsOut(view: View, onAnimationEnd: (() -> Unit)? = null) {
+        val animator = ValueAnimator.ofFloat(1f, 0f).apply {
+            duration = 50
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener { animation ->
+                val progress = animation.animatedValue as Float
+                view.alpha = progress
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    view.visibility = View.GONE
+                    view.alpha = 1f
+                    onAnimationEnd?.invoke()
+                }
+            })
+        }
+        animator.start()
+    }
+
+    private fun animateMicrophoneOut(view: View, onAnimationEnd: (() -> Unit)? = null) {
+        if (view.visibility != View.VISIBLE) {
+            view.visibility = View.GONE
+            view.alpha = 1f
+            onAnimationEnd?.invoke()
+            return
+        }
+
+        val animator = ValueAnimator.ofFloat(1f, 0f).apply {
+            duration = 75
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener { animation ->
+                val progress = animation.animatedValue as Float
+                view.alpha = progress
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    view.visibility = View.GONE
+                    view.alpha = 1f
+                    onAnimationEnd?.invoke()
+                }
+            })
+        }
+        animator.start()
+    }
+
+    /**
+     * Anima l'apparizione dello sfondo nero (fade in).
+     */
+    private fun animateBackgroundIn(view: View) {
+        val colorDrawable = ColorDrawable(DEFAULT_BACKGROUND)
+        view.background = colorDrawable
+        colorDrawable.alpha = 0
+
+        val animator = ValueAnimator.ofInt(0, 255).apply {
+            duration = 125
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener { animation ->
+                val alpha = animation.animatedValue as Int
+                (view.background as? ColorDrawable)?.alpha = alpha
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    (view.background as? ColorDrawable)?.alpha = 255
+                }
+            })
+        }
+        animator.start()
+    }
+
+    /**
+     * Anima la scomparsa dello sfondo nero (fade out).
+     * @param onAnimationEnd Callback chiamato quando l'animazione è completata
+     */
+    private fun animateBackgroundOut(view: View, onAnimationEnd: (() -> Unit)? = null) {
+        val background = view.background
+        if (background !is ColorDrawable) {
+            // Se non è un ColorDrawable, creane uno nuovo
+            val colorDrawable = ColorDrawable(DEFAULT_BACKGROUND)
+            colorDrawable.alpha = 255
+            view.background = colorDrawable
+        }
+
+        val animator = ValueAnimator.ofInt(255, 0).apply {
+            duration = 100
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener { animation ->
+                val alpha = animation.animatedValue as Int
+                (view.background as? ColorDrawable)?.alpha = alpha
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    (view.background as? ColorDrawable)?.alpha = 255
+                    onAnimationEnd?.invoke()
                 }
             })
         }
@@ -768,68 +1028,57 @@ class StatusBarController(
     }
     
     /**
-     * Crea il pulsante microfono placeholder (8° pulsante, sempre presente).
+     * Crea il pulsante microfono (usato nei suggerimenti).
      */
-    private fun createMicrophoneButton(buttonWidth: Int): TextView {
-        // Converti dp in pixel
-        val dp4 = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 
-            4f,
-            context.resources.displayMetrics
-        ).toInt()
-        val dp6 = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 
-            6f,
-            context.resources.displayMetrics
-        ).toInt()
-        // Altezza fissa per tutti i pulsanti (quadrati, stessa della larghezza)
-        val buttonHeight = buttonWidth
-        
-        // Crea il background del pulsante (rettangolo senza angoli arrotondati, scuro)
+    private fun createMicrophoneButton(buttonSize: Int): AppCompatImageButton {
         val drawable = GradientDrawable().apply {
-            setColor(Color.rgb(17, 17, 17)) // Grigio quasi nero
-            setCornerRadius(0f) // Nessun angolo arrotondato
-            // Nessun bordo
+            setColor(Color.rgb(17, 17, 17))
+            setCornerRadius(0f)
         }
-        
-        // Crea un drawable per lo stato pressed (più chiaro)
-        val pressedDrawable = GradientDrawable().apply {
-            setColor(Color.rgb(38, 0, 255)) // azzurro quando pressed
-            setCornerRadius(0f) // Nessun angolo arrotondato
-            // Nessun bordo
-        }
-        
-        // Crea uno StateListDrawable per gestire gli stati (normale e pressed)
-        val stateListDrawable = android.graphics.drawable.StateListDrawable().apply {
-            addState(intArrayOf(android.R.attr.state_pressed), pressedDrawable)
-            addState(intArrayOf(), drawable) // Stato normale
-        }
-        
-        val button = TextView(context).apply {
-            text = "🎤" // Icona microfono placeholder
-            textSize = 20f // Dimensione leggermente più grande per l'emoji
-            setTextColor(Color.WHITE)
-            gravity = Gravity.CENTER
-            // Padding
-            setPadding(dp6, dp4, dp6, dp4)
-            background = stateListDrawable
-            layoutParams = LinearLayout.LayoutParams(
-                buttonWidth, // Larghezza calcolata dinamicamente
-                buttonHeight  // Altezza fissa (quadrato)
-            ).apply {
-                marginEnd = 0 // Nessun margine dopo l'ultimo pulsante
-            }
-            // Rendi il pulsante clickabile
+
+        return AppCompatImageButton(context).apply {
+            setImageResource(R.drawable.ic_baseline_mic_24)
+            setColorFilter(Color.WHITE)
+            background = drawable
+            scaleType = ImageView.ScaleType.CENTER
             isClickable = true
             isFocusable = true
+            setPadding(0, 0, 0, 0)
+            layoutParams = LinearLayout.LayoutParams(
+                buttonSize,
+                buttonSize
+            )
         }
-        
-        // Listener placeholder (per ora non fa nulla)
-        button.setOnClickListener {
-            // TODO: Implementare funzionalità microfono
+    }
+    
+    /**
+     * Avvia il riconoscimento vocale di Google Voice Typing.
+     */
+    private fun startSpeechRecognition(inputConnection: android.view.inputmethod.InputConnection?) {
+        try {
+            val intent = Intent(context, SpeechRecognitionActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            
+            // Salva l'inputConnection per usarlo quando riceviamo il risultato
+            // Lo passeremo tramite il listener
+            context.startActivity(intent)
+            Log.d(TAG, "Riconoscimento vocale avviato")
+        } catch (e: Exception) {
+            Log.e(TAG, "Errore nel lancio del riconoscimento vocale", e)
         }
-        
-        return button
+    }
+    
+    /**
+     * Gestisce il risultato del riconoscimento vocale.
+     */
+    fun handleSpeechResult(text: String, inputConnection: android.view.inputmethod.InputConnection?) {
+        if (text.isNotEmpty() && inputConnection != null) {
+            Log.d(TAG, "Inserimento testo riconosciuto: $text")
+            inputConnection.commitText(text, 1)
+            // Notifica il listener se presente
+            onSpeechResultListener?.invoke(text)
+        }
     }
     
     /**
@@ -873,12 +1122,110 @@ class StatusBarController(
         return button
     }
 
+    /**
+     * Mostra i suggerimenti (variazioni) e il microfono.
+     * Questa funzione viene chiamata dopo che la griglia SYM è completamente collassata.
+     */
+    private fun showVariationsAndMicrophone(snapshot: StatusSnapshot, inputConnection: android.view.inputmethod.InputConnection?) {
+        val variationsContainerView = variationsContainer ?: return
+        variationsContainerView.visibility = View.VISIBLE
+
+        val limitedVariations = if (snapshot.variations.isNotEmpty() && snapshot.lastInsertedChar != null) {
+            snapshot.variations.take(7)
+        } else {
+            emptyList()
+        }
+
+        // Verifica se le variazioni sono le stesse di quelle già visualizzate
+        val variationsChanged = limitedVariations != lastDisplayedVariations
+        val hasExistingRow = currentVariationsRow != null && 
+                            currentVariationsRow?.parent == variationsContainerView &&
+                            currentVariationsRow?.visibility == View.VISIBLE
+
+        // Se le variazioni non sono cambiate e c'è già una riga visualizzata, non fare nulla
+        if (!variationsChanged && hasExistingRow) {
+            return
+        }
+
+        // Le variazioni sono cambiate o non c'è una riga esistente, ricrea tutto
+        variationButtons.clear()
+        currentVariationsRow?.let {
+            variationsContainerView.removeView(it)
+            currentVariationsRow = null
+        }
+
+        val screenWidth = context.resources.displayMetrics.widthPixels
+        val leftPadding = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            64f,
+            context.resources.displayMetrics
+        ).toInt()
+        val rightPadding = leftPadding
+        val availableWidth = screenWidth - leftPadding - rightPadding
+
+        val spacingBetweenButtons = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            3f,
+            context.resources.displayMetrics
+        ).toInt()
+        val totalSpacing = spacingBetweenButtons * 7
+        val buttonWidth = max(1, (availableWidth - totalSpacing) / 8)
+
+        val variationsRow = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.START or Gravity.CENTER_VERTICAL
+        }
+        currentVariationsRow = variationsRow
+
+        val rowLayoutParams = LinearLayout.LayoutParams(
+            0,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            1f
+        )
+        variationsContainerView.addView(variationsRow, 0, rowLayoutParams)
+
+        lastDisplayedVariations = limitedVariations
+
+        for (variation in limitedVariations) {
+            val button = createVariationButton(variation, inputConnection, buttonWidth)
+            variationButtons.add(button)
+            variationsRow.addView(button)
+        }
+
+        val placeholderCount = 7 - limitedVariations.size
+        for (i in 0 until placeholderCount) {
+            val placeholderButton = createPlaceholderButton(buttonWidth)
+            variationsRow.addView(placeholderButton)
+        }
+
+        val microphoneButton = microphoneButtonView ?: createMicrophoneButton(buttonWidth)
+        microphoneButtonView = microphoneButton
+        (microphoneButton.parent as? ViewGroup)?.removeView(microphoneButton)
+        val micParams = LinearLayout.LayoutParams(buttonWidth, buttonWidth)
+        variationsContainerView.addView(microphoneButton, micParams)
+        microphoneButton.setOnClickListener {
+            startSpeechRecognition(inputConnection)
+        }
+        microphoneButton.alpha = 1f
+        microphoneButton.visibility = View.VISIBLE
+
+        // Fai il fade in solo se le variazioni sono cambiate
+        if (variationsChanged) {
+            animateVariationsIn(variationsRow)
+        } else {
+            // Se le variazioni sono le stesse ma non c'era una riga, imposta direttamente la visibilità senza animazione
+            variationsRow.alpha = 1f
+            variationsRow.visibility = View.VISIBLE
+        }
+    }
+
     fun update(snapshot: StatusSnapshot, emojiMapText: String = "", inputConnection: android.view.inputmethod.InputConnection? = null, symMappings: Map<Int, String>? = null) {
         val layout = statusBarLayout ?: return
         val modifiersContainerView = modifiersContainer ?: return
         val emojiView = emojiMapTextView ?: return
         val variationsContainerView = variationsContainer ?: return
         val emojiKeyboardView = emojiKeyboardContainer ?: return
+        emojiView.visibility = View.GONE // Sempre nascosto, usiamo la griglia
 
         if (snapshot.navModeActive) {
             // Nascondi completamente la barra di stato nel nav mode
@@ -890,7 +1237,15 @@ class StatusBarController(
         // Mostra la barra quando non siamo in nav mode
         layout.visibility = View.VISIBLE
 
-        layout.setBackgroundColor(DEFAULT_BACKGROUND)
+        // Assicurati che lo sfondo sia un ColorDrawable per poter animare l'alpha
+        if (layout.background !is ColorDrawable) {
+            layout.background = ColorDrawable(DEFAULT_BACKGROUND)
+        } else {
+            // Se è già un ColorDrawable, assicurati che sia completamente opaco quando non siamo in SYM
+            if (snapshot.symPage == 0) {
+                (layout.background as ColorDrawable).alpha = 255
+            }
+        }
         
         // Nascondi sempre il container dei modificatori testuali (ora usiamo i LED)
         // Quando SYM è attivo, assicuriamoci che sia completamente nascosto (GONE)
@@ -913,75 +1268,70 @@ class StatusBarController(
         updateLed(altLed, altLocked, altActive)
         
         // SYM: rosso se attivo (sempre lockato quando attivo), grigio se spento
-        updateLed(symLed, snapshot.symKeyActive, false)
+        updateLed(symLed, snapshot.symPage > 0, false)
         
-        // Mostra la griglia emoji se SYM è attivo con animazione
-        if (snapshot.symKeyActive && symMappings != null) {
-            updateEmojiKeyboard(symMappings)
-            // Animazione slide up quando appare
+        // Gestisci le animazioni tra SYM e suggerimenti
+        if (snapshot.symPage > 0 && symMappings != null) {
+            updateEmojiKeyboard(symMappings, snapshot.symPage)
+            // Resetta le variazioni visualizzate quando SYM viene attivato
+            lastDisplayedVariations = emptyList()
+            val showSymKeyboard = {
+                if (emojiKeyboardView.visibility != View.VISIBLE) {
+                    animateEmojiKeyboardIn(emojiKeyboardView, layout)
+                }
+                variationsContainerView.visibility = View.GONE
+            }
+
             if (emojiKeyboardView.visibility != View.VISIBLE) {
-                animateEmojiKeyboardIn(emojiKeyboardView)
-            }
-            // Quando SYM è attivo, nascondi completamente il container delle variazioni (GONE invece di INVISIBLE)
-            variationsContainerView.visibility = View.GONE
-        } else {
-            // Animazione slide down quando scompare
-            if (emojiKeyboardView.visibility == View.VISIBLE) {
-                animateEmojiKeyboardOut(emojiKeyboardView)
-            }
-            // Rimuovi tutti i pulsanti delle variazioni esistenti
-            variationsContainerView.removeAllViews()
-            variationButtons.clear()
-            
-            // Calcola la larghezza disponibile per i pulsanti
-            val screenWidth = context.resources.displayMetrics.widthPixels
-            val leftPadding = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, 
-                64f, 
-                context.resources.displayMetrics
-            ).toInt()
-            val rightPadding = leftPadding // Padding speculare
-            val availableWidth = screenWidth - leftPadding - rightPadding
-            
-            // Calcola la larghezza di ogni pulsante
-            // 8 pulsanti totali (7 variazioni/placeholder + 1 microfono)
-            // 7 spazi tra i pulsanti (ogni spazio è 3dp)
-            val spacingBetweenButtons = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, 
-                3f, 
-                context.resources.displayMetrics
-            ).toInt()
-            val totalSpacing = spacingBetweenButtons * 7 // 7 spazi tra 8 pulsanti
-            val buttonWidth = (availableWidth - totalSpacing) / 8
-            
-            // Limita a 7 variazioni (prendi solo le prime 7)
-            val limitedVariations = if (snapshot.variations.isNotEmpty() && snapshot.lastInsertedChar != null) {
-                snapshot.variations.take(7)
+                var pendingAnimations = 0
+                fun animationCompleted() {
+                    pendingAnimations--
+                    if (pendingAnimations == 0) {
+                        showSymKeyboard()
+                    }
+                }
+
+                currentVariationsRow?.let { row ->
+                    if (row.parent == variationsContainerView && row.visibility == View.VISIBLE) {
+                        pendingAnimations++
+                        animateVariationsOut(row) {
+                            (row.parent as? ViewGroup)?.removeView(row)
+                            if (currentVariationsRow == row) {
+                                currentVariationsRow = null
+                            }
+                            animationCompleted()
+                        }
+                    }
+                }
+
+                microphoneButtonView?.let { microphone ->
+                    if (microphone.visibility == View.VISIBLE) {
+                        // Rimuovi immediatamente il microfono dal container per evitare che si muova durante l'animazione
+                        (microphone.parent as? ViewGroup)?.removeView(microphone)
+                        // Nascondi immediatamente senza animazione per evitare movimenti visibili
+                        microphone.visibility = View.GONE
+                        microphone.alpha = 1f
+                        animationCompleted()
+                    }
+                }
+
+                if (pendingAnimations == 0) {
+                    showSymKeyboard()
+                }
             } else {
-                emptyList()
+                microphoneButtonView?.visibility = View.GONE
             }
-            
-            // Crea un pulsante per ogni variazione (massimo 7)
-            for (variation in limitedVariations) {
-                val button = createVariationButton(variation, inputConnection, buttonWidth)
-                variationButtons.add(button)
-                variationsContainerView.addView(button)
-            }
-            
-            // Aggiungi pulsanti placeholder trasparenti per riempire fino a 7
-            val placeholderCount = 7 - limitedVariations.size
-            for (i in 0 until placeholderCount) {
-                val placeholderButton = createPlaceholderButton(buttonWidth)
-                variationsContainerView.addView(placeholderButton)
-            }
-            
-            // Aggiungi sempre il pulsante microfono come 8° pulsante
-            val microphoneButton = createMicrophoneButton(buttonWidth)
-            variationsContainerView.addView(microphoneButton)
-            
-            variationsContainerView.visibility = View.VISIBLE
+            return
         }
-        emojiView.visibility = View.GONE // Sempre nascosto, usiamo la griglia
+
+        // SYM si sta disattivando
+        if (emojiKeyboardView.visibility == View.VISIBLE) {
+            animateEmojiKeyboardOut(emojiKeyboardView, layout) {
+                showVariationsAndMicrophone(snapshot, inputConnection)
+            }
+        } else {
+            showVariationsAndMicrophone(snapshot, inputConnection)
+        }
     }
 }
 

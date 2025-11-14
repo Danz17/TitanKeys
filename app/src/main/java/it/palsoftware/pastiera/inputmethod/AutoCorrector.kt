@@ -6,10 +6,10 @@ import android.util.Log
 import org.json.JSONObject
 
 /**
- * Gestisce l'auto-correzione di accenti, apostrofi e contrazioni.
- * Corregge automaticamente pattern comuni quando viene premuto spazio o punteggiatura.
- * Supporta l'annullamento con backspace (solo come prima azione dopo la correzione).
- * Preserva la capitalizzazione originale (Cos e → Cos'è, non cos'è).
+ * Handles auto-correction of accents, apostrophes, and contractions.
+ * Automatically corrects common patterns when space or punctuation is pressed.
+ * Supports undo with backspace (only as first action after correction).
+ * Preserves original capitalization (Cos e → Cos'è, not cos'è).
  */
 object AutoCorrector {
     private const val TAG = "AutoCorrector"
@@ -17,79 +17,79 @@ object AutoCorrector {
     private val corrections = mutableMapOf<String, Map<String, String>>()
 
     /**
-     * Informazioni sull'ultima correzione applicata.
-     * La correzione rimane annullabile finché non viene premuto un tasto (tranne backspace).
+     * Information about the last applied correction.
+     * The correction remains undoable until a key is pressed (except backspace).
      */
     data class LastCorrection(
         val originalWord: String,
         val correctedWord: String,
-        val correctionLength: Int // Lunghezza della parola corretta inserita
+        val correctionLength: Int // Length of the inserted corrected word
     )
 
-    // Traccia l'ultima correzione applicata (null se non c'è o se è stata accettata)
+    // Track last applied correction (null if none or if accepted)
     private var lastCorrection: LastCorrection? = null
 
-    // Traccia le parole che sono state rifiutate (annullate con backspace)
-    // Queste parole non verranno corrette finché l'utente non modifica il testo
+    // Track words that have been rejected (undone with backspace)
+    // These words won't be corrected until the user modifies the text
     private val rejectedWords = mutableSetOf<String>()
 
-    // Traccia le lingue personalizzate caricate da file esterni
+    // Track custom languages loaded from external files
     private val customLanguages = mutableSetOf<String>()
 
     /**
-     * Carica le regole di auto-correzione dai file JSON per lingua.
-     * I file devono essere nella cartella common/autocorrect con nome: auto_corrections_{locale}.json
-     * Esempio: common/autocorrect/auto_corrections_it.json, common/autocorrect/auto_corrections_en.json
-     * Supporta anche il caricamento di file JSON personalizzati.
+     * Loads auto-correction rules from JSON files per language.
+     * Files must be in common/autocorrect folder with name: auto_corrections_{locale}.json
+     * Example: common/autocorrect/auto_corrections_it.json, common/autocorrect/auto_corrections_en.json
+     * Also supports loading custom JSON files.
      */
     fun loadCorrections(assets: AssetManager, context: Context? = null) {
         try {
             corrections.clear()
             customLanguages.clear()
 
-            // Lista delle lingue supportate di default
+            // List of supported languages by default
             val standardLocales = listOf("it", "en", "es", "fr", "de")
 
             for (locale in standardLocales) {
                 try {
-                    // Prima carica le correzioni personalizzate (se esistono)
+                    // First load custom corrections (if they exist)
                     if (context != null) {
                         val customCorrections = it.palsoftware.pastiera.SettingsManager.getCustomAutoCorrections(context, locale)
                         if (customCorrections.isNotEmpty()) {
-                            // Carica le correzioni personalizzate
+                            // Load custom corrections
                             val customJson = correctionsToJson(customCorrections)
                             loadCorrectionsFromJson(locale, customJson)
-                            // Non aggiungere lingue standard a customLanguages - sono solo modifiche, non lingue nuove
-                            Log.d(TAG, "Caricate ${customCorrections.size} correzioni personalizzate per locale: $locale")
-                            continue // Salta il caricamento del file di default
+                            // Don't add standard languages to customLanguages - these are just modifications, not new languages
+                            Log.d(TAG, "Loaded ${customCorrections.size} custom corrections for locale: $locale")
+                            continue // Skip loading default file
                         }
                     }
                     
-                    // Se non ci sono personalizzazioni, carica il file di default
+                    // If no customizations, load default file
                     val fileName = "common/autocorrect/auto_corrections_$locale.json"
                     val jsonString = assets.open(fileName).bufferedReader().use { it.readText() }
                     loadCorrectionsFromJson(locale, jsonString)
                 } catch (e: Exception) {
-                    // File non trovato o errore di parsing - ignora questa lingua
-                    Log.d(TAG, "Nessun file di correzione trovato per locale: $locale")
+                    // File not found or parsing error - ignore this language
+                    Log.d(TAG, "No correction file found for locale: $locale")
                 }
             }
 
-            // Rimuovi eventuali lingue standard da customLanguages (non dovrebbero esserci, ma per sicurezza)
+            // Remove any standard languages from customLanguages (shouldn't be there, but for safety)
             customLanguages.removeAll(standardLocales)
             
-            // Carica anche le lingue personalizzate aggiuntive (non standard)
+            // Also load additional custom languages (non-standard)
             if (context != null) {
                 try {
                     val prefs = it.palsoftware.pastiera.SettingsManager.getPreferences(context)
                     val allPrefs = prefs.all
                     
-                    // Cerca tutte le chiavi che iniziano con "auto_correct_custom_"
+                    // Search for all keys starting with "auto_correct_custom_"
                     for ((key, value) in allPrefs) {
                         if (key.startsWith("auto_correct_custom_") && value is String) {
                             val languageCode = key.removePrefix("auto_correct_custom_")
                             
-                            // Salta le lingue standard (già caricate sopra)
+                            // Skip standard languages (already loaded above)
                             if (languageCode !in standardLocales) {
                                 try {
                                     val customCorrections = it.palsoftware.pastiera.SettingsManager.getCustomAutoCorrections(context, languageCode)
@@ -97,27 +97,27 @@ object AutoCorrector {
                                         val customJson = correctionsToJson(customCorrections)
                                         loadCorrectionsFromJson(languageCode, customJson)
                                         customLanguages.add(languageCode)
-                                        Log.d(TAG, "Caricate ${customCorrections.size} correzioni per lingua personalizzata: $languageCode")
+                                        Log.d(TAG, "Loaded ${customCorrections.size} corrections for custom language: $languageCode")
                                     }
                                 } catch (e: Exception) {
-                                    Log.e(TAG, "Errore nel caricamento della lingua personalizzata $languageCode", e)
+                                    Log.e(TAG, "Error loading custom language $languageCode", e)
                                 }
                             }
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Errore nel caricamento delle lingue personalizzate", e)
+                    Log.e(TAG, "Error loading custom languages", e)
                 }
             }
             
-            Log.d(TAG, "Totale lingue caricate: ${corrections.size}")
+            Log.d(TAG, "Total languages loaded: ${corrections.size}")
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel caricamento delle correzioni", e)
+            Log.e(TAG, "Error loading corrections", e)
         }
     }
     
     /**
-     * Converte una mappa di correzioni in JSON string.
+     * Converts a map of corrections to JSON string.
      */
     private fun correctionsToJson(corrections: Map<String, String>): String {
         val jsonObject = JSONObject()
@@ -128,37 +128,37 @@ object AutoCorrector {
     }
 
     /**
-     * Carica correzioni da un file JSON personalizzato.
-     * @param locale Il codice lingua (es. "it", "en", "custom1")
-     * @param jsonString Il contenuto del file JSON
+     * Loads corrections from a custom JSON file.
+     * @param locale The language code (e.g. "it", "en", "custom1")
+     * @param jsonString The JSON file content
      */
     fun loadCustomCorrections(locale: String, jsonString: String) {
         try {
             loadCorrectionsFromJson(locale, jsonString)
-            // Aggiungi a customLanguages solo se non è una lingua standard
+            // Add to customLanguages only if not a standard language
             val standardLocales = listOf("it", "en", "es", "fr", "de")
             if (locale !in standardLocales) {
                 customLanguages.add(locale)
             }
-            Log.d(TAG, "Caricate correzioni personalizzate per locale: $locale")
+            Log.d(TAG, "Loaded custom corrections for locale: $locale")
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel caricamento delle correzioni personalizzate per $locale", e)
+            Log.e(TAG, "Error loading custom corrections for $locale", e)
         }
     }
 
     /**
-     * Carica correzioni da una stringa JSON.
-     * Ignora il campo speciale "__name" che contiene il nome della lingua.
+     * Loads corrections from a JSON string.
+     * Ignores the special "__name" field that contains the language name.
      */
     private fun loadCorrectionsFromJson(locale: String, jsonString: String) {
         val jsonObject = JSONObject(jsonString)
         val correctionMap = mutableMapOf<String, String>()
 
-        // Il file JSON contiene un oggetto con chiavi che sono le parole da correggere
+        // JSON file contains an object with keys that are words to correct
         val keys = jsonObject.keys()
         while (keys.hasNext()) {
             val key = keys.next()
-            // Salta il campo speciale del nome
+            // Skip special name field
             if (key != "__name") {
                 val value = jsonObject.getString(key)
                 correctionMap[key] = value
@@ -167,26 +167,26 @@ object AutoCorrector {
 
         if (correctionMap.isNotEmpty()) {
             corrections[locale] = correctionMap
-            Log.d(TAG, "Caricate ${correctionMap.size} correzioni per locale: $locale")
+            Log.d(TAG, "Loaded ${correctionMap.size} corrections for locale: $locale")
         }
     }
 
     /**
-     * Ottiene tutte le lingue disponibili (incluse quelle personalizzate).
+     * Gets all available languages (including custom ones).
      */
     fun getAllAvailableLanguages(): Set<String> {
         return corrections.keys.toSet()
     }
 
     /**
-     * Ottiene solo le lingue personalizzate.
+     * Gets only custom languages.
      */
     fun getCustomLanguages(): Set<String> {
         return customLanguages.toSet()
     }
 
     /**
-     * Ottiene la locale corrente basata sulla lingua del dispositivo.
+     * Gets current locale based on device language.
      */
     private fun getCurrentLocale(context: Context): String {
         val locale = context.resources.configuration.locales[0]
@@ -194,19 +194,19 @@ object AutoCorrector {
     }
 
     /**
-     * Ottiene tutte le locale supportate.
+     * Gets all supported locales.
      */
     fun getSupportedLocales(): Set<String> {
         return corrections.keys.toSet()
     }
 
     /**
-     * Applica la capitalizzazione originale alla parola corretta.
-     * Gestisce correttamente anche caratteri speciali all'inizio (apostrofi, ecc.).
+     * Applies original capitalization to corrected word.
+     * Correctly handles special characters at the beginning (apostrophes, etc.).
      *
-     * @param originalWord La parola originale (es. "Cos", "CASA", "cos")
-     * @param correctedWord La parola corretta in minuscolo (es. "cos'è", "casa")
-     * @return La parola corretta con capitalizzazione preservata (es. "Cos'è", "CASA", "cos'è")
+     * @param originalWord The original word (e.g. "Cos", "CASA", "cos")
+     * @param correctedWord The corrected word in lowercase (e.g. "cos'è", "casa")
+     * @return The corrected word with preserved capitalization (e.g. "Cos'è", "CASA", "cos'è")
      */
     private fun applyCapitalization(originalWord: String, correctedWord: String): String {
         if (originalWord.isEmpty() || correctedWord.isEmpty()) {
@@ -216,9 +216,9 @@ object AutoCorrector {
         val originalLower = originalWord.lowercase()
         val correctedLower = correctedWord.lowercase()
 
-        // Se la parola originale era tutta maiuscola, applica maiuscolo a tutta la correzione
+        // If original word was all uppercase, apply uppercase to entire correction
         if (originalWord == originalWord.uppercase() && originalWord.any { it.isLetter() }) {
-            // Trova la prima lettera alfabetica nella correzione (potrebbe essere dopo apostrofi)
+            // Find first alphabetic letter in correction (might be after apostrophes)
             val firstLetterIndex = correctedWord.indexOfFirst { it.isLetter() }
             if (firstLetterIndex >= 0) {
                 val beforeLetter = correctedWord.substring(0, firstLetterIndex)
@@ -228,41 +228,41 @@ object AutoCorrector {
             return correctedWord.uppercase()
         }
 
-        // Se la prima lettera della parola originale era maiuscola, metti in maiuscolo la prima lettera della correzione
+        // If first letter of original word was uppercase, capitalize first letter of correction
         if (originalWord.isNotEmpty() && originalWord[0].isUpperCase()) {
-            // Trova la prima lettera alfabetica nella correzione (potrebbe essere dopo apostrofi/punteggiatura)
+            // Find first alphabetic letter in correction (might be after apostrophes/punctuation)
             val firstLetterIndex = correctedWord.indexOfFirst { it.isLetter() }
             if (firstLetterIndex >= 0) {
                 val beforeLetter = correctedWord.substring(0, firstLetterIndex)
                 val firstLetter = correctedWord[firstLetterIndex]
                 val afterLetter = correctedWord.substring(firstLetterIndex + 1)
 
-                // Metti in maiuscolo la prima lettera alfabetica
+                // Capitalize first alphabetic letter
                 return beforeLetter + firstLetter.uppercaseChar() + afterLetter
             }
         }
 
-        // Altrimenti, mantieni la correzione in minuscolo
+        // Otherwise, keep correction in lowercase
         return correctedWord
     }
 
     /**
-     * Controlla se una parola deve essere corretta.
-     * @param word La parola da controllare (senza spazi finali)
-     * @param locale La locale da usare (es. "it", "en"). Se null, usa la locale del dispositivo.
-     * @param context Il contesto per verificare le lingue abilitate
-     * @return La parola corretta con capitalizzazione preservata, o null se non c'è correzione.
+     * Checks if a word should be corrected.
+     * @param word The word to check (without trailing spaces)
+     * @param locale The locale to use (e.g. "it", "en"). If null, uses device locale.
+     * @param context The context to verify enabled languages
+     * @return The corrected word with preserved capitalization, or null if no correction.
      */
     fun getCorrection(word: String, locale: String? = null, context: Context? = null): String? {
         val targetLocale = locale ?: (context?.let { getCurrentLocale(it) } ?: "en")
 
-        // Verifica se la lingua è abilitata
+        // Verify if language is enabled
         if (context != null) {
             val enabledLanguages = it.palsoftware.pastiera.SettingsManager.getAutoCorrectEnabledLanguages(context)
             if (enabledLanguages.isNotEmpty() && !enabledLanguages.contains(targetLocale)) {
-                // Lingua non abilitata, prova con fallback solo se "en" è abilitata
+                // Language not enabled, try fallback only if "en" is enabled
                 if (enabledLanguages.contains("en") && targetLocale != "en") {
-                    // Prova con "en" come fallback
+                    // Try "en" as fallback
                     corrections["en"]?.let { enCorrections ->
                         val wordLower = word.lowercase()
                         enCorrections[wordLower]?.let { correction ->
@@ -274,10 +274,10 @@ object AutoCorrector {
             }
         }
 
-        // Cerca la correzione usando la parola in minuscolo (le chiavi nel JSON sono in minuscolo)
+        // Search for correction using lowercase word (JSON keys are lowercase)
         val wordLower = word.lowercase()
 
-        // Prova prima con la locale specifica
+        // Try specific locale first
         corrections[targetLocale]?.let { localeCorrections ->
             localeCorrections[wordLower]?.let { correction ->
                 // Applica la capitalizzazione originale alla correzione
@@ -285,13 +285,13 @@ object AutoCorrector {
             }
         }
 
-        // Fallback: prova con "en" se la locale target non ha corrispondenze
+        // Fallback: try "en" if target locale has no matches
         if (targetLocale != "en") {
-            // Verifica se "en" è abilitata (se abbiamo un contesto)
+            // Verify if "en" is enabled (if we have context)
             if (context == null || it.palsoftware.pastiera.SettingsManager.isAutoCorrectLanguageEnabled(context, "en")) {
                 corrections["en"]?.let { enCorrections ->
                     enCorrections[wordLower]?.let { correction ->
-                        // Applica la capitalizzazione originale alla correzione
+                        // Apply original capitalization to correction
                         return applyCapitalization(word, correction)
                     }
                 }
@@ -302,12 +302,12 @@ object AutoCorrector {
     }
 
     /**
-     * Processa il testo prima del cursore e applica correzioni se necessario.
-     * Supporta sia parole singole che pattern con spazi (es. "cos e" → "cos'è").
-     * @param textBeforeCursor Il testo prima del cursore
-     * @param locale La locale da usare
-     * @param context Il contesto per ottenere la locale se non specificata
-     * @return Pair<wordToReplace, correctedWord> se c'è una correzione, null altrimenti
+     * Processes text before cursor and applies corrections if needed.
+     * Supports both single words and patterns with spaces (e.g. "cos e" → "cos'è").
+     * @param textBeforeCursor The text before cursor
+     * @param locale The locale to use
+     * @param context The context to get locale if not specified
+     * @return Pair<wordToReplace, correctedWord> if there's a correction, null otherwise
      */
     fun processText(
         textBeforeCursor: CharSequence?,
@@ -321,7 +321,7 @@ object AutoCorrector {
         val text = textBeforeCursor.toString()
         var endIndex = text.length
 
-        // Ignora spazi e punteggiatura alla fine
+        // Ignore spaces and punctuation at the end
         while (endIndex > 0 && (text[endIndex - 1].isWhitespace() ||
                                 text[endIndex - 1] in ".,;:!?()[]{}\"'")) {
             endIndex--
@@ -331,36 +331,36 @@ object AutoCorrector {
             return null
         }
 
-        // Ottieni le lingue abilitate se abbiamo un contesto
+        // Get enabled languages if we have context
         val enabledLanguages = if (context != null) {
             it.palsoftware.pastiera.SettingsManager.getAutoCorrectEnabledLanguages(context)
         } else {
             emptySet<String>()
         }
         
-        // Se ci sono lingue abilitate specifiche, usa quelle, altrimenti usa tutte le lingue disponibili
+        // If there are specific enabled languages, use those, otherwise use all available languages
         val languagesToSearch = if (enabledLanguages.isNotEmpty()) {
             enabledLanguages
         } else {
             corrections.keys.toSet()
         }
         
-        // Se non ci sono lingue disponibili, esci
+        // If no languages available, exit
         if (languagesToSearch.isEmpty()) {
             return null
         }
 
-        // Prima, prova a cercare pattern che includono spazi (es. "cos e")
-        // Cerchiamo fino a 3 "parole" (separate da spazi) prima del cursore
-        // Questo permette di trovare pattern come "cos e", "qual e", ecc.
+        // First, try to search for patterns that include spaces (e.g. "cos e")
+        // Search up to 3 "words" (separated by spaces) before cursor
+        // This allows finding patterns like "cos e", "qual e", etc.
         for (maxWords in 2 downTo 1) {
             var currentEnd = endIndex
             var wordsFound = 0
             var startIndex = currentEnd
 
-            // Trova l'inizio della sequenza di maxWords parole
+            // Find start of maxWords word sequence
             while (startIndex > 0 && wordsFound < maxWords) {
-                // Vai indietro fino a trovare uno spazio o punteggiatura
+                // Go back until finding space or punctuation
                 var tempIndex = startIndex - 1
                 while (tempIndex > 0 && !text[tempIndex - 1].isWhitespace() &&
                        text[tempIndex - 1] !in ".,;:!?()[]{}\"'") {
@@ -370,7 +370,7 @@ object AutoCorrector {
                 if (tempIndex < startIndex) {
                     wordsFound++
                     if (wordsFound < maxWords) {
-                        // Vai indietro oltre lo spazio per trovare la prossima parola
+                        // Go back past space to find next word
                         while (tempIndex > 0 && (text[tempIndex - 1].isWhitespace() ||
                                                  text[tempIndex - 1] in ".,;:!?()[]{}\"'")) {
                             tempIndex--
@@ -385,21 +385,21 @@ object AutoCorrector {
             }
 
             if (startIndex < currentEnd && wordsFound == maxWords) {
-                // Estrai la sequenza (può contenere spazi se maxWords > 1)
+                // Extract sequence (may contain spaces if maxWords > 1)
                 val sequence = text.substring(startIndex, currentEnd).trim()
                 if (sequence.isNotEmpty()) {
-                    // Controlla se questa sequenza è stata rifiutata
+                    // Check if this sequence has been rejected
                     val sequenceLower = sequence.lowercase()
                     if (rejectedWords.contains(sequenceLower)) {
-                        Log.d(TAG, "Sequenza '$sequence' è stata rifiutata, non correggere")
-                        continue // Prova con meno parole
+                        Log.d(TAG, "Sequence '$sequence' has been rejected, don't correct")
+                        continue // Try with fewer words
                     }
 
-                    // Controlla se c'è una correzione per questa sequenza in una delle lingue abilitate
+                    // Check if there's a correction for this sequence in one of the enabled languages
                     for (lang in languagesToSearch) {
                         val correction = getCorrection(sequence, lang, context)
                         if (correction != null) {
-                            Log.d(TAG, "Trovata correzione per sequenza multi-parola: '$sequence' → '$correction' (lingua: $lang)")
+                            Log.d(TAG, "Found correction for multi-word sequence: '$sequence' → '$correction' (language: $lang)")
                             return Pair(sequence, correction)
                         }
                     }
@@ -407,7 +407,7 @@ object AutoCorrector {
             }
         }
 
-        // Se non abbiamo trovato pattern con spazi, cerca una singola parola
+        // If we didn't find patterns with spaces, search for a single word
         var startIndex = endIndex
         while (startIndex > 0 && !text[startIndex - 1].isWhitespace() &&
                text[startIndex - 1] !in ".,;:!?()[]{}\"'") {
@@ -423,18 +423,18 @@ object AutoCorrector {
             return null
         }
 
-        // Controlla se questa parola è stata rifiutata (annullata con backspace)
+        // Check if this word has been rejected (undone with backspace)
         val wordLower = word.lowercase()
         if (rejectedWords.contains(wordLower)) {
-            Log.d(TAG, "Parola '$word' è stata rifiutata, non correggere")
+            Log.d(TAG, "Word '$word' has been rejected, don't correct")
             return null
         }
 
-        // Controlla se c'è una correzione per la singola parola in una delle lingue abilitate
+        // Check if there's a correction for the single word in one of the enabled languages
         for (lang in languagesToSearch) {
             val correction = getCorrection(word, lang, context)
             if (correction != null) {
-                Log.d(TAG, "Trovata correzione per parola: '$word' → '$correction' (lingua: $lang)")
+                Log.d(TAG, "Found correction for word: '$word' → '$correction' (language: $lang)")
                 return Pair(word, correction)
             }
         }
@@ -443,10 +443,10 @@ object AutoCorrector {
     }
 
     /**
-     * Registra una correzione applicata.
-     * La correzione rimane annullabile finché non viene premuto un tasto (tranne backspace).
-     * @param originalWord La parola originale
-     * @param correctedWord La parola corretta
+     * Records an applied correction.
+     * The correction remains undoable until a key is pressed (except backspace).
+     * @param originalWord The original word
+     * @param correctedWord The corrected word
      */
     fun recordCorrection(originalWord: String, correctedWord: String) {
         lastCorrection = LastCorrection(
@@ -454,44 +454,44 @@ object AutoCorrector {
             correctedWord = correctedWord,
             correctionLength = correctedWord.length
         )
-        Log.d(TAG, "Correzione registrata: '$originalWord' → '$correctedWord'")
+        Log.d(TAG, "Correction recorded: '$originalWord' → '$correctedWord'")
     }
 
     /**
-     * Ottiene l'ultima correzione se è ancora annullabile.
-     * @return Le informazioni sulla correzione se può essere annullata, null altrimenti
+     * Gets last correction if still undoable.
+     * @return Correction information if it can be undone, null otherwise
      */
     fun getLastCorrection(): LastCorrection? {
         return lastCorrection
     }
 
     /**
-     * Accetta l'ultima correzione (viene chiamato quando viene premuto un tasto diverso da backspace).
-     * Dopo l'accettazione, la correzione non può più essere annullata.
+     * Accepts last correction (called when a key other than backspace is pressed).
+     * After acceptance, the correction can no longer be undone.
      */
     fun acceptLastCorrection() {
         if (lastCorrection != null) {
-            Log.d(TAG, "Correzione accettata: '${lastCorrection!!.correctedWord}'")
+            Log.d(TAG, "Correction accepted: '${lastCorrection!!.correctedWord}'")
             lastCorrection = null
         }
     }
 
     /**
-     * Annulla l'ultima correzione.
-     * Dopo l'annullamento, la correzione non può più essere annullata.
-     * La parola originale viene aggiunta alla lista delle parole rifiutate
-     * per evitare di riproporre la stessa correzione immediatamente.
-     * @return Le informazioni sulla correzione annullata, null se non c'era nessuna correzione
+     * Undoes last correction.
+     * After undo, the correction can no longer be undone.
+     * The original word is added to the rejected words list
+     * to avoid immediately re-proposing the same correction.
+     * @return Information about undone correction, null if there was no correction
      */
     fun undoLastCorrection(): LastCorrection? {
         val correction = lastCorrection
         if (correction != null) {
-            Log.d(TAG, "Correzione annullata: '${correction.correctedWord}' → '${correction.originalWord}'")
+            Log.d(TAG, "Correction undone: '${correction.correctedWord}' → '${correction.originalWord}'")
 
-            // Aggiungi la parola originale alla lista delle parole rifiutate
-            // (usiamo minuscolo per il confronto, così funziona indipendentemente dalla capitalizzazione)
+            // Add original word to rejected words list
+            // (use lowercase for comparison, so it works regardless of capitalization)
             rejectedWords.add(correction.originalWord.lowercase())
-            Log.d(TAG, "Parola '${correction.originalWord}' aggiunta alla lista rifiutate")
+            Log.d(TAG, "Word '${correction.originalWord}' added to rejected list")
 
             lastCorrection = null
             return correction
@@ -500,14 +500,14 @@ object AutoCorrector {
     }
 
     /**
-     * Resetta la lista delle parole rifiutate.
-     * Viene chiamato quando l'utente digita un nuovo carattere (non backspace),
-     * indicando che potrebbe aver modificato il testo e quindi le correzioni rifiutate
-     * potrebbero non essere più valide.
+     * Resets the rejected words list.
+     * Called when user types a new character (not backspace),
+     * indicating they may have modified the text and thus rejected corrections
+     * might no longer be valid.
      */
     fun clearRejectedWords() {
         if (rejectedWords.isNotEmpty()) {
-            Log.d(TAG, "Reset lista parole rifiutate (${rejectedWords.size} parole)")
+            Log.d(TAG, "Reset rejected words list (${rejectedWords.size} words)")
             rejectedWords.clear()
         }
     }

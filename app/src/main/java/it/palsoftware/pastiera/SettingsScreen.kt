@@ -32,7 +32,7 @@ import android.net.Uri
 import it.palsoftware.pastiera.R
 
 /**
- * Schermata delle impostazioni dell'app.
+ * App settings screen.
  */
 @Composable
 fun SettingsScreen(
@@ -42,41 +42,41 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     
-    // Carica il valore salvato del long press threshold
+    // Load saved long press threshold value
     var longPressThreshold by remember { 
         mutableStateOf(SettingsManager.getLongPressThreshold(context))
     }
     
-    // Carica il valore salvato dell'auto-maiuscola
+    // Load saved auto-capitalize value
     var autoCapitalizeFirstLetter by remember {
         mutableStateOf(SettingsManager.getAutoCapitalizeFirstLetter(context))
     }
     
-    // Carica il valore salvato del doppio tap spazio
+    // Load saved double space to period value
     var doubleSpaceToPeriod by remember {
         mutableStateOf(SettingsManager.getDoubleSpaceToPeriod(context))
     }
     
-    // Carica il valore salvato dello swipe per cancellare
+    // Load saved swipe to delete value
     var swipeToDelete by remember {
         mutableStateOf(SettingsManager.getSwipeToDelete(context))
     }
     
-    // Carica il valore salvato dell'attivazione automatica della tastiera
+    // Load saved auto show keyboard value
     var autoShowKeyboard by remember {
         mutableStateOf(SettingsManager.getAutoShowKeyboard(context))
     }
     
-    // Carica il valore salvato dell'auto-correzione
+    // Load saved auto-correction value
     var autoCorrectEnabled by remember {
         mutableStateOf(SettingsManager.getAutoCorrectEnabled(context))
     }
     
-    // Stato per la navigazione alle impostazioni auto-correzione
+    // State for navigation to auto-correction settings
     var showAutoCorrectSettings by remember { mutableStateOf(false) }
     var showAutoCorrectEdit by remember { mutableStateOf<String?>(null) }
     
-    // Gestisci il back button di sistema
+    // Handle system back button
     BackHandler {
         when {
             showAutoCorrectEdit != null -> {
@@ -124,7 +124,7 @@ fun SettingsScreen(
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
         ) {
-        // Header moderno
+        // Modern header
         Surface(
             modifier = Modifier.fillMaxWidth(),
             tonalElevation = 1.dp
@@ -150,7 +150,7 @@ fun SettingsScreen(
             }
         }
         
-        // Lista impostazioni moderna
+        // Modern settings list
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(1.dp)
@@ -404,7 +404,7 @@ fun SettingsScreen(
             
             HorizontalDivider()
             
-            // Auto-Correction Languages (solo se auto-correzione è abilitata)
+            // Auto-Correction Languages (only if auto-correction is enabled)
             if (autoCorrectEnabled) {
                 Surface(
                     modifier = Modifier
@@ -476,7 +476,7 @@ fun SettingsScreen(
             
             HorizontalDivider()
             
-            // About Section
+            // About section
             Surface(
                 modifier = Modifier.fillMaxWidth()
             ) {

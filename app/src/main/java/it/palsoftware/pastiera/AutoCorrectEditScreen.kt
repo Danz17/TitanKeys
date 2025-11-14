@@ -28,8 +28,8 @@ import org.json.JSONObject
 import java.util.Locale
 
 /**
- * Schermata per modificare le correzioni di una lingua specifica.
- * Mostra le correzioni in formato "originale -> corretta" e permette di modificarle.
+ * Screen for editing corrections for a specific language.
+ * Shows corrections in the format "original -> corrected" and allows editing them.
  */
 @Composable
 fun AutoCorrectEditScreen(
@@ -39,16 +39,16 @@ fun AutoCorrectEditScreen(
 ) {
     val context = LocalContext.current
     
-    // Carica le correzioni (prima quelle personalizzate, poi quelle di default)
+    // Load corrections (custom first, then default)
     var corrections by remember {
         mutableStateOf(loadCorrectionsForLanguage(context, languageCode))
     }
     
-    // Stato per il dialog di aggiunta/modifica
+    // State for the add/edit dialog
     var showAddDialog by remember { mutableStateOf(false) }
     var editingKey by remember { mutableStateOf<String?>(null) }
     
-    // Gestisci il back button di sistema
+    // Handle the system back button
     BackHandler {
         onBack()
     }
@@ -106,7 +106,7 @@ fun AutoCorrectEditScreen(
                         .padding(paddingValues)
                         .verticalScroll(rememberScrollState())
                 ) {
-            // Header con descrizione
+            // Header with description
             Surface(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -120,9 +120,9 @@ fun AutoCorrectEditScreen(
             
             HorizontalDivider()
             
-            // Lista delle correzioni
+            // List of corrections
             if (corrections.isEmpty()) {
-                // Messaggio quando non ci sono correzioni
+                // Message shown when there are no corrections
                 Surface(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -137,7 +137,7 @@ fun AutoCorrectEditScreen(
                     )
                 }
             } else {
-                // Mostra le correzioni ordinate alfabeticamente
+                // Show corrections ordered alphabetically
                 val sortedCorrections = corrections.toList().sortedBy { it.first }
                 
                 sortedCorrections.forEach { (original, corrected) ->
@@ -151,8 +151,8 @@ fun AutoCorrectEditScreen(
                         onDelete = {
                             corrections = corrections - original
                             saveCorrections(context, languageCode, corrections, null)
-                            // Ricarica tutte le correzioni (incluso le nuove lingue)
-                            // Usa un context che permetta di accedere agli assets
+                            // Reload all corrections (including new languages)
+                            // Use a context that allows access to assets
                             try {
                                 val assets = context.assets
                                 AutoCorrector.loadCorrections(assets, context)
@@ -184,13 +184,13 @@ fun AutoCorrectEditScreen(
             onSave = { original, corrected ->
                 val newCorrections = corrections.toMutableMap()
                 if (editingKey != null && editingKey != original) {
-                    // Rimuovi la vecchia chiave se è stata modificata
+                    // Remove the old key if it has been changed
                     newCorrections.remove(editingKey)
                 }
                 newCorrections[original.lowercase()] = corrected
                 corrections = newCorrections
                 saveCorrections(context, languageCode, corrections, null)
-                // Ricarica tutte le correzioni (incluso le nuove lingue)
+                // Reload all corrections (including new languages)
                 try {
                     val assets = context.assets
                     AutoCorrector.loadCorrections(assets, context)
@@ -285,7 +285,7 @@ private fun AddCorrectionDialog(
     var originalText by remember { mutableStateOf(originalKey ?: "") }
     var correctedText by remember { mutableStateOf(originalValue ?: "") }
     
-    // Aggiorna i campi quando cambia originalKey
+    // Update fields when originalKey changes
     LaunchedEffect(originalKey) {
         originalText = originalKey ?: ""
         correctedText = originalValue ?: ""
@@ -344,19 +344,19 @@ private fun AddCorrectionDialog(
 }
 
 /**
- * Carica le correzioni per una lingua specifica.
- * Prima carica quelle personalizzate, poi quelle di default dalle assets.
+ * Loads corrections for a specific language.
+ * First loads custom corrections, then the default ones from assets.
  */
 private fun loadCorrectionsForLanguage(context: Context, languageCode: String): Map<String, String> {
     val corrections = mutableMapOf<String, String>()
     
-    // Prima carica le correzioni personalizzate (se esistono)
+    // First load custom corrections (if any)
     val customCorrections = SettingsManager.getCustomAutoCorrections(context, languageCode)
     if (customCorrections.isNotEmpty()) {
         corrections.putAll(customCorrections)
     }
     
-    // Poi carica quelle di default dalle assets (solo se non ci sono personalizzazioni)
+    // Then load default corrections from assets (only if there are no custom ones)
     if (corrections.isEmpty()) {
         try {
             val fileName = "common/autocorrect/auto_corrections_$languageCode.json"
@@ -370,7 +370,7 @@ private fun loadCorrectionsForLanguage(context: Context, languageCode: String): 
                 corrections[key] = value
             }
         } catch (e: Exception) {
-            // File non trovato o errore di parsing
+            // File not found or parsing error
         }
     }
     
@@ -378,7 +378,7 @@ private fun loadCorrectionsForLanguage(context: Context, languageCode: String): 
 }
 
 /**
- * Salva le correzioni personalizzate per una lingua.
+ * Saves custom corrections for a language.
  */
 private fun saveCorrections(
     context: Context, 
@@ -390,7 +390,7 @@ private fun saveCorrections(
 }
 
 /**
- * Converte una mappa di correzioni in JSON string.
+ * Converts a map of corrections into a JSON string.
  */
 private fun correctionsToJson(corrections: Map<String, String>): String {
     val jsonObject = JSONObject()
@@ -401,16 +401,16 @@ private fun correctionsToJson(corrections: Map<String, String>): String {
 }
 
 /**
- * Ottiene il nome visualizzato per una lingua.
+ * Gets the display name for a language.
  */
 private fun getLanguageDisplayName(context: Context, languageCode: String): String {
-    // Prima prova a ottenere il nome salvato nel JSON
+    // First try to get the name saved in JSON
     val savedName = SettingsManager.getCustomLanguageName(context, languageCode)
     if (savedName != null) {
         return savedName
     }
     
-    // Se non c'è un nome salvato, usa il nome generato dalla locale
+    // If there is no saved name, use the name generated from the locale
     return try {
         val locale = Locale(languageCode)
         locale.getDisplayLanguage(locale).replaceFirstChar { 

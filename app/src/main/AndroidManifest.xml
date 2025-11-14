@@ -4,6 +4,9 @@
 
     <!-- Permesso per le notifiche (richiesto da Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    
+    <!-- Permesso per il riconoscimento vocale -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="true"
@@ -39,6 +42,14 @@
                 android:name="android.view.im"
                 android:resource="@xml/method" />
         </service>
+        
+        <!-- Attività helper per il riconoscimento vocale -->
+        <activity
+            android:name=".inputmethod.SpeechRecognitionActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask" />
     </application>
 
 </manifest>

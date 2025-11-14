@@ -5,8 +5,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 
 /**
- * Tracker globale per gli eventi tastiera.
- * Permette al servizio di immissione di comunicare gli eventi alla MainActivity.
+ * Global tracker for keyboard events.
+ * Allows input method service to communicate events to MainActivity.
  */
 object KeyboardEventTracker {
     private var _keyEventState: MutableState<KeyEventInfo?>? = null

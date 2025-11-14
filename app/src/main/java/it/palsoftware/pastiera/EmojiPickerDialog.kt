@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.RecyclerView
 import it.palsoftware.pastiera.R
 
 /**
- * Dialog per selezionare un'emoji.
- * Usa le emoji standard di Android organizzate per categoria.
+ * Dialog for selecting an emoji.
+ * Uses standard Android emojis organized by category.
  */
 @Composable
 fun EmojiPickerDialog(
@@ -44,7 +44,7 @@ fun EmojiPickerDialog(
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                // Header
+                // Header section
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -66,8 +66,8 @@ fun EmojiPickerDialog(
                 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                 
-                // Categorie emoji standard (future-proof - si aggiornano con il sistema)
-                // Usa chiavi hardcoded e traduce solo per la visualizzazione
+                // Standard emoji categories (future-proof - updates with system)
+                // Uses hardcoded keys and translates only for display
                 val emojiCategories = remember {
                     mapOf(
                         "smileys" to listOf(
@@ -291,7 +291,7 @@ fun EmojiPickerDialog(
                     )
                 }
                 
-                // Funzione helper per tradurre le chiavi delle categorie
+                // Helper function to translate category keys
                 @Composable
                 fun getCategoryName(categoryKey: String): String {
                     return when (categoryKey) {
@@ -307,10 +307,10 @@ fun EmojiPickerDialog(
                     }
                 }
                 
-                // Tab per categorie
+                // Category tabs
                 var selectedCategory by remember { mutableStateOf(emojiCategories.keys.first()) }
                 
-                // Tab selector (usando Row scrollabile invece di ScrollableTabRow per compatibilità)
+                // Tab selector (using scrollable Row instead of ScrollableTabRow for compatibility)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -329,7 +329,7 @@ fun EmojiPickerDialog(
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
-                // Griglia emoji con RecyclerView per performance ottimali
+                // Emoji grid with RecyclerView for optimal performance
                 val selectedEmojis = emojiCategories[selectedCategory] ?: emptyList()
                 
                 key(selectedCategory) {
@@ -341,7 +341,7 @@ fun EmojiPickerDialog(
                         val spacing = (2 * context.resources.displayMetrics.density).toInt()
                         val padding = (4 * context.resources.displayMetrics.density).toInt()
                         
-                        // Calcola il numero di colonne in base alla larghezza dello schermo
+                        // Calculate number of columns based on screen width
                         val columns = (screenWidth / (emojiSize + spacing)).coerceAtLeast(4)
                         
                         recyclerView.apply {
@@ -352,7 +352,7 @@ fun EmojiPickerDialog(
                             }
                             setPadding(padding, padding, padding, padding)
                             clipToPadding = false
-                            // Ottimizzazioni per performance
+                            // Performance optimizations
                             setHasFixedSize(true)
                             setItemViewCacheSize(20)
                         }

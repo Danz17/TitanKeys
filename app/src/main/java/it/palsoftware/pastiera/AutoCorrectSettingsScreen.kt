@@ -85,13 +85,13 @@ private fun LanguageItem(
 }
 
 private fun getLanguageDisplayName(context: Context, languageCode: String): String {
-    // Prima prova a ottenere il nome salvato nel JSON
+    // First try to get saved name from JSON
     val savedName = SettingsManager.getCustomLanguageName(context, languageCode)
     if (savedName != null) {
         return savedName
     }
     
-    // Se non c'è un nome salvato, usa il nome generato dalla locale
+    // If no saved name, use name generated from locale
     return try {
         val locale = Locale(languageCode)
         locale.getDisplayLanguage(locale).replaceFirstChar { 
@@ -179,8 +179,8 @@ private fun AddNewLanguageDialog(
 }
 
 /**
- * Schermata per gestire le impostazioni dell'auto-correzione.
- * Permette di attivare/disattivare le lingue per l'auto-correzione.
+ * Screen for managing auto-correction settings.
+ * Allows enabling/disabling languages for auto-correction.
  */
 @Composable
 fun AutoCorrectSettingsScreen(
@@ -190,47 +190,47 @@ fun AutoCorrectSettingsScreen(
 ) {
     val context = LocalContext.current
     
-    // Carica le lingue disponibili (aggiornabile)
+    // Load available languages (updatable)
     var allLanguages by remember { mutableStateOf(AutoCorrector.getAllAvailableLanguages()) }
     val systemLocale = remember {
         context.resources.configuration.locales[0].language.lowercase()
     }
     
-    // Carica le lingue abilitate
+    // Load enabled languages
     var enabledLanguages by remember {
         mutableStateOf(SettingsManager.getAutoCorrectEnabledLanguages(context))
     }
     
-    // Stato per il dialog di nuova lingua
+    // State for new language dialog
     var showNewLanguageDialog by remember { mutableStateOf(false) }
     
-    // Helper per determinare se una lingua è abilitata
+    // Helper to determine if a language is enabled
     fun isLanguageEnabled(locale: String): Boolean {
-        // Se il set è vuoto, tutte le lingue sono abilitate (default)
+        // If set is empty, all languages are enabled (default)
         return enabledLanguages.isEmpty() || enabledLanguages.contains(locale)
     }
     
-    // Helper per contare quante lingue sono abilitate
+    // Helper to count how many languages are enabled
     fun countEnabledLanguages(): Int {
         return if (enabledLanguages.isEmpty()) {
-            allLanguages.size // Tutte abilitate
+            allLanguages.size // All enabled
         } else {
             enabledLanguages.size
         }
     }
     
-    // Helper per gestire il toggle di una lingua
+    // Helper to handle language toggle
     fun toggleLanguage(locale: String, currentEnabled: Boolean) {
         if (!currentEnabled) {
-            // Abilita: aggiungi alla lista
+            // Enable: add to list
             val newSet = if (enabledLanguages.isEmpty()) {
-                // Era "tutte abilitate", ora abilitiamo solo questa
+                // Was "all enabled", now enable only this one
                 setOf(locale)
             } else {
                 enabledLanguages + locale
             }
             
-            // Se il nuovo set contiene tutte le lingue, salva come vuoto (tutte abilitate)
+            // If new set contains all languages, save as empty (all enabled)
             val finalSet = if (newSet.size == allLanguages.size && newSet.containsAll(allLanguages)) {
                 emptySet<String>()
             } else {
@@ -240,10 +240,10 @@ fun AutoCorrectSettingsScreen(
             enabledLanguages = finalSet
             SettingsManager.setAutoCorrectEnabledLanguages(context, finalSet)
         } else {
-            // Disabilita: verifica che non sia l'ultima lingua
+            // Disable: verify it's not the last language
             val enabledCount = countEnabledLanguages()
             if (enabledCount <= 1) {
-                // È l'ultima lingua abilitata, mostra toast e non permettere di disabilitarla
+                // This is the last enabled language, show toast and don't allow disabling
                 Toast.makeText(
                     context,
                     context.getString(R.string.auto_correct_at_least_one_language_required),
@@ -253,14 +253,14 @@ fun AutoCorrectSettingsScreen(
             }
             
             val newSet = if (enabledLanguages.isEmpty()) {
-                // Era "tutte abilitate", ora disabilitiamo questa
-                // Quindi abilitiamo tutte le altre
+                // Was "all enabled", now disable this one
+                // So enable all others
                 allLanguages.filter { it != locale }.toSet()
             } else {
                 enabledLanguages - locale
             }
             
-            // Se il nuovo set contiene tutte le lingue, salva come vuoto
+            // If new set contains all languages, save as empty
             val finalSet = if (newSet.size == allLanguages.size && newSet.containsAll(allLanguages)) {
                 emptySet<String>()
             } else {
@@ -272,7 +272,7 @@ fun AutoCorrectSettingsScreen(
         }
     }
     
-    // Gestisci il back button di sistema
+    // Handle system back button
     BackHandler {
         onBack()
     }
@@ -330,7 +330,7 @@ fun AutoCorrectSettingsScreen(
                         .padding(paddingValues)
                         .verticalScroll(rememberScrollState())
                 ) {
-            // Descrizione
+            // Description section
             Surface(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -344,7 +344,7 @@ fun AutoCorrectSettingsScreen(
             
             HorizontalDivider()
             
-            // Lingua di sistema (sempre in alto)
+            // System language (always at top)
             if (allLanguages.contains(systemLocale)) {
                 val systemEnabled = isLanguageEnabled(systemLocale)
             LanguageItem(
@@ -362,11 +362,11 @@ fun AutoCorrectSettingsScreen(
                 HorizontalDivider()
             }
             
-            // Altre lingue disponibili
+            // Other available languages
             val otherLanguages = allLanguages.filter { it != systemLocale }.sorted()
             
             if (otherLanguages.isNotEmpty()) {
-                // Header per altre lingue
+                // Header for other languages
                 Surface(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -397,8 +397,8 @@ fun AutoCorrectSettingsScreen(
                 }
             }
             
-            // Sezione per lingue personalizzate (se presenti)
-            // Filtra solo le lingue che non sono standard e non sono già mostrate sopra
+            // Section for custom languages (if present)
+            // Filter only languages that are not standard and not already shown above
             val customLanguages = AutoCorrector.getCustomLanguages()
                 .filter { it != systemLocale && it !in otherLanguages }
             if (customLanguages.isNotEmpty()) {
@@ -437,12 +437,12 @@ fun AutoCorrectSettingsScreen(
                 }
             }
             
-            // Dialog per aggiungere una nuova lingua (fuori dallo Scaffold)
+            // Dialog to add a new language (outside Scaffold)
             if (showNewLanguageDialog) {
         AddNewLanguageDialog(
             onDismiss = { showNewLanguageDialog = false },
             onSave = { languageCode, languageName ->
-                // Crea un dizionario vuoto per la nuova lingua con il nome salvato
+                // Create empty dictionary for new language with saved name
                 SettingsManager.saveCustomAutoCorrections(
                     context, 
                     languageCode, 
@@ -450,19 +450,19 @@ fun AutoCorrectSettingsScreen(
                     languageName = languageName
                 )
                 
-                // Ricarica tutte le correzioni (incluso la nuova lingua)
+                // Reload all corrections (including new language)
                 try {
                     val assets = context.assets
                     AutoCorrector.loadCorrections(assets, context)
                 } catch (e: Exception) {
-                    // Fallback: carica solo la nuova lingua
+                    // Fallback: load only the new language
                     AutoCorrector.loadCustomCorrections(languageCode, "{}")
                 }
                 
-                // Aggiorna la lista delle lingue disponibili
+                // Update list of available languages
                 allLanguages = AutoCorrector.getAllAvailableLanguages()
                 
-                // Abilita automaticamente la nuova lingua
+                // Automatically enable the new language
                 val newSet = if (enabledLanguages.isEmpty()) {
                     setOf(languageCode)
                 } else {
@@ -473,7 +473,7 @@ fun AutoCorrectSettingsScreen(
                 
                 showNewLanguageDialog = false
                 
-                // Naviga alla schermata di modifica della nuova lingua
+                // Navigate to edit screen for the new language
                 onEditLanguage(languageCode)
             },
             existingLanguages = allLanguages

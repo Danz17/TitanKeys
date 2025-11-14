@@ -5,21 +5,21 @@ import android.view.KeyEvent
 import android.view.inputmethod.InputConnection
 
 /**
- * Gestisce il nav mode: doppio tap su Ctrl per attivare/disattivare Ctrl latch
- * anche quando non siamo in un campo di testo.
+ * Handles nav mode: double-tap Ctrl to enable/disable Ctrl latch
+ * even when no text field is focused.
  */
 object NavModeHandler {
     private const val TAG = "NavModeHandler"
-    private const val DOUBLE_TAP_THRESHOLD = 500L // millisecondi
+    private const val DOUBLE_TAP_THRESHOLD = 500L // milliseconds
     
     /**
-     * Gestisce la pressione di Ctrl nel nav mode.
-     * @param keyCode Il keycode del tasto Ctrl premuto
-     * @param ctrlPressed Flag che indica se Ctrl è già premuto
-     * @param ctrlLatchActive Flag che indica se Ctrl latch è attivo
-     * @param lastCtrlReleaseTime Timestamp dell'ultimo rilascio di Ctrl
-     * @return Pair<Boolean, NavModeResult> dove il Boolean indica se consumare l'evento,
-     *         e NavModeResult contiene le modifiche da applicare agli stati
+     * Handles Ctrl key down while in nav mode.
+     * @param keyCode The keycode of the pressed Ctrl key
+     * @param ctrlPressed Whether Ctrl is already pressed
+     * @param ctrlLatchActive Whether Ctrl latch is currently active
+     * @param lastCtrlReleaseTime Timestamp of the last Ctrl release
+     * @return Pair<Boolean, NavModeResult> where the Boolean indicates if the event is consumed
+     *         and NavModeResult contains state changes to apply
      */
     fun handleCtrlKeyDown(
         keyCode: Int,
@@ -35,8 +35,8 @@ object NavModeHandler {
         val currentTime = System.currentTimeMillis()
         
         if (ctrlLatchActive) {
-            // Se Ctrl latch è attivo, un singolo tap lo disattiva
-            Log.d(TAG, "Nav mode: Ctrl latch disattivato")
+            // If Ctrl latch is active, a single tap deactivates it
+            Log.d(TAG, "Nav mode: Ctrl latch deactivated")
             return Pair(true, NavModeResult(
                 ctrlLatchActive = false,
                 ctrlPhysicallyPressed = true,
@@ -44,10 +44,10 @@ object NavModeHandler {
                 lastCtrlReleaseTime = 0
             ))
         } else {
-            // Controlla il doppio tap
+            // Check for double tap
             if (currentTime - lastCtrlReleaseTime < DOUBLE_TAP_THRESHOLD && lastCtrlReleaseTime > 0) {
-                // Doppio tap rilevato - attiva Ctrl latch e mostra la tastiera
-                Log.d(TAG, "Nav mode: Ctrl latch attivato con doppio tap")
+                // Double tap detected - activate Ctrl latch and show the keyboard
+                Log.d(TAG, "Nav mode: Ctrl latch activated with double tap")
                 return Pair(true, NavModeResult(
                     ctrlLatchActive = true,
                     ctrlPhysicallyPressed = true,
@@ -55,8 +55,8 @@ object NavModeHandler {
                     lastCtrlReleaseTime = 0
                 ))
             } else {
-                // Singolo tap - non fare nulla, aspetta il secondo tap
-                Log.d(TAG, "Nav mode: primo tap su Ctrl, aspetto il secondo")
+                // Single tap - do nothing, wait for the second tap
+                Log.d(TAG, "Nav mode: first tap on Ctrl, waiting for second tap")
                 return Pair(true, NavModeResult(
                     ctrlPhysicallyPressed = true,
                     lastCtrlReleaseTime = lastCtrlReleaseTime
@@ -66,7 +66,7 @@ object NavModeHandler {
     }
     
     /**
-     * Gestisce il rilascio di Ctrl nel nav mode.
+     * Handles Ctrl key up in nav mode.
      */
     fun handleCtrlKeyUp(): NavModeResult {
         return NavModeResult(
@@ -77,8 +77,8 @@ object NavModeHandler {
     }
     
     /**
-     * Risultato delle operazioni del nav mode.
-     * Contiene le modifiche da applicare agli stati del servizio.
+     * Result of nav mode operations.
+     * Contains the state updates that should be applied to the service.
      */
     data class NavModeResult(
         val ctrlLatchActive: Boolean? = null,

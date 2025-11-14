@@ -11,14 +11,14 @@ import android.view.inputmethod.InputConnection
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Gestisce le mappature Alt/SYM, il long press e l'inserimento dei caratteri speciali.
+ * Manages Alt/SYM mappings, long press handling and special character insertion.
  */
 class AltSymManager(
     private val assets: AssetManager,
     private val prefs: SharedPreferences,
     private val context: Context? = null
 ) {
-    // Callback chiamato quando viene inserito un carattere Alt dopo long press
+    // Callback invoked when an Alt character is inserted after a long press
     var onAltCharInserted: ((Char) -> Unit)? = null
 
     companion object {
@@ -29,6 +29,7 @@ class AltSymManager(
 
     private val altKeyMap = mutableMapOf<Int, String>()
     private val symKeyMap = mutableMapOf<Int, String>()
+    private val symKeyMap2 = mutableMapOf<Int, String>()
 
     private val pressedKeys = ConcurrentHashMap<Int, Long>()
     private val longPressRunnables = ConcurrentHashMap<Int, Runnable>()
@@ -40,6 +41,7 @@ class AltSymManager(
     init {
         altKeyMap.putAll(KeyMappingLoader.loadAltKeyMappings(assets, context))
         symKeyMap.putAll(KeyMappingLoader.loadSymKeyMappings(assets))
+        symKeyMap2.putAll(KeyMappingLoader.loadSymKeyMappingsPage2(assets))
         reloadLongPressThreshold()
     }
 
@@ -51,6 +53,8 @@ class AltSymManager(
 
     fun getSymMappings(): Map<Int, String> = symKeyMap
     
+    fun getSymMappings2(): Map<Int, String> = symKeyMap2
+    
     /**
      * Ricarica le mappature SYM, controllando prima le personalizzazioni.
      */
@@ -60,12 +64,31 @@ class AltSymManager(
             if (customMappings.isNotEmpty()) {
                 symKeyMap.clear()
                 symKeyMap.putAll(customMappings)
-                Log.d(TAG, "Caricate mappature SYM personalizzate: ${customMappings.size} mappature")
+                Log.d(TAG, "Loaded custom SYM mappings: ${customMappings.size} entries")
             } else {
-                // Usa quelle di default dal JSON
+                // Use default mappings from JSON
                 symKeyMap.clear()
                 symKeyMap.putAll(KeyMappingLoader.loadSymKeyMappings(assets))
-                Log.d(TAG, "Caricate mappature SYM di default")
+                Log.d(TAG, "Loaded default SYM mappings")
+            }
+        }
+    }
+    
+    /**
+     * Reloads SYM mappings for page 2, checking for custom mappings first.
+     */
+    fun reloadSymMappings2() {
+        if (context != null) {
+            val customMappings = it.palsoftware.pastiera.SettingsManager.getSymMappingsPage2(context)
+            if (customMappings.isNotEmpty()) {
+                symKeyMap2.clear()
+                symKeyMap2.putAll(customMappings)
+                Log.d(TAG, "Loaded custom SYM page 2 mappings: ${customMappings.size} entries")
+            } else {
+                // Use default mappings from JSON
+                symKeyMap2.clear()
+                symKeyMap2.putAll(KeyMappingLoader.loadSymKeyMappingsPage2(assets))
+                Log.d(TAG, "Loaded default SYM page 2 mappings")
             }
         }
     }
@@ -126,7 +149,8 @@ class AltSymManager(
         keyCode: Int,
         event: KeyEvent?,
         capsLockEnabled: Boolean,
-        inputConnection: InputConnection
+        inputConnection: InputConnection,
+        shiftOneShot: Boolean = false
     ): Boolean {
         pressedKeys[keyCode] = System.currentTimeMillis()
         longPressActivated[keyCode] = false
@@ -138,7 +162,10 @@ class AltSymManager(
         }
 
         if (normalChar.isNotEmpty()) {
-            if (capsLockEnabled && event?.isShiftPressed != true) {
+            // Gestisci shiftOneShot: se è attivo e il carattere è una lettera, rendilo maiuscolo
+            if (shiftOneShot && normalChar.isNotEmpty() && normalChar[0].isLetter()) {
+                normalChar = normalChar.uppercase()
+            } else if (capsLockEnabled && event?.isShiftPressed != true) {
                 normalChar = normalChar.uppercase()
             } else if (capsLockEnabled && event?.isShiftPressed == true) {
                 normalChar = normalChar.lowercase()
@@ -169,11 +196,16 @@ class AltSymManager(
         }
     }
 
-    fun handleKeyUp(keyCode: Int, symKeyActive: Boolean): Boolean {
+    fun handleKeyUp(keyCode: Int, symKeyActive: Boolean, shiftPressed: Boolean = false): Boolean {
         val pressStartTime = pressedKeys.remove(keyCode)
         longPressActivated.remove(keyCode)
         insertedNormalChars.remove(keyCode)
-        longPressRunnables.remove(keyCode)?.let { handler.removeCallbacks(it) }
+        
+        // Non cancellare il long press se shift è ancora premuto
+        // Questo permette al long press di completarsi anche se il tasto viene rilasciato mentre shift è premuto
+        if (!shiftPressed) {
+            longPressRunnables.remove(keyCode)?.let { handler.removeCallbacks(it) }
+        }
 
         return pressStartTime != null && altKeyMap.containsKey(keyCode) && !symKeyActive
     }

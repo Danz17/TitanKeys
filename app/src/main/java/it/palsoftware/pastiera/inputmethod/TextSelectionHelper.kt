@@ -5,14 +5,14 @@ import android.view.inputmethod.InputConnection
 import android.util.Log
 
 /**
- * Helper per gestire operazioni di selezione del testo.
+ * Helper for handling text selection operations.
  */
 object TextSelectionHelper {
     private const val TAG = "TextSelectionHelper"
     
     /**
-     * Espande la selezione di un carattere verso sinistra.
-     * Se non c'è selezione, crea una selezione di un carattere a sinistra del cursore.
+     * Expands selection one character to the left.
+     * If there's no selection, creates a selection of one character to the left of cursor.
      */
     fun expandSelectionLeft(inputConnection: InputConnection): Boolean {
         try {
@@ -30,15 +30,15 @@ object TextSelectionHelper {
                 val textAfter = inputConnection.getTextAfterCursor(1, 0)
                 
                 if (textBefore != null && textBefore.isNotEmpty()) {
-                    // Se c'è testo dopo, probabilmente c'è una selezione
-                    // Per semplicità, assumiamo che il cursore sia alla fine del testo prima
+                    // If there's text after, there's probably a selection
+                    // For simplicity, assume cursor is at end of text before
                     val currentPos = textBefore.length
                     val newStart = currentPos - 1
                     
                     if (newStart >= 0) {
-                        // Crea o espande la selezione di un carattere a sinistra
+                        // Create or expand selection one character to the left
                         inputConnection.setSelection(newStart, currentPos)
-                        Log.d(TAG, "expandSelectionLeft: selezione creata/espansa a [$newStart, $currentPos]")
+                        Log.d(TAG, "expandSelectionLeft: selection created/expanded to [$newStart, $currentPos]")
                         return true
                     }
                 }
@@ -49,50 +49,50 @@ object TextSelectionHelper {
             val selectionEnd = extractedText.selectionEnd
             
             if (selectionStart < 0 || selectionEnd < 0) {
-                Log.d(TAG, "expandSelectionLeft: impossibile ottenere la selezione")
+                Log.d(TAG, "expandSelectionLeft: unable to get selection")
                 return false
             }
             
-            // Verifica se possiamo espandere a sinistra
-            // Se selectionStart è già 0, non possiamo espandere ulteriormente
+            // Verify if we can expand left
+            // If selectionStart is already 0, we can't expand further
             if (selectionStart <= 0) {
-                Log.d(TAG, "expandSelectionLeft: selezione già all'inizio del testo, non posso espandere")
+                Log.d(TAG, "expandSelectionLeft: selection already at start of text, can't expand")
                 return false
             }
             
-            // Ottieni il testo prima del cursore per verificare che ci sia testo
+            // Get text before cursor to verify there's text
             val textBefore = inputConnection.getTextBeforeCursor(1, 0)
             
             if (textBefore != null && textBefore.isNotEmpty()) {
                 val newStart: Int
                 
                 if (selectionStart == selectionEnd) {
-                    // Nessuna selezione: crea una selezione di un carattere a sinistra
+                    // No selection: create selection of one character to the left
                     newStart = selectionStart - 1
                 } else {
-                    // C'è già una selezione: espandila di un carattere a sinistra
+                    // There's already a selection: expand it one character to the left
                     newStart = selectionStart - 1
                 }
                 
-                // Assicurati che newStart non sia negativo e che sia diverso da selectionStart
+                // Ensure newStart is not negative and is different from selectionStart
                 if (newStart >= 0 && newStart < selectionStart) {
                     inputConnection.setSelection(newStart, selectionEnd)
-                    Log.d(TAG, "expandSelectionLeft: selezione espansa da [$selectionStart, $selectionEnd] a [$newStart, $selectionEnd]")
+                    Log.d(TAG, "expandSelectionLeft: selection expanded from [$selectionStart, $selectionEnd] to [$newStart, $selectionEnd]")
                     return true
                 } else {
-                    Log.d(TAG, "expandSelectionLeft: impossibile espandere (newStart: $newStart, selectionStart: $selectionStart)")
+                    Log.d(TAG, "expandSelectionLeft: unable to expand (newStart: $newStart, selectionStart: $selectionStart)")
                     return false
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Errore in expandSelectionLeft", e)
+            Log.e(TAG, "Error in expandSelectionLeft", e)
         }
         return false
     }
     
     /**
-     * Espande la selezione di un carattere verso destra.
-     * Se non c'è selezione, crea una selezione di un carattere a destra del cursore.
+     * Expands selection one character to the right.
+     * If there's no selection, creates a selection of one character to the right of cursor.
      */
     fun expandSelectionRight(inputConnection: InputConnection): Boolean {
         try {
@@ -110,13 +110,13 @@ object TextSelectionHelper {
                 val textAfter = inputConnection.getTextAfterCursor(1000, 0)
                 
                 if (textAfter != null && textAfter.isNotEmpty()) {
-                    // Se c'è testo dopo, possiamo espandere la selezione
+                    // If there's text after, we can expand selection
                     val currentPos = textBefore?.length ?: 0
                     val newEnd = currentPos + 1
                     
-                    // Crea o espande la selezione di un carattere a destra
+                    // Create or expand selection one character to the right
                     inputConnection.setSelection(currentPos, newEnd)
-                    Log.d(TAG, "expandSelectionRight: selezione creata/espansa a [$currentPos, $newEnd]")
+                    Log.d(TAG, "expandSelectionRight: selection created/expanded to [$currentPos, $newEnd]")
                     return true
                 }
                 return false
@@ -126,85 +126,85 @@ object TextSelectionHelper {
             val selectionEnd = extractedText.selectionEnd
             
             if (selectionStart < 0 || selectionEnd < 0) {
-                Log.d(TAG, "expandSelectionRight: impossibile ottenere la selezione")
+                Log.d(TAG, "expandSelectionRight: unable to get selection")
                 return false
             }
             
-            // Verifica la lunghezza totale del testo
+            // Verify total text length
             val fullText = extractedText.text?.toString() ?: ""
             val textLength = fullText.length
             
-            // Se selectionEnd è già alla fine del testo, non possiamo espandere ulteriormente
+            // If selectionEnd is already at end of text, we can't expand further
             if (selectionEnd >= textLength) {
-                Log.d(TAG, "expandSelectionRight: selezione già alla fine del testo (selectionEnd: $selectionEnd, textLength: $textLength), non posso espandere")
+                Log.d(TAG, "expandSelectionRight: selection already at end of text (selectionEnd: $selectionEnd, textLength: $textLength), can't expand")
                 return false
             }
             
-            // Ottieni il testo dopo il cursore per verificare che ci sia testo
+            // Get text after cursor to verify there's text
             val textAfter = inputConnection.getTextAfterCursor(1, 0)
             
             if (textAfter != null && textAfter.isNotEmpty()) {
                 val newEnd: Int
                 
                 if (selectionStart == selectionEnd) {
-                    // Nessuna selezione: crea una selezione di un carattere a destra
+                    // No selection: create selection of one character to the right
                     newEnd = selectionEnd + 1
                 } else {
-                    // C'è già una selezione: espandila di un carattere a destra
+                    // There's already a selection: expand it one character to the right
                     newEnd = selectionEnd + 1
                 }
                 
-                // Verifica che newEnd non superi la lunghezza del testo e che sia diverso da selectionEnd
+                // Verify newEnd doesn't exceed text length and is different from selectionEnd
                 if (newEnd <= textLength && newEnd > selectionEnd) {
                     inputConnection.setSelection(selectionStart, newEnd)
-                    Log.d(TAG, "expandSelectionRight: selezione espansa da [$selectionStart, $selectionEnd] a [$selectionStart, $newEnd]")
+                    Log.d(TAG, "expandSelectionRight: selection expanded from [$selectionStart, $selectionEnd] to [$selectionStart, $newEnd]")
                     return true
                 } else {
-                    Log.d(TAG, "expandSelectionRight: impossibile espandere (newEnd: $newEnd, selectionEnd: $selectionEnd, textLength: $textLength)")
+                    Log.d(TAG, "expandSelectionRight: unable to expand (newEnd: $newEnd, selectionEnd: $selectionEnd, textLength: $textLength)")
                     return false
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Errore in expandSelectionRight", e)
+            Log.e(TAG, "Error in expandSelectionRight", e)
         }
         return false
     }
     
     /**
-     * Cancella l'ultima parola prima del cursore.
+     * Deletes last word before cursor.
      */
     fun deleteLastWord(inputConnection: InputConnection): Boolean {
         try {
-            // Ottieni il testo prima del cursore (fino a 100 caratteri)
+            // Get text before cursor (up to 100 characters)
             val textBeforeCursor = inputConnection.getTextBeforeCursor(100, 0)
             
             if (textBeforeCursor != null && textBeforeCursor.isNotEmpty()) {
-                // Trova l'ultima parola (separata da spazi o all'inizio del testo)
+                // Find last word (separated by spaces or at start of text)
                 var endIndex = textBeforeCursor.length
                 var startIndex = endIndex
                 
-                // Trova la fine dell'ultima parola (ignora spazi alla fine)
+                // Find end of last word (ignore spaces at end)
                 while (startIndex > 0 && textBeforeCursor[startIndex - 1].isWhitespace()) {
                     startIndex--
                 }
                 
-                // Trova l'inizio dell'ultima parola (primo spazio o inizio del testo)
+                // Find start of last word (first space or start of text)
                 while (startIndex > 0 && !textBeforeCursor[startIndex - 1].isWhitespace()) {
                     startIndex--
                 }
                 
-                // Calcola quanti caratteri cancellare
+                // Calculate how many characters to delete
                 val charsToDelete = endIndex - startIndex
                 
                 if (charsToDelete > 0) {
-                    // Cancella l'ultima parola (inclusi eventuali spazi dopo)
+                    // Delete last word (including any spaces after)
                     inputConnection.deleteSurroundingText(charsToDelete, 0)
-                    Log.d(TAG, "deleteLastWord: cancellati $charsToDelete caratteri")
+                    Log.d(TAG, "deleteLastWord: deleted $charsToDelete characters")
                     return true
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Errore in deleteLastWord", e)
+            Log.e(TAG, "Error in deleteLastWord", e)
         }
         return false
     }

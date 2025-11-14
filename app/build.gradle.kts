@@ -109,6 +109,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.compose.material:material-icons-extended")
     // RecyclerView per performance ottimali nella griglia emoji
     implementation("androidx.recyclerview:recyclerview:1.3.2")

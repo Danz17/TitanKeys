@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Pastiera</string>
     <string name="input_method_name">Pastiera Physical Keyboard</string>
+    <string name="input_method_name_en">Pastiera (English)</string>
+    <string name="input_method_name_it">Pastiera (Italiano)</string>
     
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>

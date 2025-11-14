@@ -7,8 +7,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 /**
- * Adapter per RecyclerView delle emoji.
- * Ottimizzato per performance con RecyclerView classico.
+ * Adapter for emoji RecyclerView.
+ * Optimized for performance using classic RecyclerView.
  */
 class EmojiRecyclerViewAdapter(
     private val emojis: List<String>,
@@ -24,7 +24,7 @@ class EmojiRecyclerViewAdapter(
             .inflate(android.R.layout.simple_list_item_1, parent, false)
         val holder = EmojiViewHolder(view)
         
-        // Configura il TextView per centrare l'emoji
+        // Configure TextView to center emoji
         holder.emojiText.apply {
             textSize = 24f
             gravity = android.view.Gravity.CENTER
@@ -33,7 +33,7 @@ class EmojiRecyclerViewAdapter(
             minWidth = (40 * parent.context.resources.displayMetrics.density).toInt()
         }
         
-        // Click listener
+        // Click listener setup
         view.setOnClickListener {
             val position = holder.bindingAdapterPosition
             if (position != RecyclerView.NO_POSITION && position < emojis.size) {

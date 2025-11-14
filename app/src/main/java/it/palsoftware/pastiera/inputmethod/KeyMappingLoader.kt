@@ -8,31 +8,31 @@ import org.json.JSONObject
 import java.io.InputStream
 
 /**
- * Helper per caricare le mappature dei tasti dai file JSON.
+ * Helper for loading key mappings from JSON files.
  */
 object KeyMappingLoader {
     private const val TAG = "KeyMappingLoader"
     
     /**
-     * Rileva il dispositivo corrente e restituisce il nome della cartella device-specific.
-     * Per ora supporta solo "titan2", ma può essere esteso in futuro.
-     * 
-     * TODO: In futuro implementare il rilevamento automatico basato su Build.MODEL, Build.MANUFACTURER, ecc.
+     * Detects the current device and returns the name of the device-specific folder.
+     * Currently supports only "titan2", but can be extended in the future.
+     *
+     * TODO: In the future implement automatic detection based on Build.MODEL, Build.MANUFACTURER, etc.
      */
     fun getDeviceName(context: Context? = null): String {
-        // Per ora hardcodiamo "titan2" come dispositivo predefinito
-        // In futuro si può implementare il rilevamento automatico:
+        // For now we hard-code "titan2" as the default device.
+        // In the future we could implement automatic detection:
         // val model = Build.MODEL.lowercase()
         // val manufacturer = Build.MANUFACTURER.lowercase()
         // return when {
         //     model.contains("titan") && model.contains("2") -> "titan2"
-        //     else -> "default" // o altro dispositivo
+        //     else -> "default"
         // }
         return "titan2"
     }
     
     /**
-     * Mappa comune dei keycode alle costanti KeyEvent.
+     * Common map of keycode names to KeyEvent constants.
      */
     private val keyCodeMap = mapOf(
         "KEYCODE_Q" to KeyEvent.KEYCODE_Q,
@@ -83,8 +83,8 @@ object KeyMappingLoader {
     )
     
     /**
-     * Carica le mappature Alt+tasto dal file JSON device-specific.
-     * I file sono nella cartella devices/{device_name}/alt_key_mappings.json
+     * Loads Alt+key mappings from the device-specific JSON file.
+     * Files live under devices/{device_name}/alt_key_mappings.json
      */
     fun loadAltKeyMappings(assets: AssetManager, context: Context? = null): Map<Int, String> {
         val altKeyMap = mutableMapOf<Int, String>()
@@ -106,10 +106,10 @@ object KeyMappingLoader {
                     altKeyMap[keyCode] = character
                 }
             }
-            Log.d(TAG, "Caricate mappature Alt per dispositivo: $deviceName")
+            Log.d(TAG, "Loaded Alt mappings for device: $deviceName")
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel caricamento delle mappature Alt", e)
-            // Fallback a mappature di base
+            Log.e(TAG, "Error loading Alt mappings", e)
+            // Fallback to basic mappings
             altKeyMap[KeyEvent.KEYCODE_T] = "("
             altKeyMap[KeyEvent.KEYCODE_Y] = ")"
         }
@@ -117,8 +117,8 @@ object KeyMappingLoader {
     }
     
     /**
-     * Carica le mappature SYM+tasto dal file JSON comune.
-     * I file sono nella cartella common/sym/sym_key_mappings.json
+     * Loads SYM+key mappings from the common JSON file.
+     * Files live under common/sym/sym_key_mappings.json
      */
     fun loadSymKeyMappings(assets: AssetManager): Map<Int, String> {
         val symKeyMap = mutableMapOf<Int, String>()
@@ -140,8 +140,8 @@ object KeyMappingLoader {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel caricamento delle mappature SYM", e)
-            // Fallback a emoji di base
+            Log.e(TAG, "Error loading SYM mappings", e)
+            // Fallback to basic emoji
             symKeyMap[KeyEvent.KEYCODE_Q] = "😀"
             symKeyMap[KeyEvent.KEYCODE_W] = "😂"
         }
@@ -149,13 +149,45 @@ object KeyMappingLoader {
     }
     
     /**
-     * Data class per le mappature Ctrl.
+     * Loads SYM page 2 mappings (unicode characters) from the common JSON file.
+     * Files live under common/sym/sym_key_mappings_page2.json
+     */
+    fun loadSymKeyMappingsPage2(assets: AssetManager): Map<Int, String> {
+        val symKeyMap = mutableMapOf<Int, String>()
+        try {
+            val filePath = "common/sym/sym_key_mappings_page2.json"
+            val inputStream: InputStream = assets.open(filePath)
+            val jsonString = inputStream.bufferedReader().use { it.readText() }
+            val jsonObject = JSONObject(jsonString)
+            val mappingsObject = jsonObject.getJSONObject("mappings")
+            
+            val keys = mappingsObject.keys()
+            while (keys.hasNext()) {
+                val keyName = keys.next()
+                val keyCode = keyCodeMap[keyName]
+                val character = mappingsObject.getString(keyName)
+                
+                if (keyCode != null) {
+                    symKeyMap[keyCode] = character
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading SYM page 2 mappings", e)
+            // Fallback to basic characters
+            symKeyMap[KeyEvent.KEYCODE_Q] = "¿"
+            symKeyMap[KeyEvent.KEYCODE_W] = "¡"
+        }
+        return symKeyMap
+    }
+    
+    /**
+     * Data class for Ctrl mappings.
      */
     data class CtrlMapping(val type: String, val value: String)
     
     /**
-     * Carica le mappature Ctrl+tasto dal file JSON comune.
-     * I file sono nella cartella common/ctrl/ctrl_key_mappings.json
+     * Loads Ctrl+key mappings from the common JSON file.
+     * Files live under common/ctrl/ctrl_key_mappings.json
      */
     fun loadCtrlKeyMappings(assets: AssetManager): Map<Int, CtrlMapping> {
         val ctrlKeyMap = mutableMapOf<Int, CtrlMapping>()
@@ -166,7 +198,7 @@ object KeyMappingLoader {
             val jsonObject = JSONObject(jsonString)
             val mappingsObject = jsonObject.getJSONObject("mappings")
             
-            // Mappa i nomi dei keycode speciali alle costanti KeyEvent
+            // Map special keycode names to KeyEvent constants
             val specialKeyCodeMap = mapOf(
                 "DPAD_UP" to KeyEvent.KEYCODE_DPAD_UP,
                 "DPAD_DOWN" to KeyEvent.KEYCODE_DPAD_DOWN,
@@ -199,14 +231,14 @@ object KeyMappingLoader {
                             }
                         }
                         "none" -> {
-                            // Tasto mappato ma senza azione - non aggiungiamo alla mappa
+                            // Key is mapped but with no action - do not add it to the map
                         }
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel caricamento delle mappature Ctrl", e)
-            // Fallback a mappature di base
+            Log.e(TAG, "Error loading Ctrl mappings", e)
+            // Fallback to basic mappings
             ctrlKeyMap[KeyEvent.KEYCODE_C] = CtrlMapping("action", "copy")
             ctrlKeyMap[KeyEvent.KEYCODE_V] = CtrlMapping("action", "paste")
             ctrlKeyMap[KeyEvent.KEYCODE_X] = CtrlMapping("action", "cut")
@@ -220,8 +252,8 @@ object KeyMappingLoader {
     }
     
     /**
-     * Carica le variazioni dei caratteri dal file JSON comune.
-     * I file sono nella cartella common/variations/variations.json
+     * Loads character variations from the common JSON file.
+     * Files live under common/variations/variations.json
      */
     fun loadVariations(assets: AssetManager): Map<Char, List<String>> {
         val variationsMap = mutableMapOf<Char, List<String>>()
@@ -245,8 +277,8 @@ object KeyMappingLoader {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel caricamento delle variazioni", e)
-            // Fallback a variazioni di base
+            Log.e(TAG, "Error loading character variations", e)
+            // Fallback to basic variations
             variationsMap['e'] = listOf("è", "é", "€")
             variationsMap['a'] = listOf("à", "á", "ä")
         }

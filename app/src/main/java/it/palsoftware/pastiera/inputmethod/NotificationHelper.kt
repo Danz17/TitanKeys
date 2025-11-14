@@ -16,7 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
 
 /**
- * Helper per gestire le notifiche dell'app.
+ * Helper for managing app notifications.
  */
 object NotificationHelper {
     private const val CHANNEL_ID = "pastiera_nav_mode_channel"
@@ -24,38 +24,38 @@ object NotificationHelper {
     private const val NOTIFICATION_ID = 1
     
     /**
-     * Verifica se il permesso per le notifiche è concesso.
-     * Su Android 13+ (API 33+) è necessario il permesso POST_NOTIFICATIONS.
+     * Checks whether notification permission is granted.
+     * On Android 13+ (API 33+) POST_NOTIFICATIONS is required.
      */
     fun hasNotificationPermission(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ richiede il permesso POST_NOTIFICATIONS
+            // Android 13+ requires POST_NOTIFICATIONS permission
             ContextCompat.checkSelfPermission(
                 context,
                 android.Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         } else {
-            // Android 12 e precedenti non richiedono permessi espliciti per le notifiche
+            // Android 12 and below do not require explicit notification permissions
             true
         }
     }
     
     /**
-     * Crea il canale di notifica (richiesto per Android 8.0+).
-     * Usa IMPORTANCE_HIGH per cercare di posizionare la notifica più in alto nella barra di stato.
+     * Creates the notification channel (required on Android 8.0+).
+     * Uses IMPORTANCE_LOW for a silent notification without sound or vibration.
      */
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_HIGH // Priorità alta per visibilità migliore
+                NotificationManager.IMPORTANCE_LOW // Silent notification (no sound/vibration)
             ).apply {
-                description = "Notifiche per il nav mode di Pastiera"
+                description = "Notifications for Pastiera nav mode"
                 setShowBadge(false)
-                // Su Android 8.0+, le notifiche con importanza alta possono apparire più in alto
-                enableLights(true)
-                enableVibration(false)
+                enableLights(false) // Disable LED light for silent notification
+                enableVibration(false) // No vibration
+                setSound(null, null) // No sound
             }
             
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -64,10 +64,10 @@ object NotificationHelper {
     }
     
     /**
-     * Crea un'icona bitmap con la lettera "N" per la notifica del nav mode.
-     * @param size Dimensione dell'icona in pixel
-     * @param backgroundColor Colore di sfondo (default trasparente)
-     * @param textColor Colore del testo (default bianco)
+     * Creates a bitmap icon with the letter "N" for the nav mode notification.
+     * @param size Icon size in pixels
+     * @param backgroundColor Background color (default transparent)
+     * @param textColor Text color (default white)
      */
     private fun createNavModeIcon(
         size: Int,
@@ -77,76 +77,77 @@ object NotificationHelper {
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         
-        // Disegna lo sfondo
+        // Draw background
         if (backgroundColor != Color.TRANSPARENT) {
             canvas.drawColor(backgroundColor)
         } else {
             canvas.drawColor(Color.TRANSPARENT)
         }
         
-        // Disegna la lettera "N"
+        // Draw the "N" letter
         val paint = Paint().apply {
             color = textColor
-            textSize = size * 0.7f // 70% della dimensione per avere margini
+            textSize = size * 0.7f // 70% of size to keep margins
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             isAntiAlias = true
             textAlign = Paint.Align.CENTER
         }
         
-        // Calcola la posizione verticale per centrare il testo
+        // Compute vertical position to center the text
         val textY = (canvas.height / 2) - ((paint.descent() + paint.ascent()) / 2)
         
-        // Disegna la "N"
+        // Draw "N"
         canvas.drawText("N", canvas.width / 2f, textY, paint)
         
         return bitmap
     }
     
     /**
-     * Mostra una notifica per l'attivazione del nav mode.
-     * Verifica prima se il permesso è concesso.
+     * Shows a notification when nav mode is activated.
+     * Checks permissions before showing it.
      */
     fun showNavModeActivatedNotification(context: Context) {
-        // Verifica se il permesso è concesso
+        // Check permission first
         if (!hasNotificationPermission(context)) {
-            android.util.Log.w("NotificationHelper", "Permesso per le notifiche non concesso")
+            android.util.Log.w("NotificationHelper", "Notification permission not granted")
             return
         }
         
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         
-        // Crea il canale se non esiste (per Android 8.0+)
+        // Create the channel if needed (Android 8.0+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(context)
         }
         
-        // Crea l'icona personalizzata con "N" per la small icon (barra di stato)
-        // Dimensioni standard per small icon: 24dp convertiti in pixel
+        // Create custom "N" icon for the small icon (status bar)
+        // Standard size for small icon: 24dp converted to pixels
         val smallIconSize = (24 * context.resources.displayMetrics.density).toInt().coerceAtLeast(24)
         val smallIconBitmap = createNavModeIcon(smallIconSize, Color.TRANSPARENT, Color.WHITE)
         val smallIcon = IconCompat.createWithBitmap(smallIconBitmap)
         
-        // Crea l'icona grande per la notifica espansa
+        // Create large icon for expanded notification
         val largeIconSize = (64 * context.resources.displayMetrics.density).toInt().coerceAtLeast(64)
         val largeIconBitmap = createNavModeIcon(largeIconSize, Color.TRANSPARENT, Color.WHITE)
         
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("Nav Mode Activated")
             .setContentText("Nav mode activated")
-            .setSmallIcon(smallIcon) // Icona personalizzata con "N" per la barra di stato
-            .setLargeIcon(largeIconBitmap) // Icona grande con "N" per la notifica espansa
-            .setPriority(NotificationCompat.PRIORITY_HIGH) // Priorità alta per visibilità migliore
-            .setAutoCancel(true) // Si chiude automaticamente quando viene toccata
-            .setOngoing(true) // Persistente per rimanere visibile
-            .setCategory(NotificationCompat.CATEGORY_STATUS) // Categoria status per barra di stato
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) // Visibile anche su schermo bloccato
+            .setSmallIcon(smallIcon) // Custom "N" icon for status bar
+            .setLargeIcon(largeIconBitmap) // Large "N" icon for expanded notification
+            .setPriority(NotificationCompat.PRIORITY_LOW) // Low priority for silent notification
+            .setAutoCancel(true) // Automatically dismissed when tapped
+            .setOngoing(true) // Persistent, stays visible
+            .setCategory(NotificationCompat.CATEGORY_STATUS) // Status category for status bar
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) // Visible on lock screen
+            .setSilent(true) // Silent notification (no sound)
             .build()
         
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
     
     /**
-     * Cancella la notifica del nav mode.
+     * Cancels the nav mode notification.
      */
     fun cancelNavModeNotification(context: Context) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

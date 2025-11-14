@@ -7,24 +7,25 @@ import android.view.KeyEvent
 import org.json.JSONObject
 
 /**
- * Gestisce le impostazioni dell'app.
- * Centralizza l'accesso alle SharedPreferences per le impostazioni di Pastiera.
+ * Manages the app settings.
+ * Centralizes access to SharedPreferences for Pastiera settings.
  */
 object SettingsManager {
     private const val TAG = "SettingsManager"
     private const val PREFS_NAME = "pastiera_prefs"
     
-    // Chiavi delle impostazioni
+    // Settings keys
     private const val KEY_LONG_PRESS_THRESHOLD = "long_press_threshold"
     private const val KEY_AUTO_CAPITALIZE_FIRST_LETTER = "auto_capitalize_first_letter"
     private const val KEY_DOUBLE_SPACE_TO_PERIOD = "double_space_to_period"
     private const val KEY_SWIPE_TO_DELETE = "swipe_to_delete"
     private const val KEY_AUTO_SHOW_KEYBOARD = "auto_show_keyboard"
     private const val KEY_SYM_MAPPINGS_CUSTOM = "sym_mappings_custom"
+    private const val KEY_SYM_MAPPINGS_PAGE2_CUSTOM = "sym_mappings_page2_custom"
     private const val KEY_AUTO_CORRECT_ENABLED = "auto_correct_enabled"
     private const val KEY_AUTO_CORRECT_ENABLED_LANGUAGES = "auto_correct_enabled_languages"
     
-    // Valori di default
+    // Default values
     private const val DEFAULT_LONG_PRESS_THRESHOLD = 500L
     private const val MIN_LONG_PRESS_THRESHOLD = 50L
     private const val MAX_LONG_PRESS_THRESHOLD = 1000L
@@ -35,22 +36,22 @@ object SettingsManager {
     private const val DEFAULT_AUTO_CORRECT_ENABLED = true
     
     /**
-     * Ottiene le SharedPreferences per Pastiera.
+     * Returns the SharedPreferences instance for Pastiera.
      */
     fun getPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
     
     /**
-     * Ottiene la soglia di long press in millisecondi.
+     * Returns the long-press threshold in milliseconds.
      */
     fun getLongPressThreshold(context: Context): Long {
         return getPreferences(context).getLong(KEY_LONG_PRESS_THRESHOLD, DEFAULT_LONG_PRESS_THRESHOLD)
     }
     
     /**
-     * Imposta la soglia di long press in millisecondi.
-     * Il valore viene automaticamente limitato tra MIN e MAX.
+     * Sets the long-press threshold in milliseconds.
+     * The value is automatically clamped between MIN and MAX.
      */
     fun setLongPressThreshold(context: Context, threshold: Long) {
         val clampedValue = threshold.coerceIn(MIN_LONG_PRESS_THRESHOLD, MAX_LONG_PRESS_THRESHOLD)
@@ -60,29 +61,29 @@ object SettingsManager {
     }
     
     /**
-     * Ottiene il valore minimo consentito per la soglia di long press.
+     * Returns the minimum allowed value for the long-press threshold.
      */
     fun getMinLongPressThreshold(): Long = MIN_LONG_PRESS_THRESHOLD
     
     /**
-     * Ottiene il valore massimo consentito per la soglia di long press.
+     * Returns the maximum allowed value for the long-press threshold.
      */
     fun getMaxLongPressThreshold(): Long = MAX_LONG_PRESS_THRESHOLD
     
     /**
-     * Ottiene il valore di default per la soglia di long press.
+     * Returns the default value for the long-press threshold.
      */
     fun getDefaultLongPressThreshold(): Long = DEFAULT_LONG_PRESS_THRESHOLD
     
     /**
-     * Ottiene lo stato dell'auto-maiuscola per la prima lettera.
+     * Returns the state of auto-capitalization for the first letter.
      */
     fun getAutoCapitalizeFirstLetter(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_AUTO_CAPITALIZE_FIRST_LETTER, DEFAULT_AUTO_CAPITALIZE_FIRST_LETTER)
     }
     
     /**
-     * Imposta lo stato dell'auto-maiuscola per la prima lettera.
+     * Sets the state of auto-capitalization for the first letter.
      */
     fun setAutoCapitalizeFirstLetter(context: Context, enabled: Boolean) {
         getPreferences(context).edit()
@@ -91,14 +92,14 @@ object SettingsManager {
     }
     
     /**
-     * Ottiene lo stato del doppio tap spazio per inserire punto e spazio.
+     * Returns the state of the double-space-to-period feature.
      */
     fun getDoubleSpaceToPeriod(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_DOUBLE_SPACE_TO_PERIOD, DEFAULT_DOUBLE_SPACE_TO_PERIOD)
     }
     
     /**
-     * Imposta lo stato del doppio tap spazio per inserire punto e spazio.
+     * Sets the state of the double-space-to-period feature.
      */
     fun setDoubleSpaceToPeriod(context: Context, enabled: Boolean) {
         getPreferences(context).edit()
@@ -107,14 +108,14 @@ object SettingsManager {
     }
     
     /**
-     * Ottiene lo stato dello swipe per cancellare (keycode 322).
+     * Returns the state of swipe-to-delete (keycode 322).
      */
     fun getSwipeToDelete(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_SWIPE_TO_DELETE, DEFAULT_SWIPE_TO_DELETE)
     }
     
     /**
-     * Imposta lo stato dello swipe per cancellare (keycode 322).
+     * Sets the state of swipe-to-delete (keycode 322).
      */
     fun setSwipeToDelete(context: Context, enabled: Boolean) {
         getPreferences(context).edit()
@@ -123,14 +124,14 @@ object SettingsManager {
     }
     
     /**
-     * Ottiene lo stato dell'attivazione automatica della tastiera quando un campo riceve il focus.
+     * Returns the state of automatically showing the keyboard when a field gains focus.
      */
     fun getAutoShowKeyboard(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_AUTO_SHOW_KEYBOARD, DEFAULT_AUTO_SHOW_KEYBOARD)
     }
     
     /**
-     * Imposta lo stato dell'attivazione automatica della tastiera quando un campo riceve il focus.
+     * Sets the state of automatically showing the keyboard when a field gains focus.
      */
     fun setAutoShowKeyboard(context: Context, enabled: Boolean) {
         getPreferences(context).edit()
@@ -139,8 +140,8 @@ object SettingsManager {
     }
     
     /**
-     * Ottiene le mappature SYM personalizzate.
-     * Restituisce una mappa vuota se non ci sono personalizzazioni.
+     * Returns custom SYM mappings.
+     * Returns an empty map if there are no custom mappings.
      */
     fun getSymMappings(context: Context): Map<Int, String> {
         val prefs = getPreferences(context)
@@ -177,13 +178,13 @@ object SettingsManager {
             }
             result
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel caricamento delle mappature SYM personalizzate", e)
+            Log.e(TAG, "Error loading custom SYM mappings", e)
             emptyMap()
         }
     }
     
     /**
-     * Salva le mappature SYM personalizzate.
+     * Saves custom SYM mappings.
      */
     fun saveSymMappings(context: Context, mappings: Map<Int, String>) {
         try {
@@ -218,12 +219,12 @@ object SettingsManager {
                 .putString(KEY_SYM_MAPPINGS_CUSTOM, jsonObject.toString())
                 .apply()
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel salvataggio delle mappature SYM personalizzate", e)
+            Log.e(TAG, "Error saving custom SYM mappings", e)
         }
     }
     
     /**
-     * Resetta le mappature SYM personalizzate (torna ai default).
+     * Resets custom SYM mappings back to defaults.
      */
     fun resetSymMappings(context: Context) {
         getPreferences(context).edit()
@@ -232,7 +233,7 @@ object SettingsManager {
     }
     
     /**
-     * Verifica se ci sono mappature SYM personalizzate.
+     * Returns true if custom SYM mappings exist.
      */
     fun hasCustomSymMappings(context: Context): Boolean {
         val prefs = getPreferences(context)
@@ -240,14 +241,115 @@ object SettingsManager {
     }
     
     /**
-     * Ottiene lo stato dell'auto-correzione.
+     * Returns custom SYM mappings for page 2.
+     * Returns an empty map if there are no custom mappings.
+     */
+    fun getSymMappingsPage2(context: Context): Map<Int, String> {
+        val prefs = getPreferences(context)
+        val jsonString = prefs.getString(KEY_SYM_MAPPINGS_PAGE2_CUSTOM, null) ?: return emptyMap()
+        
+        return try {
+            val jsonObject = JSONObject(jsonString)
+            val mappingsObject = jsonObject.getJSONObject("mappings")
+            val keyCodeMap = mapOf(
+                "KEYCODE_Q" to KeyEvent.KEYCODE_Q, "KEYCODE_W" to KeyEvent.KEYCODE_W,
+                "KEYCODE_E" to KeyEvent.KEYCODE_E, "KEYCODE_R" to KeyEvent.KEYCODE_R,
+                "KEYCODE_T" to KeyEvent.KEYCODE_T, "KEYCODE_Y" to KeyEvent.KEYCODE_Y,
+                "KEYCODE_U" to KeyEvent.KEYCODE_U, "KEYCODE_I" to KeyEvent.KEYCODE_I,
+                "KEYCODE_O" to KeyEvent.KEYCODE_O, "KEYCODE_P" to KeyEvent.KEYCODE_P,
+                "KEYCODE_A" to KeyEvent.KEYCODE_A, "KEYCODE_S" to KeyEvent.KEYCODE_S,
+                "KEYCODE_D" to KeyEvent.KEYCODE_D, "KEYCODE_F" to KeyEvent.KEYCODE_F,
+                "KEYCODE_G" to KeyEvent.KEYCODE_G, "KEYCODE_H" to KeyEvent.KEYCODE_H,
+                "KEYCODE_J" to KeyEvent.KEYCODE_J, "KEYCODE_K" to KeyEvent.KEYCODE_K,
+                "KEYCODE_L" to KeyEvent.KEYCODE_L, "KEYCODE_Z" to KeyEvent.KEYCODE_Z,
+                "KEYCODE_X" to KeyEvent.KEYCODE_X, "KEYCODE_C" to KeyEvent.KEYCODE_C,
+                "KEYCODE_V" to KeyEvent.KEYCODE_V, "KEYCODE_B" to KeyEvent.KEYCODE_B,
+                "KEYCODE_N" to KeyEvent.KEYCODE_N, "KEYCODE_M" to KeyEvent.KEYCODE_M
+            )
+            
+            val result = mutableMapOf<Int, String>()
+            val keys = mappingsObject.keys()
+            while (keys.hasNext()) {
+                val keyName = keys.next()
+                val keyCode = keyCodeMap[keyName]
+                val character = mappingsObject.getString(keyName)
+                if (keyCode != null) {
+                    result[keyCode] = character
+                }
+            }
+            result
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading custom SYM page 2 mappings", e)
+            emptyMap()
+        }
+    }
+    
+    /**
+     * Saves custom SYM mappings for page 2.
+     */
+    fun saveSymMappingsPage2(context: Context, mappings: Map<Int, String>) {
+        try {
+            val keyCodeToName = mapOf(
+                KeyEvent.KEYCODE_Q to "KEYCODE_Q", KeyEvent.KEYCODE_W to "KEYCODE_W",
+                KeyEvent.KEYCODE_E to "KEYCODE_E", KeyEvent.KEYCODE_R to "KEYCODE_R",
+                KeyEvent.KEYCODE_T to "KEYCODE_T", KeyEvent.KEYCODE_Y to "KEYCODE_Y",
+                KeyEvent.KEYCODE_U to "KEYCODE_U", KeyEvent.KEYCODE_I to "KEYCODE_I",
+                KeyEvent.KEYCODE_O to "KEYCODE_O", KeyEvent.KEYCODE_P to "KEYCODE_P",
+                KeyEvent.KEYCODE_A to "KEYCODE_A", KeyEvent.KEYCODE_S to "KEYCODE_S",
+                KeyEvent.KEYCODE_D to "KEYCODE_D", KeyEvent.KEYCODE_F to "KEYCODE_F",
+                KeyEvent.KEYCODE_G to "KEYCODE_G", KeyEvent.KEYCODE_H to "KEYCODE_H",
+                KeyEvent.KEYCODE_J to "KEYCODE_J", KeyEvent.KEYCODE_K to "KEYCODE_K",
+                KeyEvent.KEYCODE_L to "KEYCODE_L", KeyEvent.KEYCODE_Z to "KEYCODE_Z",
+                KeyEvent.KEYCODE_X to "KEYCODE_X", KeyEvent.KEYCODE_C to "KEYCODE_C",
+                KeyEvent.KEYCODE_V to "KEYCODE_V", KeyEvent.KEYCODE_B to "KEYCODE_B",
+                KeyEvent.KEYCODE_N to "KEYCODE_N", KeyEvent.KEYCODE_M to "KEYCODE_M"
+            )
+            
+            val mappingsObject = JSONObject()
+            for ((keyCode, character) in mappings) {
+                val keyName = keyCodeToName[keyCode]
+                if (keyName != null) {
+                    mappingsObject.put(keyName, character)
+                }
+            }
+            
+            val jsonObject = JSONObject()
+            jsonObject.put("mappings", mappingsObject)
+            
+            getPreferences(context).edit()
+                .putString(KEY_SYM_MAPPINGS_PAGE2_CUSTOM, jsonObject.toString())
+                .apply()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving custom SYM page 2 mappings", e)
+        }
+    }
+    
+    /**
+     * Resets custom SYM mappings for page 2 back to defaults.
+     */
+    fun resetSymMappingsPage2(context: Context) {
+        getPreferences(context).edit()
+            .remove(KEY_SYM_MAPPINGS_PAGE2_CUSTOM)
+            .apply()
+    }
+    
+    /**
+     * Returns true if custom SYM page 2 mappings exist.
+     */
+    fun hasCustomSymMappingsPage2(context: Context): Boolean {
+        val prefs = getPreferences(context)
+        return prefs.contains(KEY_SYM_MAPPINGS_PAGE2_CUSTOM)
+    }
+    
+    /**
+     * Returns whether auto-correction is enabled.
      */
     fun getAutoCorrectEnabled(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_AUTO_CORRECT_ENABLED, DEFAULT_AUTO_CORRECT_ENABLED)
     }
     
     /**
-     * Imposta lo stato dell'auto-correzione.
+     * Sets whether auto-correction is enabled.
      */
     fun setAutoCorrectEnabled(context: Context, enabled: Boolean) {
         getPreferences(context).edit()
@@ -256,8 +358,8 @@ object SettingsManager {
     }
     
     /**
-     * Ottiene l'elenco delle lingue abilitate per l'auto-correzione.
-     * @return Set di codici lingua (es. "it", "en")
+     * Returns the list of languages enabled for auto-correction.
+     * @return Set of language codes (e.g. "it", "en")
      */
     fun getAutoCorrectEnabledLanguages(context: Context): Set<String> {
         val prefs = getPreferences(context)
@@ -265,14 +367,14 @@ object SettingsManager {
         return if (languagesString != null && languagesString.isNotEmpty()) {
             languagesString.split(",").toSet()
         } else {
-            // Default: tutte le lingue disponibili sono abilitate
+            // Default: all available languages are enabled
             setOf("it", "en")
         }
     }
     
     /**
-     * Imposta l'elenco delle lingue abilitate per l'auto-correzione.
-     * @param languages Set di codici lingua (es. "it", "en")
+     * Sets the list of languages enabled for auto-correction.
+     * @param languages Set of language codes (e.g. "it", "en")
      */
     fun setAutoCorrectEnabledLanguages(context: Context, languages: Set<String>) {
         val languagesString = languages.joinToString(",")
@@ -282,21 +384,21 @@ object SettingsManager {
     }
     
     /**
-     * Verifica se una lingua è abilitata per l'auto-correzione.
+     * Returns true if a language is enabled for auto-correction.
      */
     fun isAutoCorrectLanguageEnabled(context: Context, language: String): Boolean {
         val enabledLanguages = getAutoCorrectEnabledLanguages(context)
-        // Se la lista è vuota, tutte le lingue sono abilitate (comportamento default)
+        // If the list is empty, all languages are enabled (default behavior)
         return enabledLanguages.isEmpty() || enabledLanguages.contains(language)
     }
     
     /**
-     * Campo speciale nel JSON per il nome della lingua.
+     * Special JSON field for the language name.
      */
     private const val LANGUAGE_NAME_KEY = "__name"
     
     /**
-     * Ottiene le correzioni personalizzate per una lingua.
+     * Returns custom corrections for a language.
      */
     fun getCustomAutoCorrections(context: Context, languageCode: String): Map<String, String> {
         val prefs = getPreferences(context)
@@ -309,7 +411,7 @@ object SettingsManager {
             val keys = jsonObject.keys()
             while (keys.hasNext()) {
                 val correctionKey = keys.next()
-                // Salta il campo speciale del nome
+                // Skip the special name field
                 if (correctionKey != LANGUAGE_NAME_KEY) {
                     val value = jsonObject.getString(correctionKey)
                     corrections[correctionKey] = value
@@ -317,13 +419,13 @@ object SettingsManager {
             }
             corrections
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel caricamento delle correzioni personalizzate per $languageCode", e)
+            Log.e(TAG, "Error loading custom corrections for $languageCode", e)
             emptyMap()
         }
     }
     
     /**
-     * Ottiene il nome visualizzato di una lingua personalizzata dal JSON.
+     * Returns the display name of a custom language from JSON.
      */
     fun getCustomLanguageName(context: Context, languageCode: String): String? {
         val prefs = getPreferences(context)
@@ -338,14 +440,14 @@ object SettingsManager {
                 null
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel caricamento del nome della lingua per $languageCode", e)
+            Log.e(TAG, "Error loading language name for $languageCode", e)
             null
         }
     }
     
     /**
-     * Salva le correzioni personalizzate per una lingua.
-     * @param languageName Il nome visualizzato della lingua (opzionale, se null non viene salvato/aggiornato)
+     * Saves custom corrections for a language.
+     * @param languageName The display name of the language (optional, if null it is not saved/updated)
      */
     fun saveCustomAutoCorrections(
         context: Context, 
@@ -356,20 +458,20 @@ object SettingsManager {
         try {
             val jsonObject = JSONObject()
             
-            // Salva il nome della lingua se fornito
+            // Save the language name if provided
             if (languageName != null) {
                 jsonObject.put(LANGUAGE_NAME_KEY, languageName)
             } else {
-                // Se non fornito, prova a mantenere il nome esistente
+                // If not provided, try to keep the existing name
                 val existingName = getCustomLanguageName(context, languageCode)
                 if (existingName != null) {
                     jsonObject.put(LANGUAGE_NAME_KEY, existingName)
                 }
             }
             
-            // Salva le correzioni
+            // Save corrections
             corrections.forEach { (key, value) ->
-                // Salta il campo speciale se presente nelle correzioni
+                // Skip the special field if present in the corrections
                 if (key != LANGUAGE_NAME_KEY) {
                     jsonObject.put(key, value)
                 }
@@ -380,12 +482,12 @@ object SettingsManager {
                 .putString(key, jsonObject.toString())
                 .apply()
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel salvataggio delle correzioni personalizzate per $languageCode", e)
+            Log.e(TAG, "Error saving custom corrections for $languageCode", e)
         }
     }
     
     /**
-     * Aggiorna solo il nome di una lingua personalizzata.
+     * Updates only the display name of a custom language.
      */
     fun updateCustomLanguageName(context: Context, languageCode: String, languageName: String) {
         try {
@@ -405,7 +507,7 @@ object SettingsManager {
                 .putString(key, jsonObject.toString())
                 .apply()
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nell'aggiornamento del nome della lingua per $languageCode", e)
+            Log.e(TAG, "Error updating language name for $languageCode", e)
         }
     }
 }
