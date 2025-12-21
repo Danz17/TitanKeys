@@ -1,5 +1,67 @@
 # Changelog
 
+## New Features Pastiera 0.9 (In Development)
+
+### Development Tools & Workflow
+- **Tools Folder Reorganization**: Support scripts organized into `tools/` with subfolders:
+  - `tools/dictionaries/` - Dictionary download, merge, and preprocessing scripts
+  - `tools/testing/` - Live testing and debug scripts
+  - `tools/adb/` - Wireless ADB connection utilities
+  - `tools/corpora/` - Downloaded frequency data (gitignored)
+- **Wireless ADB Support**: Automated scripts for connecting to Titan 2 via wireless ADB
+- **Live Testing Scripts**: One-command build, install, and test workflow
+- **Dictionary Enhancement Tools**: Scripts for downloading corpora, extracting n-grams, and merging dictionaries
+- **Complete Dictionary Pipeline**: Automated script for building enhanced dictionaries with n-gram data
+- **Enhanced Build Scripts**: Build scripts now automatically attempt wireless ADB connection
+
+### Clipboard Quick Paste
+- **Quick Paste on Tap**: Tap the clipboard button to instantly paste the current clipboard content
+- **Clipboard History on Long-Press**: Long-press the clipboard button to show a popup with recent clipboard items
+- **Native Android Integration**: Uses Android's ClipboardManager API for seamless clipboard access
+- **Haptic Feedback**: Provides tactile feedback on both quick paste and history access
+
+### Next-Word Prediction System
+- **N-gram Language Model**: Implemented bigram and trigram models for context-aware next-word prediction
+- **Adaptive Suggestion Modes**: System automatically switches between current-word suggestions and next-word predictions based on typing context
+- **User Learning**: Keyboard learns from user typing patterns and adapts predictions over time
+- **Context Tracking**: Tracks previous words in sentences to provide better predictions
+- **BlackBerry-style Predictions**: Shows next-word predictions after space/punctuation, similar to classic BlackBerry keyboards
+
+### Enhanced Dictionary Infrastructure
+- **N-gram Support**: Dictionary format extended to support bigram and trigram data
+- **Context-Aware Predictions**: Predictions based on word sequences, not just individual words
+- **User Learning Store**: Persists learned word patterns to improve predictions over time
+- **N-gram Extraction Tools**: Python script for extracting n-grams from text corpora
+
+### Dictionary Updates (December 2025)
+- **Expanded Word Lists**: All 9 language dictionaries updated with FrequencyWords (OpenSubtitles) and Wikipedia frequency data
+- **Multiple Data Sources**: Combined word lists from OpenSubtitles corpus and Wikipedia word frequencies
+- **Final Word Counts**:
+  - English: 50,000 → 74,611 words (+49%)
+  - Italian: 50,000 → 79,193 words (+58%)
+  - German: 50,000 → 84,268 words (+69%)
+  - Spanish: 50,000 → 81,072 words (+62%)
+  - French: 50,000 → 76,754 words (+53%)
+  - Polish: 50,000 → 84,574 words (+69%)
+  - Portuguese: 50,000 → 82,268 words (+65%)
+  - Russian: 50,000 → 83,550 words (+67%)
+  - Lithuanian: 50,000 → 79,946 words (+60%, OpenSubtitles only)
+- **Improved Frequency Data**: Word frequencies merged using weighted average strategy for better suggestion ranking
+- **Tools Reorganization**: Dictionary tools moved to `tools/dictionaries/` for better project organization
+
+### Settings & Configuration
+- **Next-Word Prediction Toggle**: Enable/disable next-word prediction in settings
+- **Prediction Mode Selection**: Choose between current-word, next-word, or hybrid modes
+- **User Learning Toggle**: Enable/disable learning from typing patterns
+- **Settings Manager Integration**: All prediction settings integrated into SettingsManager
+
+## Documentation Updates
+
+### README Translation (v0.8)
+- **English Translation**: Added complete English translation to README.md for better international accessibility
+- **Maintained Technical Accuracy**: All technical terms, file paths, and code references preserved
+- **Structure Preserved**: Original markdown formatting and organization maintained
+
 ## New Features Pastiera 0.2
 
 ### Keyboard Enhancements

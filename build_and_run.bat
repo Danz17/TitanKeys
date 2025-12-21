@@ -4,6 +4,29 @@ echo Compilazione e installazione Pastiera
 echo ========================================
 echo.
 
+REM Check if ADB is available
+where adb >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo WARNING: ADB not found in PATH
+    echo Continuing with build only (install will be skipped)
+    set SKIP_INSTALL=1
+) else (
+    REM Check if device is connected (USB or wireless)
+    adb devices | findstr /R "device$" >nul
+    if %ERRORLEVEL% NEQ 0 (
+        adb devices | findstr /R "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*:[0-9][0-9]*" >nul
+        if %ERRORLEVEL% NEQ 0 (
+            echo No device connected. Attempting wireless ADB connection...
+            if exist tools\adb\wireless_adb_connect.bat (
+                call tools\adb\wireless_adb_connect.bat
+            ) else (
+                echo WARNING: wireless_adb_connect.bat not found
+                echo Please connect device manually or run: adb connect ^<IP^>:^<PORT^>
+            )
+        )
+    )
+)
+
 REM Compila e installa l'app
 call gradlew.bat installDebug
 

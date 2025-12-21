@@ -39,23 +39,35 @@ fi
 # Check if device is connected
 echo "Verifica dispositivo connesso..."
 DEVICE_COUNT=$("$ADB_PATH" devices | grep -v "List" | grep "device$" | wc -l | tr -d ' ')
-if [ "$DEVICE_COUNT" -eq 0 ]; then
+WIRELESS_COUNT=$("$ADB_PATH" devices | grep -E "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+" | wc -l | tr -d ' ')
+
+if [ "$DEVICE_COUNT" -eq 0 ] && [ "$WIRELESS_COUNT" -eq 0 ]; then
     echo "ATTENZIONE: Nessun dispositivo Android connesso."
-    echo "Collega un dispositivo o avvia un emulatore prima di continuare."
-    echo ""
-    echo "Compilazione dell'APK..."
-    ./gradlew assembleDebug
-    if [ $? -eq 0 ]; then
+    echo "Tentativo di connessione wireless ADB..."
+    
+    if [ -f "tools/adb/wireless_adb_connect.sh" ]; then
+        bash tools/adb/wireless_adb_connect.sh
+        # Re-check after connection attempt
+        DEVICE_COUNT=$("$ADB_PATH" devices | grep -v "List" | grep "device$" | wc -l | tr -d ' ')
+        WIRELESS_COUNT=$("$ADB_PATH" devices | grep -E "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+" | wc -l | tr -d ' ')
+    fi
+    
+    if [ "$DEVICE_COUNT" -eq 0 ] && [ "$WIRELESS_COUNT" -eq 0 ]; then
+        echo "Nessun dispositivo trovato. Compilazione dell'APK senza installazione..."
         echo ""
-        echo "========================================"
-        echo "APK compilato con successo!"
-        echo "========================================"
-        echo "APK disponibile in: app/build/outputs/apk/debug/app-debug.apk"
-        exit 0
-    else
-        echo ""
-        echo "ERRORE: La compilazione non è riuscita."
-        exit 1
+        ./gradlew assembleDebug
+        if [ $? -eq 0 ]; then
+            echo ""
+            echo "========================================"
+            echo "APK compilato con successo!"
+            echo "========================================"
+            echo "APK disponibile in: app/build/outputs/apk/debug/app-debug.apk"
+            exit 0
+        else
+            echo ""
+            echo "ERRORE: La compilazione non è riuscita."
+            exit 1
+        fi
     fi
 fi
 

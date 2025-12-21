@@ -26,3 +26,6 @@ keystore.properties
 
 # Build scripts (local)
 assembla_release.sh
+
+# Tools folder - corpora data (generated, large files)
+tools/corpora/
