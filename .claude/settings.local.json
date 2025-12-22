@@ -27,7 +27,10 @@
       "Bash(./gradlew:*)",
       "Bash(git fetch:*)",
       "Bash(find:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nRebrand: Pastiera → TitanKeys - Complete package rename\n\n## Major Changes\n- Renamed package from it.palsoftware.pastiera to com.titankeys.keyboard\n- New app name: TitanKeys\n- New app icon: Blue gradient with TK keyboard key design\n- Developer: Phenix\n- Detached from upstream repository\n\n## Branding Updates\n- All 100+ Kotlin files updated with new package\n- Theme renamed: Theme.TitanKeys\n- Database: titankeys_clipboard.db\n- Preferences: titankeys_prefs\n- Backup files: titankeys-backup-*.zip\n- Log tags: TitanKeysIME\n\n## Features\n- Keyboard bar reorganization \\(voice, suggestions, clipboard\\)\n- Universal clipboard image capture\n- Cursor scroll via swipe gestures\n- Configurable suggestion fade delay\n- All language support and predictions\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git remote:*)"
     ]
   }
 }

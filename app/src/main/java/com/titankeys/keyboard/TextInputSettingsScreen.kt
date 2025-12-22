@@ -604,6 +604,7 @@ fun TextInputSettingsScreen(
                     onClick = {
                         // Clear user learning data
                         val store = UserLearningStore(locale = Locale.getDefault(), debugLogging = false)
+                        store.load(context) // Load first to sync in-memory state
                         store.clear(context)
                         Toast.makeText(
                             context,
