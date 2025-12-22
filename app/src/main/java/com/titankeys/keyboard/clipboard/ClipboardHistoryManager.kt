@@ -346,7 +346,11 @@ class ClipboardHistoryManager(
 
         return ClipboardHistoryPopupView(context).apply {
             setOnItemClickListener { entry ->
-                pasteText(entry.text ?: "", inputConnection)
+                if (entry.isImage && entry.imagePath != null) {
+                    pasteImage(entry.imagePath)
+                } else {
+                    pasteText(entry.text ?: "", inputConnection)
+                }
                 dismiss()
                 onDismiss()
             }

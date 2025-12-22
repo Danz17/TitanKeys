@@ -24,6 +24,9 @@ keystore.properties
 # Cursor rules (workspace-specific)
 .cursor/
 
+# Claude Code local settings
+.claude/
+
 # Build scripts (local)
 assembla_release.sh
 
