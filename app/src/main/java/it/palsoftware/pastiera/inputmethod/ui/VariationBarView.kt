@@ -65,6 +65,8 @@ class VariationBarView(
     var onAddUserWord: ((String) -> Unit)? = null
     var onLanguageSwitchRequested: (() -> Unit)? = null
     var onClipboardRequested: (() -> Unit)? = null
+    var onQuickPasteRequested: ((android.view.inputmethod.InputConnection?) -> Unit)? = null
+    var onHideKeyboardRequested: (() -> Unit)? = null
     
     /**
      * Sets the microphone button active state (red pulsing background) during speech recognition.
@@ -217,6 +219,7 @@ class VariationBarView(
     private var clipboardFlashOverlay: View? = null
     private var clipboardFlashAnimator: ValueAnimator? = null
     private var lastClipboardCount: Int? = null
+    private var hideKeyboardButtonView: ImageView? = null
 
     fun ensureView(): FrameLayout {
         if (wrapper != null) {
@@ -346,6 +349,7 @@ class VariationBarView(
         removeSettingsImmediate()
         removeLanguageButtonImmediate()
         removeClipboardButtonImmediate()
+        removeHideKeyboardButtonImmediate()
         hideSwipeIndicator(immediate = true)
         hideSwipeHintImmediate()
         shouldShowSwipeHint = false
@@ -366,6 +370,7 @@ class VariationBarView(
         removeSettingsImmediate()
         removeLanguageButtonImmediate()
         removeClipboardButtonImmediate()
+        removeHideKeyboardButtonImmediate()
         hideSwipeIndicator(immediate = true)
         hideSwipeHintImmediate()
         shouldShowSwipeHint = false
@@ -528,7 +533,47 @@ class VariationBarView(
         lastInputConnectionUsed = inputConnection
         lastIsStaticContent = isStaticContent
 
-        // Add clipboard button with badge container at the start of variations row
+        // NEW LAYOUT: [Hide Keyboard] ... [Voice][Clipboard] ... [Language Switcher]
+
+        // 1. FAR LEFT: Hide keyboard button
+        val hideKeyboardButton = hideKeyboardButtonView ?: createHideKeyboardButton(fixedButtonSize)
+        hideKeyboardButtonView = hideKeyboardButton
+        (hideKeyboardButton.parent as? ViewGroup)?.removeView(hideKeyboardButton)
+        hideKeyboardButton.setOnClickListener {
+            NotificationHelper.triggerHapticFeedback(context)
+            onHideKeyboardRequested?.invoke()
+        }
+        hideKeyboardButton.alpha = 1f
+        hideKeyboardButton.visibility = View.VISIBLE
+
+        leftButtonsContainer?.let { leftContainer ->
+            leftContainer.removeAllViews()
+            val hideParams = LinearLayout.LayoutParams(fixedButtonSize, fixedButtonSize).apply {
+                marginEnd = spacingBetweenButtons
+            }
+            leftContainer.addView(hideKeyboardButton, hideParams)
+        }
+
+        // 2. CENTER: Voice button first, then Clipboard with badge
+        val microphoneButton = microphoneButtonView ?: createMicrophoneButton(fixedButtonSize)
+        microphoneButtonView = microphoneButton
+        (microphoneButton.parent as? ViewGroup)?.removeView(microphoneButton)
+        val micParams = LinearLayout.LayoutParams(fixedButtonSize, fixedButtonSize).apply {
+            marginEnd = spacingBetweenButtons
+        }
+        variationsRow.addView(microphoneButton, micParams)
+        microphoneButton.setOnClickListener {
+            NotificationHelper.triggerHapticFeedback(context)
+            if (onSpeechRecognitionRequested != null) {
+                onSpeechRecognitionRequested?.invoke()
+            } else {
+                startSpeechRecognition(inputConnection)
+            }
+        }
+        microphoneButton.alpha = 1f
+        microphoneButton.visibility = View.VISIBLE
+
+        // Clipboard button with badge container (in center area)
         val clipboardButton = clipboardButtonView ?: createClipboardButton(fixedButtonSize)
         clipboardButtonView = clipboardButton
         val badge = clipboardBadgeView ?: createClipboardBadge()
@@ -550,7 +595,7 @@ class VariationBarView(
                 Gravity.END or Gravity.TOP
             ).apply {
                 val m = dpToPx(2f)
-                val offset = dpToPx(2f) // push badge slightly downward
+                val offset = dpToPx(2f)
                 setMargins(m, m + offset, m, m)
             }
         )
@@ -564,22 +609,24 @@ class VariationBarView(
             isClickable = false
             isFocusable = false
         }.also { clipboardFlashOverlay = it }
-        // ensure overlay is topmost
         clipboardFrame.addView(flashOverlay)
+        variationsRow.addView(clipboardFrame)
 
-        leftButtonsContainer?.let { leftContainer ->
-            leftContainer.removeAllViews()
-            leftContainer.addView(clipboardFrame)
-        }
         clipboardButton.setOnClickListener {
             NotificationHelper.triggerHapticFeedback(context)
+            onQuickPasteRequested?.invoke(currentInputConnection)
+        }
+        clipboardButton.setOnLongClickListener {
+            NotificationHelper.triggerHapticFeedback(context)
+            clipboardButton.isPressed = false
             onClipboardRequested?.invoke()
+            true
         }
         clipboardButton.alpha = 1f
         clipboardButton.visibility = View.VISIBLE
-        // Update badge with current clipboard count
         updateClipboardBadge(snapshot.clipboardCount)
 
+        // Variation buttons in center
         val addCandidate = snapshot.addWordCandidate
         for (variation in limitedVariations) {
             val isAddCandidate = addCandidate != null && variation.equals(addCandidate, ignoreCase = true)
@@ -588,55 +635,27 @@ class VariationBarView(
             variationsRow.addView(button)
         }
 
-        // Add buttons to the fixed-position container on the right
+        // 3. FAR RIGHT: Language switch button only
         val buttonsContainerView = buttonsContainer ?: return
         buttonsContainerView.removeAllViews()
-        
-        val microphoneButton = microphoneButtonView ?: createMicrophoneButton(fixedButtonSize)
-        microphoneButtonView = microphoneButton
-        (microphoneButton.parent as? ViewGroup)?.removeView(microphoneButton)
-        val micParams = LinearLayout.LayoutParams(fixedButtonSize, fixedButtonSize).apply {
-            marginStart = spacingBetweenButtons
-        }
-        buttonsContainerView.addView(microphoneButton, micParams)
-        microphoneButton.setOnClickListener {
-            NotificationHelper.triggerHapticFeedback(context)
-            // Use callback if available (modern SpeechRecognizer approach), otherwise fallback to Activity
-            if (onSpeechRecognitionRequested != null) {
-                onSpeechRecognitionRequested?.invoke()
-            } else {
-                startSpeechRecognition(inputConnection)
-            }
-        }
-        microphoneButton.alpha = 1f
-        microphoneButton.visibility = View.VISIBLE
 
-        // Language switch button (language code)
         val languageButton = languageButtonView ?: createLanguageButton(fixedButtonSize)
         languageButtonView = languageButton
         (languageButton.parent as? ViewGroup)?.removeView(languageButton)
         val languageParams = LinearLayout.LayoutParams(fixedButtonSize, fixedButtonSize).apply {
-            topMargin = 0
             marginStart = spacingBetweenButtons
         }
         buttonsContainerView.addView(languageButton, languageParams)
-        // Update language code text
         updateLanguageButtonText(languageButton)
         languageButton.setOnClickListener {
             val now = System.currentTimeMillis()
-            // Debounce: prevent rapid consecutive clicks
             if (now - lastLanguageSwitchTime < LANGUAGE_SWITCH_DEBOUNCE_MS) {
                 return@setOnClickListener
             }
             lastLanguageSwitchTime = now
-            
-            // Disable button during switch to prevent multiple simultaneous switches
             languageButton.isEnabled = false
             languageButton.alpha = 0.5f
-            
             onLanguageSwitchRequested?.invoke()
-            
-            // Re-enable button and update text after language switch (with a delay to ensure the change is applied)
             Handler(Looper.getMainLooper()).postDelayed({
                 languageButton.isEnabled = true
                 languageButton.alpha = 1f
@@ -692,7 +711,10 @@ class VariationBarView(
                         longPressHandler = Handler(Looper.getMainLooper())
                         longPressRunnable = Runnable {
                             longPressExecuted = true
+                            // Reset pressed state before long click (callback may hide the bar)
+                            pressedView?.isPressed = false
                             pressedView?.performLongClick()
+                            pressedView = null
                         }
                         longPressHandler?.postDelayed(longPressRunnable!!, 500) // 500ms for long press
                     }
@@ -1035,6 +1057,7 @@ class VariationBarView(
             (container.parent as? ViewGroup)?.removeView(container)
         }
         clipboardButtonView?.apply {
+            isPressed = false // Reset pressed state to avoid stuck highlight
             visibility = View.GONE
             alpha = 1f
         }
@@ -1048,6 +1071,15 @@ class VariationBarView(
             (settings.parent as? ViewGroup)?.removeView(settings)
             settings.visibility = View.GONE
             settings.alpha = 1f
+        }
+    }
+
+    private fun removeHideKeyboardButtonImmediate() {
+        hideKeyboardButtonView?.let { button ->
+            (button.parent as? ViewGroup)?.removeView(button)
+            button.isPressed = false
+            button.visibility = View.GONE
+            button.alpha = 1f
         }
     }
 
@@ -1212,6 +1244,30 @@ class VariationBarView(
         }
         return ImageView(context).apply {
             setImageResource(R.drawable.ic_baseline_mic_24)
+            setColorFilter(Color.WHITE)
+            background = stateList
+            scaleType = ImageView.ScaleType.CENTER
+            isClickable = true
+            isFocusable = true
+            layoutParams = LinearLayout.LayoutParams(buttonSize, buttonSize)
+        }
+    }
+
+    private fun createHideKeyboardButton(buttonSize: Int): ImageView {
+        val normalDrawable = GradientDrawable().apply {
+            setColor(Color.rgb(17, 17, 17))
+            cornerRadius = 0f
+        }
+        val pressedDrawable = GradientDrawable().apply {
+            setColor(PRESSED_BLUE)
+            cornerRadius = 0f
+        }
+        val stateList = android.graphics.drawable.StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_pressed), pressedDrawable)
+            addState(intArrayOf(), normalDrawable)
+        }
+        return ImageView(context).apply {
+            setImageResource(R.drawable.ic_keyboard_hide_24)
             setColorFilter(Color.WHITE)
             background = stateList
             scaleType = ImageView.ScaleType.CENTER

@@ -60,6 +60,20 @@ class CandidatesBarController(
             inputStatusBar.onClipboardRequested = value
             candidatesStatusBar.onClipboardRequested = value
         }
+    
+    var onQuickPasteRequested: ((android.view.inputmethod.InputConnection?) -> Unit)? = null
+        set(value) {
+            field = value
+            inputStatusBar.onQuickPasteRequested = value
+            candidatesStatusBar.onQuickPasteRequested = value
+        }
+
+    var onHideKeyboardRequested: (() -> Unit)? = null
+        set(value) {
+            field = value
+            inputStatusBar.onHideKeyboardRequested = value
+            candidatesStatusBar.onHideKeyboardRequested = value
+        }
 
     fun getInputView(emojiMapText: String = ""): LinearLayout {
         return inputStatusBar.getOrCreateLayout(emojiMapText)

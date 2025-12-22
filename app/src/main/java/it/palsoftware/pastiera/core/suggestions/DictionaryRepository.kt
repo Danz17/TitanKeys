@@ -30,7 +30,7 @@ class DictionaryRepository(
     private val context: Context,
     private val assets: AssetManager,
     private val userDictionaryStore: UserDictionaryStore,
-    private val baseLocale: Locale = Locale.ITALIAN,
+    private val baseLocale: Locale = Locale.ENGLISH,
     private val cachePrefixLength: Int = 4,
     debugLogging: Boolean = false
 ) {
@@ -96,6 +96,10 @@ class DictionaryRepository(
     @Volatile var isReady: Boolean = false
         private set
     @Volatile private var loadStarted: Boolean = false
+    
+    // N-gram data for next-word prediction
+    @Volatile private var bigrams: Map<String, Map<String, Int>> = emptyMap()
+    @Volatile private var trigrams: Map<String, Map<String, Map<String, Int>>> = emptyMap()
     
     val isLoadStarted: Boolean
         get() = loadStarted
@@ -447,6 +451,16 @@ class DictionaryRepository(
             Log.i(tag, "Loaded precomputed SymSpell deletes: ${expandedDeletes.size} keys")
         }
 
+        // Load n-gram data if available
+        if (index.bigrams != null) {
+            bigrams = index.bigrams
+            Log.i(tag, "Loaded bigrams: ${bigrams.size} entries")
+        }
+        if (index.trigrams != null) {
+            trigrams = index.trigrams
+            Log.i(tag, "Loaded trigrams: ${trigrams.size} entries")
+        }
+
         // Re-sort caches using the runtime effective frequency scaling.
         sortCachesByEffectiveFrequency()
         Log.i(tag, "Successfully populated indices from serialized format")
@@ -614,4 +628,14 @@ class DictionaryRepository(
             list.sortByDescending { effectiveFrequency(it) }
         }
     }
+    
+    /**
+     * Gets the bigram data for next-word prediction.
+     */
+    fun getBigrams(): Map<String, Map<String, Int>> = bigrams
+    
+    /**
+     * Gets the trigram data for next-word prediction.
+     */
+    fun getTrigrams(): Map<String, Map<String, Map<String, Int>>> = trigrams
 }

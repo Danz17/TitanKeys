@@ -1,5 +1,7 @@
 package it.palsoftware.pastiera.inputmethod.suggestions.ui
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.content.Intent
 import android.content.res.AssetManager
@@ -19,6 +21,7 @@ import it.palsoftware.pastiera.SettingsActivity
 import it.palsoftware.pastiera.inputmethod.suggestions.SuggestionButtonHandler
 import it.palsoftware.pastiera.inputmethod.VariationButtonHandler
 import it.palsoftware.pastiera.inputmethod.SubtypeCycler
+import it.palsoftware.pastiera.core.suggestions.SuggestionMode
 import android.view.inputmethod.InputMethodManager
 import android.inputmethodservice.InputMethodService
 import it.palsoftware.pastiera.core.suggestions.DictionaryRepository
@@ -34,6 +37,7 @@ class FullSuggestionsBar(private val context: Context) {
     companion object {
         private val PRESSED_BLUE = Color.rgb(100, 150, 255) // Align with variation bar press state
         private val DEFAULT_SUGGESTION_COLOR = Color.rgb(17, 17, 17)
+        private val NEXT_WORD_PREDICTION_COLOR = Color.rgb(25, 40, 65) // Subtle dark blue for predictions
         private const val FLASH_DURATION_MS = 160L
     }
 
@@ -41,10 +45,13 @@ class FullSuggestionsBar(private val context: Context) {
     private var frameContainer: FrameLayout? = null
     private var languageButton: TextView? = null
     private var lastSlots: List<String?> = emptyList()
+    private var lastMode: SuggestionMode = SuggestionMode.CURRENT_WORD
     private var assets: AssetManager? = null
     private var imeServiceClass: Class<*>? = null
     private var showLanguageButton: Boolean = false // Control visibility of language button
     private val suggestionButtons: MutableList<TextView> = mutableListOf()
+    private var isTyping: Boolean = false
+    private var fadeAnimator: android.view.ViewPropertyAnimator? = null
     private val targetHeightPx: Int by lazy {
         // Compact row sized around three suggestion pills
         dpToPx(36f)
@@ -57,6 +64,51 @@ class FullSuggestionsBar(private val context: Context) {
         this.assets = assets
         this.imeServiceClass = imeServiceClass
     }
+
+    /**
+     * Controls the typing state for fade animation.
+     * When typing starts, the suggestions bar fades in.
+     * When typing stops, the bar fades out after a delay to reveal the scroll bar underneath.
+     */
+    fun setTypingState(typing: Boolean) {
+        if (isTyping == typing) return
+        isTyping = typing
+
+        val frame = frameContainer ?: return
+
+        // Cancel any ongoing animation
+        fadeAnimator?.cancel()
+        fadeAnimator = null
+
+        if (typing) {
+            // Fade in when typing
+            frame.visibility = View.VISIBLE
+            fadeAnimator = frame.animate()
+                .alpha(1f)
+                .setDuration(150)
+                .setListener(null)
+            fadeAnimator?.start()
+        } else {
+            // Fade out after delay when stopped typing
+            fadeAnimator = frame.animate()
+                .alpha(0f)
+                .setStartDelay(500) // Wait 500ms before fading out
+                .setDuration(200)
+                .setListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        if (!isTyping) {
+                            frame.visibility = View.INVISIBLE
+                        }
+                    }
+                })
+            fadeAnimator?.start()
+        }
+    }
+
+    /**
+     * Gets the current typing state.
+     */
+    fun isCurrentlyTyping(): Boolean = isTyping
 
     fun ensureView(): FrameLayout {
         if (frameContainer == null) {
@@ -177,7 +229,8 @@ class FullSuggestionsBar(private val context: Context) {
         listener: VariationButtonHandler.OnVariationSelectedListener?,
         shouldDisableSuggestions: Boolean,
         addWordCandidate: String?,
-        onAddUserWord: ((String) -> Unit)?
+        onAddUserWord: ((String) -> Unit)?,
+        suggestionMode: SuggestionMode = SuggestionMode.CURRENT_WORD
     ) {
         val bar = container ?: return
         val frame = frameContainer ?: return
@@ -201,13 +254,14 @@ class FullSuggestionsBar(private val context: Context) {
         languageButton?.text = getCurrentLanguageCode()
 
         val slots = buildSlots(suggestions)
-        if (slots == lastSlots && bar.childCount > 0) {
+        if (slots == lastSlots && lastMode == suggestionMode && bar.childCount > 0) {
             bar.visibility = View.VISIBLE
             return
         }
 
-        renderSlots(bar, slots, inputConnection, listener, shouldDisableSuggestions, addWordCandidate, onAddUserWord)
+        renderSlots(bar, slots, inputConnection, listener, shouldDisableSuggestions, addWordCandidate, onAddUserWord, suggestionMode)
         lastSlots = slots
+        lastMode = suggestionMode
     }
 
     private fun openSettings() {
@@ -228,7 +282,8 @@ class FullSuggestionsBar(private val context: Context) {
         listener: VariationButtonHandler.OnVariationSelectedListener?,
         shouldDisableSuggestions: Boolean,
         addWordCandidate: String?,
-        onAddUserWord: ((String) -> Unit)?
+        onAddUserWord: ((String) -> Unit)?,
+        suggestionMode: SuggestionMode
     ) {
         bar.removeAllViews()
         suggestionButtons.clear()
@@ -261,6 +316,7 @@ class FullSuggestionsBar(private val context: Context) {
             marginEnd = dpToPx(3f)
         }
 
+        val isNextWordMode = suggestionMode == SuggestionMode.NEXT_WORD
         val slotOrder = listOf(slots[0], slots[1], slots[2]) // left, center, right
         for (suggestion in slotOrder) {
             val slotIndex = suggestionButtons.size
@@ -275,7 +331,7 @@ class FullSuggestionsBar(private val context: Context) {
                 maxLines = 1
                 ellipsize = TextUtils.TruncateAt.END
                 setPadding(padH, padV, padH, padV)
-                background = buildSuggestionBackground()
+                background = buildSuggestionBackground(isNextWordMode)
                 layoutParams = weightLayoutParams
                 isClickable = suggestion != null
                 isFocusable = suggestion != null
@@ -289,6 +345,12 @@ class FullSuggestionsBar(private val context: Context) {
                         setOnClickListener {
                             flashSlot(slotIndex)
                             onAddUserWord?.invoke(suggestion)
+                        }
+                    } else if (isNextWordMode) {
+                        // Next-word prediction: insert word + space directly
+                        setOnClickListener {
+                            flashSlot(slotIndex)
+                            inputConnection?.commitText("$suggestion ", 1)
                         }
                     } else {
                         val clickListener = SuggestionButtonHandler.createSuggestionClickListener(
@@ -347,9 +409,10 @@ class FullSuggestionsBar(private val context: Context) {
         }, FLASH_DURATION_MS)
     }
 
-    private fun buildSuggestionBackground(): StateListDrawable {
+    private fun buildSuggestionBackground(isNextWordMode: Boolean = false): StateListDrawable {
+        val normalColor = if (isNextWordMode) NEXT_WORD_PREDICTION_COLOR else DEFAULT_SUGGESTION_COLOR
         val normalDrawable = GradientDrawable().apply {
-            setColor(DEFAULT_SUGGESTION_COLOR)
+            setColor(normalColor)
             cornerRadius = 0f
             alpha = 255 // placeholders look identical; they stay non-clickable
         }

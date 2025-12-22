@@ -36,6 +36,7 @@ import it.palsoftware.pastiera.core.TextInputController
 import it.palsoftware.pastiera.core.suggestions.SuggestionController
 import it.palsoftware.pastiera.core.suggestions.SuggestionResult
 import it.palsoftware.pastiera.core.suggestions.SuggestionSettings
+import it.palsoftware.pastiera.core.suggestions.SuggestionMode
 import it.palsoftware.pastiera.data.layout.LayoutMappingRepository
 import it.palsoftware.pastiera.data.layout.LayoutFileStore
 import it.palsoftware.pastiera.data.layout.LayoutMapping
@@ -326,6 +327,12 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
 
     private fun getSuggestionSettings(): SuggestionSettings {
         val suggestionsEnabled = SettingsManager.getSuggestionsEnabled(this)
+        val nextWordMode = when (SettingsManager.getNextWordPredictionMode(this)) {
+            0 -> SuggestionMode.CURRENT_WORD
+            1 -> SuggestionMode.NEXT_WORD
+            2 -> SuggestionMode.HYBRID
+            else -> SuggestionMode.NEXT_WORD
+        }
         return SuggestionSettings(
             suggestionsEnabled = suggestionsEnabled,
             accentMatching = SettingsManager.getAccentMatchingEnabled(this),
@@ -333,7 +340,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
             maxAutoReplaceDistance = SettingsManager.getMaxAutoReplaceDistance(this),
             maxSuggestions = 3,
             useKeyboardProximity = SettingsManager.getUseKeyboardProximity(this),
-            useEditTypeRanking = SettingsManager.getUseEditTypeRanking(this)
+            useEditTypeRanking = SettingsManager.getUseEditTypeRanking(this),
+            nextWordPredictionEnabled = SettingsManager.getNextWordPredictionEnabled(this),
+            nextWordPredictionMode = nextWordMode,
+            userLearningEnabled = SettingsManager.getUserLearningEnabled(this)
         )
     }
 
@@ -773,6 +783,18 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
             symLayoutController.openClipboardPage()
             updateStatusBarText()
         }
+        // Register listener for quick paste (tap clipboard button)
+        candidatesBarController.onQuickPasteRequested = { inputConnection ->
+            val success = clipboardHistoryManager.quickPaste(inputConnection ?: currentInputConnection)
+            if (success) {
+                NotificationHelper.triggerHapticFeedback(this)
+            }
+            // If clipboard is empty, do nothing (user can long-press for history)
+        }
+        // Register listener for hide keyboard button
+        candidatesBarController.onHideKeyboardRequested = {
+            requestHideSelf(0)
+        }
         val postClipboardBadgeUpdate: () -> Unit = {
             val count = clipboardHistoryManager.getHistorySize()
             uiHandler.post {
@@ -1186,14 +1208,31 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
 
     /**
      * Computes the insets for the IME window.
-     * This is critical for candidates view to receive touch events properly.
+     * This is critical for:
+     * 1. Candidates view to receive touch events properly
+     * 2. Apps to properly resize their content area when keyboard is shown
+     *
      * Setting contentTopInsets = visibleTopInsets ensures touch events reach the candidates view.
+     * Setting touchableInsets = TOUCHABLE_INSETS_CONTENT ensures the keyboard area receives touches.
      */
     override fun onComputeInsets(outInsets: InputMethodService.Insets?) {
         super.onComputeInsets(outInsets)
-        
-        if (outInsets != null && !isFullscreenMode()) {
+
+        if (outInsets == null) return
+
+        // Get the input view to measure its height
+        val inputView = window?.window?.decorView?.rootView
+        val inputViewHeight = inputView?.height ?: 0
+
+        if (!isFullscreenMode() && inputViewHeight > 0) {
+            // Ensure content insets match visible insets for proper touch handling
             outInsets.contentTopInsets = outInsets.visibleTopInsets
+
+            // Set touchable region to content area so keyboard receives all touches
+            outInsets.touchableInsets = InputMethodService.Insets.TOUCHABLE_INSETS_CONTENT
+
+            // The touchable region should cover the entire keyboard area
+            outInsets.touchableRegion.setEmpty()
         }
     }
 
@@ -1267,6 +1306,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
             clipboardCount = clipboardCount,
             variations = variationSnapshot.variations,
             suggestions = suggestionsWithAdd,
+            suggestionMode = suggestionController.currentSuggestionMode(),
             addWordCandidate = addWordCandidate,
             lastInsertedChar = variationSnapshot.lastInsertedChar,
             // Granular smart features flags
@@ -1791,23 +1831,23 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
     
     /**
      * Gets the locale from the current IME subtype.
-     * Falls back to Italian if no subtype is available.
+     * Falls back to English if no subtype is available.
      */
     private fun getLocaleFromSubtype(): Locale {
         val imm = getSystemService(InputMethodManager::class.java)
         val subtype = imm.currentInputMethodSubtype
-        val localeString = subtype?.locale ?: "it_IT"
+        val localeString = subtype?.locale ?: "en_US"
         return try {
             // Convert "en_US" format to Locale
             val parts = localeString.split("_")
             when (parts.size) {
                 2 -> Locale(parts[0], parts[1])
                 1 -> Locale(parts[0])
-                else -> Locale.ITALIAN
+                else -> Locale.ENGLISH
             }
         } catch (e: Exception) {
             Log.w(TAG, "Failed to parse locale from subtype: $localeString", e)
-            Locale.ITALIAN
+            Locale.ENGLISH
         }
     }
     
@@ -1938,7 +1978,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
         if (inputConnection == null) {
             return super.onKeyLongPress(keyCode, event)
         }
-        
+
         // If the keyboard is hidden but we have an InputConnection, reactivate it
         if (!isInputViewActive) {
             isInputViewActive = true
@@ -1946,13 +1986,13 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
                 ensureInputViewCreated()
             }
         }
-        
+
         // Intercept long presses BEFORE Android handles them
         if (altSymManager.hasAltMapping(keyCode)) {
             // Consumiamo l'evento per evitare il popup di Android
             return true
         }
-        
+
         return super.onKeyLongPress(keyCode, event)
     }
 
@@ -2413,6 +2453,20 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
 
             // Provide visual feedback on the suggestions bar, matching variation press color
             candidatesBarController.flashSuggestionSlot(suggestionIndex)
+
+            // Check if this is a next-word prediction
+            val isNextWordMode = suggestionController.currentSuggestionMode() == SuggestionMode.NEXT_WORD
+
+            if (isNextWordMode) {
+                // For next-word predictions: just insert the word + space directly
+                Log.d(TAG, "Accepting next-word prediction '$suggestion' from third=$third (index=$suggestionIndex)")
+                ic.commitText("$suggestion ", 1)
+                it.palsoftware.pastiera.core.AutoSpaceTracker.markAutoSpace()
+                suggestionController.onContextReset()
+                NotificationHelper.triggerHapticFeedback(this)
+                Log.d(TAG, "Next-word prediction '$suggestion' inserted successfully")
+                return@post
+            }
 
             val forceLeadingCapital = AutoCapitalizeHelper.shouldAutoCapitalizeAtCursor(
                 context = this,

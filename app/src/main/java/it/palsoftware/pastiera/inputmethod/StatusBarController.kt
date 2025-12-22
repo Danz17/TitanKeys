@@ -33,6 +33,7 @@ import it.palsoftware.pastiera.inputmethod.ui.ClipboardHistoryView
 import it.palsoftware.pastiera.inputmethod.ui.LedStatusView
 import it.palsoftware.pastiera.inputmethod.ui.VariationBarView
 import it.palsoftware.pastiera.inputmethod.suggestions.ui.FullSuggestionsBar
+import it.palsoftware.pastiera.core.suggestions.SuggestionMode
 import android.content.res.AssetManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -92,7 +93,18 @@ class StatusBarController(
             field = value
             variationBarView?.onClipboardRequested = value
         }
-    
+    var onQuickPasteRequested: ((android.view.inputmethod.InputConnection?) -> Unit)? = null
+        set(value) {
+            field = value
+            variationBarView?.onQuickPasteRequested = value
+        }
+
+    var onHideKeyboardRequested: (() -> Unit)? = null
+        set(value) {
+            field = value
+            variationBarView?.onHideKeyboardRequested = value
+        }
+
     // Callback for speech recognition state changes (active/inactive)
     var onSpeechRecognitionStateChanged: ((Boolean) -> Unit)? = null
         set(value) {
@@ -163,6 +175,7 @@ class StatusBarController(
         val clipboardCount: Int = 0, // numero di elementi in clipboard
         val variations: List<String> = emptyList(),
         val suggestions: List<String> = emptyList(),
+        val suggestionMode: SuggestionMode = SuggestionMode.CURRENT_WORD,
         val addWordCandidate: String? = null,
         val lastInsertedChar: Char? = null,
         // Granular smart features flags
@@ -186,7 +199,6 @@ class StatusBarController(
     private var emojiKeyboardHorizontalPaddingPx: Int = 0
     private var emojiKeyboardBottomPaddingPx: Int = 0
     private var clipboardHistoryView: ClipboardHistoryView? = null
-    private var lastClipboardCountRendered: Int = -1
     private var emojiKeyButtons: MutableList<View> = mutableListOf()
     private var lastSymPageRendered: Int = 0
     private var lastSymMappingsRendered: Map<Int, String>? = null
@@ -444,13 +456,11 @@ class StatusBarController(
         }
         view.setInputConnection(inputConnection)
 
-        // Refresh only when needed (data changed), otherwise keep the list stable.
-        val count = manager.getHistorySize()
-        if (count != lastClipboardCountRendered) {
-            manager.prepareClipboardHistory()
-            view.refresh()
-            lastClipboardCountRendered = count
-        }
+        // Always refresh when clipboard page is shown to catch new entries
+        // that might have same count (due to retention cleanup removing old + adding new).
+        // The view uses DiffUtil internally for efficient updates.
+        manager.prepareClipboardHistory()
+        view.refresh()
         lastSymPageRendered = 3
     }
 
@@ -1078,7 +1088,8 @@ class StatusBarController(
             onVariationSelectedListener,
             snapshot.shouldDisableSuggestions,
             snapshot.addWordCandidate,
-            onAddUserWord
+            onAddUserWord,
+            snapshot.suggestionMode
         )
         
         if (snapshot.clipboardOverlay) {

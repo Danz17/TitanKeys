@@ -2,6 +2,22 @@
 
 ## New Features Pastiera 0.9 (In Development)
 
+### Keyboard Bar Layout Improvements (December 2025)
+- **Reorganized Button Layout**: New layout: [Hide Keyboard] ... [Voice][Clipboard] ... [Language Switcher]
+- **Hide Keyboard Button**: Added dedicated button to dismiss the virtual keyboard
+- **Fade Animation for Suggestions**: Predictive words bar now fades in when typing and fades out after 500ms delay
+- **Improved Window Insets**: Apps now properly resize when keyboard is shown/hidden
+
+### Clipboard Image Capture (December 2025)
+- **Universal Image Detection**: Clipboard now captures ALL copied images, not just screenshots
+- **Multi-Method Detection**: Uses MIME type, ContentResolver query, and bitmap header detection
+- **Cross-App Support**: Works with images from WhatsApp, Gallery, browsers, and any other app
+
+### Language Improvements (December 2025)
+- **English Default**: Changed default locale from Italian to English for better international support
+- **Fixed Prediction Language**: Predictions now correctly default to English when no subtype is selected
+- **Strict Language Filtering**: Improved dictionary filtering to prevent cross-language contamination
+
 ### Development Tools & Workflow
 - **Tools Folder Reorganization**: Support scripts organized into `tools/` with subfolders:
   - `tools/dictionaries/` - Dictionary download, merge, and preprocessing scripts

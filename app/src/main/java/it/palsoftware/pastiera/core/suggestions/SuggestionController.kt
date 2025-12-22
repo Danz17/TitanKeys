@@ -25,7 +25,7 @@ class SuggestionController(
     private val isEnabled: () -> Boolean = { true },
     debugLogging: Boolean = false,
     private val onSuggestionsUpdated: (List<SuggestionResult>) -> Unit,
-    private var currentLocale: Locale = Locale.ITALIAN,
+    private var currentLocale: Locale = Locale.ENGLISH,
     private val keyboardLayoutProvider: () -> String = { "qwerty" }
 ) {
 
@@ -36,6 +36,19 @@ class SuggestionController(
     private var suggestionEngine = SuggestionEngine(dictionaryRepository, locale = currentLocale, debugLogging = debugLogging).apply {
         setKeyboardLayout(keyboardLayoutProvider())
     }
+    
+    // Next-word prediction components
+    private val contextTracker = ContextTracker(maxContextLength = 3, locale = currentLocale, debugLogging = debugLogging)
+    private val userLearningStore = UserLearningStore(locale = currentLocale, debugLogging = debugLogging)
+    private var ngramLanguageModel = NgramLanguageModel(dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
+    private var nextWordPredictor = NextWordPredictor(ngramLanguageModel, userLearningStore, dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
+    private val adaptiveMode = AdaptiveSuggestionMode(settingsProvider())
+    
+    // Load user learning data
+    init {
+        userLearningStore.load(appContext)
+    }
+    
     private var tracker = CurrentWordTracker(
         onWordChanged = { word ->
             val settings = settingsProvider()
@@ -43,13 +56,59 @@ class SuggestionController(
                 if (debugLogging) {
                     Log.d("PastieraIME", "trackerWordChanged='$word' len=${word.length}")
                 }
-                val next = suggestionEngine.suggest(word, settings.maxSuggestions, settings.accentMatching, settings.useKeyboardProximity, settings.useEditTypeRanking)
-                latestSuggestions.set(next)
-                suggestionsListener?.invoke(next)
+                // Determine mode and get appropriate suggestions
+                val mode = adaptiveMode.determineMode(
+                    hasCurrentWord = word.isNotBlank(),
+                    contextLength = contextTracker.size(),
+                    nextWordPredictionEnabled = settings.nextWordPredictionEnabled
+                )
+                
+                val suggestions = when (mode) {
+                    SuggestionMode.CURRENT_WORD -> {
+                        // Current word suggestions
+                        suggestionEngine.suggest(word, settings.maxSuggestions, settings.accentMatching, settings.useKeyboardProximity, settings.useEditTypeRanking)
+                    }
+                    SuggestionMode.NEXT_WORD -> {
+                        // Next word predictions
+                        val context = contextTracker.getContext()
+                        val predictions = nextWordPredictor.predict(context, settings.maxSuggestions)
+                        // Convert predictions to SuggestionResult format
+                        predictions.mapIndexed { index, pred ->
+                            SuggestionResult(
+                                candidate = pred,
+                                distance = 0,
+                                score = (predictions.size - index).toDouble(),
+                                source = SuggestionSource.MAIN
+                            )
+                        }
+                    }
+                    SuggestionMode.HYBRID -> {
+                        // Show both: current word suggestions if typing, otherwise next-word predictions
+                        if (word.isNotBlank()) {
+                            suggestionEngine.suggest(word, settings.maxSuggestions, settings.accentMatching, settings.useKeyboardProximity, settings.useEditTypeRanking)
+                        } else {
+                            val context = contextTracker.getContext()
+                            val predictions = nextWordPredictor.predict(context, settings.maxSuggestions)
+                            predictions.mapIndexed { index, pred ->
+                                SuggestionResult(
+                                    candidate = pred,
+                                    distance = 0,
+                                    score = (predictions.size - index).toDouble(),
+                                    source = SuggestionSource.MAIN
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                latestSuggestions.set(suggestions)
+                latestMode.set(mode)
+                suggestionsListener?.invoke(suggestions)
             }
         },
         onWordReset = {
             latestSuggestions.set(emptyList())
+            latestMode.set(SuggestionMode.CURRENT_WORD)
             suggestionsListener?.invoke(emptyList())
         }
     )
@@ -72,6 +131,11 @@ class SuggestionController(
         }
         autoReplaceController = AutoReplaceController(dictionaryRepository, suggestionEngine, settingsProvider)
         
+        // Recreate next-word prediction components
+        contextTracker.reset()
+        ngramLanguageModel = NgramLanguageModel(dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
+        nextWordPredictor = NextWordPredictor(ngramLanguageModel, userLearningStore, dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
+        
         // Recreate tracker to use new engine (tracker captures suggestionEngine in closure)
         tracker = CurrentWordTracker(
             onWordChanged = { word ->
@@ -91,10 +155,18 @@ class SuggestionController(
         // Reload dictionary in background
         currentLoadJob = loadScope.launch {
             dictionaryRepository.loadIfNeeded()
+            // Load n-gram data after dictionary is ready
+            if (dictionaryRepository.isReady) {
+                ngramLanguageModel.loadNgrams(
+                    dictionaryRepository.getBigrams(),
+                    dictionaryRepository.getTrigrams()
+                )
+            }
         }
         
         // Reset tracker and clear suggestions
         tracker.reset()
+        contextTracker.reset()
         suggestionsListener?.invoke(emptyList())
     }
 
@@ -106,6 +178,7 @@ class SuggestionController(
     }
 
     private val latestSuggestions: AtomicReference<List<SuggestionResult>> = AtomicReference(emptyList())
+    private val latestMode: AtomicReference<SuggestionMode> = AtomicReference(SuggestionMode.CURRENT_WORD)
     // Dedicated IO scope so dictionary preload never blocks the main thread.
     private val loadScope = CoroutineScope(Dispatchers.IO)
     private var currentLoadJob: Job? = null
@@ -208,11 +281,57 @@ class SuggestionController(
         }
 
         val result = autoReplaceController.handleBoundary(keyCode, event, tracker, inputConnection)
+        
+        // Update context and learning after word is committed
+        val settings = settingsProvider()
+        val completedWord = tracker.currentWord
+        if (completedWord.isNotBlank() && settings.userLearningEnabled) {
+            // Add word to context
+            contextTracker.addWord(completedWord)
+            
+            // Record sequence for learning (get last few words including the one just completed)
+            val contextWords = contextTracker.getContext()
+            if (contextWords.size >= 2) {
+                userLearningStore.recordSequence(contextWords)
+                // Persist periodically (every 10 sequences or so)
+                if (contextWords.size % 10 == 0) {
+                    userLearningStore.persist(appContext)
+                }
+            }
+        }
+        
+        // Check if this is a sentence boundary
+        val boundaryChar = event?.unicodeChar?.toChar()
+        if (boundaryChar != null && (boundaryChar == '.' || boundaryChar == '!' || boundaryChar == '?' || boundaryChar == '\n')) {
+            contextTracker.onSentenceBoundary()
+        }
+        
         if (result.replaced) {
             NotificationHelper.triggerHapticFeedback(appContext)
         } else {
             pendingAddUserWord = null
         }
+        
+        // Show next-word predictions if enabled and we have context
+        if (settings.nextWordPredictionEnabled && !completedWord.isBlank()) {
+            val context = contextTracker.getContext()
+            if (context.isNotEmpty()) {
+                val predictions = nextWordPredictor.predict(context, settings.maxSuggestions)
+                val predictionResults = predictions.mapIndexed { index, pred ->
+                    SuggestionResult(
+                        candidate = pred,
+                        distance = 0,
+                        score = (predictions.size - index).toDouble(),
+                        source = SuggestionSource.MAIN
+                    )
+                }
+                latestSuggestions.set(predictionResults)
+                latestMode.set(SuggestionMode.NEXT_WORD)
+                suggestionsListener?.invoke(predictionResults)
+                return result
+            }
+        }
+        
         suggestionsListener?.invoke(emptyList())
         return result
     }
@@ -291,6 +410,7 @@ class SuggestionController(
     fun onContextReset() {
         if (!isEnabled()) return
         tracker.onContextChanged()
+        contextTracker.reset()
         pendingAddUserWord = null
         suggestionsListener?.invoke(emptyList())
     }
@@ -317,6 +437,8 @@ class SuggestionController(
     }
 
     fun currentSuggestions(): List<SuggestionResult> = latestSuggestions.get()
+
+    fun currentSuggestionMode(): SuggestionMode = latestMode.get()
 
     fun userDictionarySnapshot(): List<UserDictionaryStore.UserEntry> = userDictionaryStore.getSnapshot()
 
@@ -408,6 +530,13 @@ class SuggestionController(
         if (!dictionaryRepository.isReady && !dictionaryRepository.isLoadStarted) {
             loadScope.launch {
                 dictionaryRepository.loadIfNeeded()
+                // Load n-gram data after dictionary is ready
+                if (dictionaryRepository.isReady) {
+                    ngramLanguageModel.loadNgrams(
+                        dictionaryRepository.getBigrams(),
+                        dictionaryRepository.getTrigrams()
+                    )
+                }
             }
         }
     }
@@ -417,7 +546,23 @@ class SuggestionController(
             dictionaryRepository.ensureLoadScheduled {
                 loadScope.launch {
                     dictionaryRepository.loadIfNeeded()
+                    // Load n-gram data after dictionary is ready
+                    if (dictionaryRepository.isReady) {
+                        ngramLanguageModel.loadNgrams(
+                            dictionaryRepository.getBigrams(),
+                            dictionaryRepository.getTrigrams()
+                        )
+                    }
                 }
+            }
+        } else {
+            // Dictionary is ready, ensure n-grams are loaded
+            val repoBigrams = dictionaryRepository.getBigrams()
+            if (repoBigrams.isNotEmpty()) {
+                ngramLanguageModel.loadNgrams(
+                    repoBigrams,
+                    dictionaryRepository.getTrigrams()
+                )
             }
         }
     }
