@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\")",
+      "Bash(\"/c/Program Files/Android/Android Studio/plugins/Kotlin/kotlinc/bin/kotlinc.bat\" -script tools/dictionaries/preprocess-dictionaries.main.kts)",
+      "Bash(cat:*)",
+      "Bash(\"/c/Program Files/Android/Android Studio/plugins/Kotlin/kotlinc/bin/kotlinc.bat\" -script tools/dictionaries/preprocess-dictionaries.main.kts .)",
+      "Bash(\"/c/Program Files/Android/Android Studio/plugins/Kotlin/kotlinc/bin/kotlinc.bat\" -script tools/dictionaries/preprocess-dictionaries.main.kts \"D:/AI/Github/Pastiera-EN-AI\")",
+      "Bash(echo:*)",
+      "Bash(ls:*)",
+      "Bash(python tools/dictionaries/preprocess_dictionaries.py:*)",
+      "Bash(python tools/dictionaries/download_corpora.py:*)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(for lang in en it de es fr pl pt ru lt)",
+      "Bash(do echo \"=== Merging $lang ===\")",
+      "Bash(python tools/dictionaries/merge_dictionaries.py:*)",
+      "Bash(done)",
+      "Bash(unzip:*)",
+      "Bash(for lang in en it de es fr pl pt ru)",
+      "Bash(do echo \"=== Merging $lang with Wikipedia ===\")",
+      "WebSearch",
+      "Bash(adb:*)",
+      "Bash(./gradlew clean)",
+      "Bash(./gradlew:*)",
+      "Bash(git fetch:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

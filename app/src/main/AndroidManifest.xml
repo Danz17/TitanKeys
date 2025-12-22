@@ -17,6 +17,11 @@
     <!-- Permesso per mostrare finestre overlay (per debug trackpad) -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
+    <!-- Permission to read screenshots from MediaStore -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <!-- Query per vedere tutte le app installate che possono essere avviate -->
     <queries>
         <intent>
@@ -39,18 +44,18 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Pastiera">
+        android:theme="@style/Theme.TitanKeys">
         <activity
             android:name=".TutorialActivity"
             android:exported="false"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Pastiera" />
+            android:theme="@style/Theme.TitanKeys" />
         
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Pastiera">
+            android:theme="@style/Theme.TitanKeys">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -63,27 +68,27 @@
             android:name=".SymCustomizationActivity"
             android:exported="false"
             android:label="@string/sym_customize_title"
-            android:theme="@style/Theme.Pastiera" />
+            android:theme="@style/Theme.TitanKeys" />
         
         <!-- Activity per le impostazioni -->
         <activity
             android:name=".SettingsActivity"
             android:exported="true"
             android:label="@string/settings_title"
-            android:theme="@style/Theme.Pastiera" />
+            android:theme="@style/Theme.TitanKeys" />
         
         <!-- Activity per gestire le lingue degli input method subtypes -->
         <activity
             android:name=".LanguagesActivity"
             android:exported="false"
             android:label="@string/languages_title"
-            android:theme="@style/Theme.Pastiera" />
+            android:theme="@style/Theme.TitanKeys" />
         
         <activity
             android:name=".InstalledDictionariesActivity"
             android:exported="false"
             android:label="@string/installed_dictionaries_title"
-            android:theme="@style/Theme.Pastiera" />
+            android:theme="@style/Theme.TitanKeys" />
 
         <!-- Activity for trackpad debug -->
         <activity
@@ -129,7 +134,7 @@
         <!-- Attività per assegnare scorciatoie del launcher -->
         <activity
             android:name=".inputmethod.LauncherShortcutAssignmentActivity"
-            android:theme="@style/Theme.Pastiera.OverlayDialog"
+            android:theme="@style/Theme.TitanKeys.OverlayDialog"
             android:exported="false"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
@@ -145,6 +150,17 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
+        <!-- FileProvider for sharing clipboard images -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Pastiera</string>
-    <string name="input_method_name">Pastiera</string>
+    <string name="app_name">TitanKeys</string>
+    <string name="input_method_name">TitanKeys</string>
     <string name="back">Հետ</string>
     <string name="settings_back_content_description">Հետ</string>
     <string name="long_press_title">Երկար սեղմում</string>
@@ -58,7 +58,7 @@
     <string name="auto_correct_settings_title">Ավտո-ուղղման փոխարինումներ</string>
     <string name="auto_correct_settings_description">Ընտրեք՝ որ փոխարինումները կօգտագործվեն ավտո-ուղղման համար։ Համակարգի լեզուն վերևում է։</string>
     <string name="auto_correct_system_language">Համակարգի լեզու</string>
-    <string name="auto_correct_ricette_pastiera_description">Կիրառվում է բոլոր փոխարինումների համար</string>
+    <string name="auto_correct_titankeys_recipes_description">Կիրառվում է բոլոր փոխարինումների համար</string>
     <string name="auto_correct_other_languages">Այլ փոխարինումներ</string>
     <string name="auto_correct_custom_languages">Սեփական փոխարինումներ</string>
     <string name="auto_correct_at_least_one_language_required">Պետք է առնվազն մեկ փոխարինում</string>

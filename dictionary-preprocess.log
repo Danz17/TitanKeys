@@ -1,0 +1,539 @@
+============================================================
+SCRIPT STARTED
+Arguments: D:/AI/Github/Pastiera-EN-AI
+Working directory: D:\AI\Github\Pastiera-EN-AI
+
+============================================================
+Dictionary Pre-processing Script
+============================================================
+Project root: D:/AI/Github/Pastiera-EN-AI
+Dictionaries dir: D:\AI\Github\Pastiera-EN-AI\app\src\main\assets\common\dictionaries
+Output dir: D:\AI\Github\Pastiera-EN-AI\app\src\main\assets\common\dictionaries_serialized
+Dictionaries dir exists: true
+Dictionaries dir is directory: true
+============================================================
+
+Output directory created/verified: D:\AI\Github\Pastiera-EN-AI\app\src\main\assets\common\dictionaries_serialized
+
+Found 9 JSON files in D:\AI\Github\Pastiera-EN-AI\app\src\main\assets\common\dictionaries
+  - de_base.json
+  - en_base.json
+  - es_base.json
+  - fr_base.json
+  - it_base.json
+  - lt_base.json
+  - pl_base.json
+  - pt_base.json
+  - ru_base.json
+
+Pre-processing dictionaries...
+
+Processing de dictionary...
+  Loaded 50000 entries
+  ERROR processing de_base.json: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+  Stack trace: kotlinx.serialization.SerializationException: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+	at kotlinx.serialization.internal.Platform_commonKt.serializerNotRegistered(Platform.common.kt:91)
+	at kotlinx.serialization.internal.PlatformKt.platformSpecificSerializerNotRegistered(Platform.kt:28)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:134)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:72)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at Preprocess_dictionaries_main.main(preprocess-dictionaries.main.kts:375)
+	at Preprocess_dictionaries_main.<init>(preprocess-dictionaries.main.kts:347)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.evalWithConfigAndOtherScriptsResults(BasicJvmScriptEvaluator.kt:122)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke$suspendImpl(BasicJvmScriptEvaluator.kt:48)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke(BasicJvmScriptEvaluator.kt)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension$doEval$1.invokeSuspend(AbstractScriptEvaluationExtension.kt:192)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlin.coroutines.ContinuationKt.startCoroutine(Continuation.kt:115)
+	at kotlin.script.experimental.impl.RunSuspendKt.internalScriptingRunSuspend(runSuspend.kt:19)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.doEval(AbstractScriptEvaluationExtension.kt:171)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:158)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:67)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:49)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:20)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:215)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:111)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:28)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:106)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:65)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:61)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:36)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:80)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:337)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:315)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:279)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit(CLICompiler.kt:416)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit$default(CLICompiler.kt:409)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMain(CLICompiler.kt:403)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler$Companion.main(K2JVMCompiler.kt:233)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.main(K2JVMCompiler.kt)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.jetbrains.kotlin.preloading.Preloader.run(Preloader.java:87)
+	at org.jetbrains.kotlin.preloading.Preloader.main(Preloader.java:44)
+
+Processing en dictionary...
+  Loaded 50000 entries
+  ERROR processing en_base.json: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+  Stack trace: kotlinx.serialization.SerializationException: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+	at kotlinx.serialization.internal.Platform_commonKt.serializerNotRegistered(Platform.common.kt:91)
+	at kotlinx.serialization.internal.PlatformKt.platformSpecificSerializerNotRegistered(Platform.kt:28)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:134)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:72)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at Preprocess_dictionaries_main.main(preprocess-dictionaries.main.kts:375)
+	at Preprocess_dictionaries_main.<init>(preprocess-dictionaries.main.kts:347)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.evalWithConfigAndOtherScriptsResults(BasicJvmScriptEvaluator.kt:122)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke$suspendImpl(BasicJvmScriptEvaluator.kt:48)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke(BasicJvmScriptEvaluator.kt)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension$doEval$1.invokeSuspend(AbstractScriptEvaluationExtension.kt:192)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlin.coroutines.ContinuationKt.startCoroutine(Continuation.kt:115)
+	at kotlin.script.experimental.impl.RunSuspendKt.internalScriptingRunSuspend(runSuspend.kt:19)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.doEval(AbstractScriptEvaluationExtension.kt:171)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:158)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:67)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:49)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:20)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:215)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:111)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:28)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:106)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:65)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:61)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:36)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:80)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:337)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:315)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:279)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit(CLICompiler.kt:416)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit$default(CLICompiler.kt:409)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMain(CLICompiler.kt:403)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler$Companion.main(K2JVMCompiler.kt:233)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.main(K2JVMCompiler.kt)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.jetbrains.kotlin.preloading.Preloader.run(Preloader.java:87)
+	at org.jetbrains.kotlin.preloading.Preloader.main(Preloader.java:44)
+
+Processing es dictionary...
+  Loaded 50000 entries
+  ERROR processing es_base.json: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+  Stack trace: kotlinx.serialization.SerializationException: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+	at kotlinx.serialization.internal.Platform_commonKt.serializerNotRegistered(Platform.common.kt:91)
+	at kotlinx.serialization.internal.PlatformKt.platformSpecificSerializerNotRegistered(Platform.kt:28)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:134)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:72)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at Preprocess_dictionaries_main.main(preprocess-dictionaries.main.kts:375)
+	at Preprocess_dictionaries_main.<init>(preprocess-dictionaries.main.kts:347)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.evalWithConfigAndOtherScriptsResults(BasicJvmScriptEvaluator.kt:122)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke$suspendImpl(BasicJvmScriptEvaluator.kt:48)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke(BasicJvmScriptEvaluator.kt)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension$doEval$1.invokeSuspend(AbstractScriptEvaluationExtension.kt:192)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlin.coroutines.ContinuationKt.startCoroutine(Continuation.kt:115)
+	at kotlin.script.experimental.impl.RunSuspendKt.internalScriptingRunSuspend(runSuspend.kt:19)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.doEval(AbstractScriptEvaluationExtension.kt:171)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:158)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:67)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:49)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:20)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:215)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:111)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:28)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:106)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:65)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:61)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:36)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:80)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:337)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:315)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:279)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit(CLICompiler.kt:416)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit$default(CLICompiler.kt:409)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMain(CLICompiler.kt:403)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler$Companion.main(K2JVMCompiler.kt:233)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.main(K2JVMCompiler.kt)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.jetbrains.kotlin.preloading.Preloader.run(Preloader.java:87)
+	at org.jetbrains.kotlin.preloading.Preloader.main(Preloader.java:44)
+
+Processing fr dictionary...
+  Loaded 50000 entries
+  ERROR processing fr_base.json: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+  Stack trace: kotlinx.serialization.SerializationException: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+	at kotlinx.serialization.internal.Platform_commonKt.serializerNotRegistered(Platform.common.kt:91)
+	at kotlinx.serialization.internal.PlatformKt.platformSpecificSerializerNotRegistered(Platform.kt:28)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:134)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:72)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at Preprocess_dictionaries_main.main(preprocess-dictionaries.main.kts:375)
+	at Preprocess_dictionaries_main.<init>(preprocess-dictionaries.main.kts:347)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.evalWithConfigAndOtherScriptsResults(BasicJvmScriptEvaluator.kt:122)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke$suspendImpl(BasicJvmScriptEvaluator.kt:48)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke(BasicJvmScriptEvaluator.kt)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension$doEval$1.invokeSuspend(AbstractScriptEvaluationExtension.kt:192)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlin.coroutines.ContinuationKt.startCoroutine(Continuation.kt:115)
+	at kotlin.script.experimental.impl.RunSuspendKt.internalScriptingRunSuspend(runSuspend.kt:19)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.doEval(AbstractScriptEvaluationExtension.kt:171)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:158)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:67)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:49)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:20)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:215)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:111)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:28)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:106)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:65)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:61)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:36)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:80)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:337)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:315)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:279)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit(CLICompiler.kt:416)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit$default(CLICompiler.kt:409)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMain(CLICompiler.kt:403)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler$Companion.main(K2JVMCompiler.kt:233)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.main(K2JVMCompiler.kt)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.jetbrains.kotlin.preloading.Preloader.run(Preloader.java:87)
+	at org.jetbrains.kotlin.preloading.Preloader.main(Preloader.java:44)
+
+Processing it dictionary...
+  Loaded 50000 entries
+  ERROR processing it_base.json: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+  Stack trace: kotlinx.serialization.SerializationException: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+	at kotlinx.serialization.internal.Platform_commonKt.serializerNotRegistered(Platform.common.kt:91)
+	at kotlinx.serialization.internal.PlatformKt.platformSpecificSerializerNotRegistered(Platform.kt:28)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:134)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:72)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at Preprocess_dictionaries_main.main(preprocess-dictionaries.main.kts:375)
+	at Preprocess_dictionaries_main.<init>(preprocess-dictionaries.main.kts:347)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.evalWithConfigAndOtherScriptsResults(BasicJvmScriptEvaluator.kt:122)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke$suspendImpl(BasicJvmScriptEvaluator.kt:48)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke(BasicJvmScriptEvaluator.kt)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension$doEval$1.invokeSuspend(AbstractScriptEvaluationExtension.kt:192)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlin.coroutines.ContinuationKt.startCoroutine(Continuation.kt:115)
+	at kotlin.script.experimental.impl.RunSuspendKt.internalScriptingRunSuspend(runSuspend.kt:19)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.doEval(AbstractScriptEvaluationExtension.kt:171)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:158)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:67)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:49)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:20)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:215)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:111)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:28)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:106)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:65)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:61)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:36)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:80)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:337)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:315)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:279)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit(CLICompiler.kt:416)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit$default(CLICompiler.kt:409)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMain(CLICompiler.kt:403)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler$Companion.main(K2JVMCompiler.kt:233)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.main(K2JVMCompiler.kt)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.jetbrains.kotlin.preloading.Preloader.run(Preloader.java:87)
+	at org.jetbrains.kotlin.preloading.Preloader.main(Preloader.java:44)
+
+Processing lt dictionary...
+  Loaded 50000 entries
+  ERROR processing lt_base.json: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+  Stack trace: kotlinx.serialization.SerializationException: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+	at kotlinx.serialization.internal.Platform_commonKt.serializerNotRegistered(Platform.common.kt:91)
+	at kotlinx.serialization.internal.PlatformKt.platformSpecificSerializerNotRegistered(Platform.kt:28)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:134)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:72)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at Preprocess_dictionaries_main.main(preprocess-dictionaries.main.kts:375)
+	at Preprocess_dictionaries_main.<init>(preprocess-dictionaries.main.kts:347)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.evalWithConfigAndOtherScriptsResults(BasicJvmScriptEvaluator.kt:122)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke$suspendImpl(BasicJvmScriptEvaluator.kt:48)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke(BasicJvmScriptEvaluator.kt)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension$doEval$1.invokeSuspend(AbstractScriptEvaluationExtension.kt:192)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlin.coroutines.ContinuationKt.startCoroutine(Continuation.kt:115)
+	at kotlin.script.experimental.impl.RunSuspendKt.internalScriptingRunSuspend(runSuspend.kt:19)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.doEval(AbstractScriptEvaluationExtension.kt:171)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:158)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:67)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:49)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:20)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:215)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:111)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:28)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:106)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:65)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:61)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:36)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:80)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:337)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:315)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:279)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit(CLICompiler.kt:416)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit$default(CLICompiler.kt:409)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMain(CLICompiler.kt:403)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler$Companion.main(K2JVMCompiler.kt:233)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.main(K2JVMCompiler.kt)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.jetbrains.kotlin.preloading.Preloader.run(Preloader.java:87)
+	at org.jetbrains.kotlin.preloading.Preloader.main(Preloader.java:44)
+
+Processing pl dictionary...
+  Loaded 50000 entries
+  ERROR processing pl_base.json: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+  Stack trace: kotlinx.serialization.SerializationException: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+	at kotlinx.serialization.internal.Platform_commonKt.serializerNotRegistered(Platform.common.kt:91)
+	at kotlinx.serialization.internal.PlatformKt.platformSpecificSerializerNotRegistered(Platform.kt:28)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:134)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:72)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at Preprocess_dictionaries_main.main(preprocess-dictionaries.main.kts:375)
+	at Preprocess_dictionaries_main.<init>(preprocess-dictionaries.main.kts:347)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.evalWithConfigAndOtherScriptsResults(BasicJvmScriptEvaluator.kt:122)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke$suspendImpl(BasicJvmScriptEvaluator.kt:48)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke(BasicJvmScriptEvaluator.kt)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension$doEval$1.invokeSuspend(AbstractScriptEvaluationExtension.kt:192)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlin.coroutines.ContinuationKt.startCoroutine(Continuation.kt:115)
+	at kotlin.script.experimental.impl.RunSuspendKt.internalScriptingRunSuspend(runSuspend.kt:19)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.doEval(AbstractScriptEvaluationExtension.kt:171)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:158)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:67)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:49)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:20)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:215)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:111)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:28)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:106)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:65)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:61)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:36)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:80)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:337)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:315)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:279)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit(CLICompiler.kt:416)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit$default(CLICompiler.kt:409)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMain(CLICompiler.kt:403)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler$Companion.main(K2JVMCompiler.kt:233)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.main(K2JVMCompiler.kt)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.jetbrains.kotlin.preloading.Preloader.run(Preloader.java:87)
+	at org.jetbrains.kotlin.preloading.Preloader.main(Preloader.java:44)
+
+Processing pt dictionary...
+  Loaded 50000 entries
+  ERROR processing pt_base.json: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+  Stack trace: kotlinx.serialization.SerializationException: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+	at kotlinx.serialization.internal.Platform_commonKt.serializerNotRegistered(Platform.common.kt:91)
+	at kotlinx.serialization.internal.PlatformKt.platformSpecificSerializerNotRegistered(Platform.kt:28)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:134)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:72)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at Preprocess_dictionaries_main.main(preprocess-dictionaries.main.kts:375)
+	at Preprocess_dictionaries_main.<init>(preprocess-dictionaries.main.kts:347)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.evalWithConfigAndOtherScriptsResults(BasicJvmScriptEvaluator.kt:122)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke$suspendImpl(BasicJvmScriptEvaluator.kt:48)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke(BasicJvmScriptEvaluator.kt)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension$doEval$1.invokeSuspend(AbstractScriptEvaluationExtension.kt:192)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlin.coroutines.ContinuationKt.startCoroutine(Continuation.kt:115)
+	at kotlin.script.experimental.impl.RunSuspendKt.internalScriptingRunSuspend(runSuspend.kt:19)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.doEval(AbstractScriptEvaluationExtension.kt:171)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:158)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:67)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:49)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:20)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:215)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:111)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:28)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:106)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:65)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:61)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:36)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:80)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:337)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:315)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:279)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit(CLICompiler.kt:416)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit$default(CLICompiler.kt:409)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMain(CLICompiler.kt:403)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler$Companion.main(K2JVMCompiler.kt:233)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.main(K2JVMCompiler.kt)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.jetbrains.kotlin.preloading.Preloader.run(Preloader.java:87)
+	at org.jetbrains.kotlin.preloading.Preloader.main(Preloader.java:44)
+
+Processing ru dictionary...
+  Loaded 50000 entries
+  ERROR processing ru_base.json: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+  Stack trace: kotlinx.serialization.SerializationException: Serializer for class 'DictionaryIndex' is not found.
+Please ensure that class is marked as '@Serializable' and that the serialization compiler plugin is applied.
+
+	at kotlinx.serialization.internal.Platform_commonKt.serializerNotRegistered(Platform.common.kt:91)
+	at kotlinx.serialization.internal.PlatformKt.platformSpecificSerializerNotRegistered(Platform.kt:28)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:134)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at kotlinx.serialization.SerializersKt__SerializersKt.serializer(Serializers.kt:72)
+	at kotlinx.serialization.SerializersKt.serializer(Unknown Source)
+	at Preprocess_dictionaries_main.main(preprocess-dictionaries.main.kts:375)
+	at Preprocess_dictionaries_main.<init>(preprocess-dictionaries.main.kts:347)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+	at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.evalWithConfigAndOtherScriptsResults(BasicJvmScriptEvaluator.kt:122)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke$suspendImpl(BasicJvmScriptEvaluator.kt:48)
+	at kotlin.script.experimental.jvm.BasicJvmScriptEvaluator.invoke(BasicJvmScriptEvaluator.kt)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension$doEval$1.invokeSuspend(AbstractScriptEvaluationExtension.kt:192)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlin.coroutines.ContinuationKt.startCoroutine(Continuation.kt:115)
+	at kotlin.script.experimental.impl.RunSuspendKt.internalScriptingRunSuspend(runSuspend.kt:19)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.doEval(AbstractScriptEvaluationExtension.kt:171)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:158)
+	at org.jetbrains.kotlin.scripting.compiler.plugin.AbstractScriptEvaluationExtension.eval(AbstractScriptEvaluationExtension.kt:67)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:49)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmScriptPipelinePhase.executePhase(JvmScriptPipelineStep.kt:20)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:215)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:111)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:28)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:106)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:65)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:61)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:36)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:80)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:337)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:315)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:279)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit(CLICompiler.kt:416)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMainNoExit$default(CLICompiler.kt:409)
+	at org.jetbrains.kotlin.cli.common.CLICompiler$Companion.doMain(CLICompiler.kt:403)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler$Companion.main(K2JVMCompiler.kt:233)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.main(K2JVMCompiler.kt)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at org.jetbrains.kotlin.preloading.Preloader.run(Preloader.java:87)
+	at org.jetbrains.kotlin.preloading.Preloader.main(Preloader.java:44)
+
+Dictionary preprocessing completed!
+============================================================
+Check output directory: D:\AI\Github\Pastiera-EN-AI\app\src\main\assets\common\dictionaries_serialized
+Generated 9 .dict files
+  ✓ de_base.dict (14471KB)
+  ✓ en_base.dict (12889KB)
+  ✓ es_base.dict (13858KB)
+  ✓ fr_base.dict (13593KB)
+  ✓ it_base.dict (13611KB)
+  ✓ lt_base.dict (13542KB)
+  ✓ pl_base.dict (13819KB)
+  ✓ pt_base.dict (13495KB)
+  ✓ ru_base.dict (20561KB)
+============================================================

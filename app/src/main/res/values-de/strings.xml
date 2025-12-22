@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Pastiera</string>
-    <string name="input_method_name">Pastiera</string>
+    <string name="app_name">TitanKeys</string>
+    <string name="input_method_name">TitanKeys</string>
     <string name="input_method_name_en">English</string>
     <string name="input_method_name_it">Italiano</string>
     <string name="input_method_name_fr">Français</string>
@@ -100,7 +100,7 @@
     <string name="auto_correct_settings_title">Autokorrektur-Ersetzungen</string>
     <string name="auto_correct_settings_description">Wählen Sie aus, welche Ersetzungen für die Autokorrektur verwendet werden sollen. Die Systemsprache wird oben angezeigt.</string>
     <string name="auto_correct_system_language">Systemsprache</string>
-    <string name="auto_correct_ricette_pastiera_description">Anpassungen gültig für alle Ersetzungen</string>
+    <string name="auto_correct_titankeys_recipes_description">Anpassungen gültig für alle Ersetzungen</string>
     <string name="auto_correct_other_languages">Andere Ersetzungen</string>
     <string name="auto_correct_custom_languages">Benutzerdefinierte Ersetzungen</string>
     <string name="auto_correct_at_least_one_language_required">Mindestens eine Ersetzung ist für die Funktionalität erforderlich</string>
@@ -292,7 +292,7 @@
     <string name="settings_nav_mode_configure">Tastenzuordnungen für Navigationsmodus konfigurieren</string>
     
     <!-- Auto Correct Settings -->
-    <string name="auto_correct_ricette_pastiera_name">Ricette Pastiera</string>
+    <string name="auto_correct_titankeys_recipes_name">TitanKeys Recipes</string>
     
     <!-- Settings Categories -->
     <string name="settings_category_keyboard_timing">Tastatur &amp; Timing</string>

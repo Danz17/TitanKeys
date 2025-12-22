@@ -58,11 +58,11 @@ tasks.register("incrementBuildNumber") {
 }
 
 android {
-    namespace = "it.palsoftware.pastiera"
+    namespace = "com.titankeys.keyboard"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "it.palsoftware.pastiera"
+        applicationId = "com.titankeys.keyboard"
         minSdk = 29
         targetSdk = 36
         versionCode = 8
@@ -94,10 +94,10 @@ android {
 
     signingConfigs {
         create("release") {
-            val storePath = signingProp("storeFile", "PASTIERA_KEYSTORE_PATH")
-            val storePass = signingProp("storePassword", "PASTIERA_KEYSTORE_PASSWORD")
-            val alias = signingProp("keyAlias", "PASTIERA_KEY_ALIAS")
-            val keyPass = signingProp("keyPassword", "PASTIERA_KEY_PASSWORD")
+            val storePath = signingProp("storeFile", "TITANKEYS_KEYSTORE_PATH")
+            val storePass = signingProp("storePassword", "TITANKEYS_KEYSTORE_PASSWORD")
+            val alias = signingProp("keyAlias", "TITANKEYS_KEY_ALIAS")
+            val keyPass = signingProp("keyPassword", "TITANKEYS_KEY_PASSWORD")
 
             // Only configure signing if all credentials are provided
             if (storePath != null && storePass != null && alias != null && keyPass != null) {
@@ -122,10 +122,10 @@ android {
                 "proguard-rules.pro"
             )
             // Only use signing config if it's properly configured
-            val storePath = signingProp("storeFile", "PASTIERA_KEYSTORE_PATH")
-            val storePass = signingProp("storePassword", "PASTIERA_KEYSTORE_PASSWORD")
-            val alias = signingProp("keyAlias", "PASTIERA_KEY_ALIAS")
-            val keyPass = signingProp("keyPassword", "PASTIERA_KEY_PASSWORD")
+            val storePath = signingProp("storeFile", "TITANKEYS_KEYSTORE_PATH")
+            val storePass = signingProp("storePassword", "TITANKEYS_KEYSTORE_PASSWORD")
+            val alias = signingProp("keyAlias", "TITANKEYS_KEY_ALIAS")
+            val keyPass = signingProp("keyPassword", "TITANKEYS_KEY_PASSWORD")
             
             if (storePath != null && storePass != null && alias != null && keyPass != null) {
                 signingConfig = signingConfigs.getByName("release")
@@ -139,16 +139,16 @@ android {
     tasks.whenTaskAdded {
         if (name.contains("Release", ignoreCase = true) && !name.contains("Debug", ignoreCase = true)) {
             doFirst {
-                val storePath = signingProp("storeFile", "PASTIERA_KEYSTORE_PATH")
-                val storePass = signingProp("storePassword", "PASTIERA_KEYSTORE_PASSWORD")
-                val alias = signingProp("keyAlias", "PASTIERA_KEY_ALIAS")
-                val keyPass = signingProp("keyPassword", "PASTIERA_KEY_PASSWORD")
-                
+                val storePath = signingProp("storeFile", "TITANKEYS_KEYSTORE_PATH")
+                val storePass = signingProp("storePassword", "TITANKEYS_KEYSTORE_PASSWORD")
+                val alias = signingProp("keyAlias", "TITANKEYS_KEY_ALIAS")
+                val keyPass = signingProp("keyPassword", "TITANKEYS_KEY_PASSWORD")
+
                 if (storePath == null || storePass == null || alias == null || keyPass == null) {
                     throw GradleException(
-                        "Missing signing config for release build. Define storeFile, storePassword, keyAlias e keyPassword in " +
-                            "keystore.properties (non tracciato) o nelle variabili d'ambiente PASTIERA_KEYSTORE_PATH, " +
-                            "PASTIERA_KEYSTORE_PASSWORD, PASTIERA_KEY_ALIAS, PASTIERA_KEY_PASSWORD."
+                        "Missing signing config for release build. Define storeFile, storePassword, keyAlias and keyPassword in " +
+                            "keystore.properties or set environment variables TITANKEYS_KEYSTORE_PATH, " +
+                            "TITANKEYS_KEYSTORE_PASSWORD, TITANKEYS_KEY_ALIAS, TITANKEYS_KEY_PASSWORD."
                     )
                 }
             }

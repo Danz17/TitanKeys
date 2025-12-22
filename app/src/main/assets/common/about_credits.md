@@ -1,25 +1,23 @@
 
-# Pastiera - La Tastiera per la tua Tastiera
+# TitanKeys - Physical Keyboard IME
 ---
-#### Creator & Main Developer 
-Andrea Palumbo (Palsoftware)
-#### Developers
-
-Justin Mitchell, NeoTheFox
+#### Creator & Main Developer
+Phenix
+#### Original Codebase
+Based on Pastiera by Andrea Palumbo (Palsoftware)
 ---
-#### Pastiera Beta Testing Team
-Laggy Luke, Vittorio, Emmanuel, Sadako, NotTeganQuinn, DrumSyBeat
-
-#### Special Thanks
-Unihertz Titan 2 Discord, Unihertz Titan 2 FB page and all the people for the outstanding support! 
+#### Special Features
+- Optimized for Unihertz Titan 2 and BlackBerry physical keyboards
+- Advanced clipboard history with image support
+- Cursor scroll via swipe gestures
+- Voice input and speech recognition
+- Multiple language support
 ---
 ## Links
-#### [GitHub repository](https://github.com/palsoftware/pastiera) 
-#### [Bug Report](https://github.com/palsoftware/pastiera/issues/)
-#### [Buy me a Coffee](https://ko-fi.com/palsoftware/)
+#### [GitHub Repository](https://github.com/Danz17/TitanKeys)
+#### [Report Issues](https://github.com/Danz17/TitanKeys/issues)
 ---
-**Grazie for using Pastiera! <3**
-
+**Thanks for using TitanKeys!**
 
 
 

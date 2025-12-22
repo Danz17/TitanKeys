@@ -1,6 +1,6 @@
 # Launcher Shortcuts and Power Shortcuts
 
-This document explains the behavior and implementation of launcher shortcuts and power shortcuts in Pastiera.
+This document explains the behavior and implementation of launcher shortcuts and power shortcuts in TitanKeys.
 
 ## Table of Contents
 

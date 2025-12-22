@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Pastiera</string>
-    <string name="input_method_name">Pastiera</string>
+    <string name="app_name">TitanKeys</string>
+    <string name="input_method_name">TitanKeys</string>
     <string name="input_method_name_en">English</string>
     <string name="input_method_name_it">Italiano</string>
     <string name="input_method_name_fr">Français</string>
@@ -116,7 +116,7 @@
     <string name="auto_correct_settings_title">Auto-Correction Substitutions</string>
     <string name="auto_correct_settings_description">Select which substitutions to use for auto-correction. The system language is shown at the top.</string>
     <string name="auto_correct_system_language">System language</string>
-    <string name="auto_correct_ricette_pastiera_description">Customizations valid for all substitutions</string>
+    <string name="auto_correct_titankeys_recipes_description">Customizations valid for all substitutions</string>
     <string name="auto_correct_other_languages">Other Substitutions</string>
     <string name="auto_correct_custom_languages">Custom Substitutions</string>
     <string name="auto_correct_at_least_one_language_required">At least one substitution required for operation</string>
@@ -147,6 +147,22 @@
     <string name="auto_correct_keyboard_proximity_description">Filter unlikely typos based on key distance (QWERTY/AZERTY/QWERTZ)</string>
     <string name="auto_correct_edit_type_ranking_title">Edit Type Ranking</string>
     <string name="auto_correct_edit_type_ranking_description">Rank suggestions by edit type (insert > substitute > delete)</string>
+
+    <!-- Next-Word Prediction Settings -->
+    <string name="prediction_section_title">Next-Word Prediction</string>
+    <string name="prediction_enabled_title">Enable Next-Word Prediction</string>
+    <string name="prediction_enabled_description">Show predictions for the next word after completing a word</string>
+    <string name="prediction_mode_title">Prediction Mode</string>
+    <string name="prediction_mode_current_word">Current Word Only</string>
+    <string name="prediction_mode_next_word">Next Word Only</string>
+    <string name="prediction_mode_hybrid">Hybrid (Both)</string>
+    <string name="user_learning_title">Learn from Typing</string>
+    <string name="user_learning_description">Learn word patterns from your typing to improve predictions</string>
+    <string name="clear_learned_patterns_title">Clear Learned Patterns</string>
+    <string name="clear_learned_patterns_description">Remove all learned word patterns</string>
+    <string name="clear_learned_patterns_confirm">Clear all learned patterns?</string>
+    <string name="clear_learned_patterns_success">Learned patterns cleared</string>
+
     <string name="clear">Clear</string>
     <string name="experimental_suggestions_title">Experimental suggestions</string>
     <string name="experimental_suggestions_subtitle">Enable the new dictionary/suggestion engine (beta)</string>
@@ -362,7 +378,7 @@
     <string name="update_dialog_download_apk">Download APK</string>
     
     <!-- Auto Correct Settings -->
-    <string name="auto_correct_ricette_pastiera_name">Ricette Pastiera</string>
+    <string name="auto_correct_titankeys_recipes_name">TitanKeys Recipes</string>
     
     <!-- Settings Categories -->
     <string name="settings_category_keyboard_timing">Keyboard &amp; Timing</string>
@@ -523,6 +539,7 @@
     <string name="clipboard_pin">Pin</string>
     <string name="clipboard_unpin">Unpin</string>
     <string name="clipboard_delete">Delete</string>
+    <string name="clipboard_image_copied">Image copied to clipboard</string>
     <string name="clipboard_retention_apply">Apply</string>
     <string name="clipboard_retention_time_title">Clipboard Retention Time</string>
     <string name="clipboard_retention_time_description">0 = never delete clips</string>
