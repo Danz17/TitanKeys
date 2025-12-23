@@ -32,3 +32,6 @@ assembla_release.sh
 
 # Tools folder - corpora data (generated, large files)
 tools/corpora/
+
+# Ideas folder (research notes, not for version control)
+ideas/
