@@ -185,7 +185,7 @@ class ClipboardHistoryPopupView(private val context: Context) {
 
         // Pin button
         val pinButton = ImageButton(context).apply {
-            // TODO: Add pin icon drawable
+            setImageResource(R.drawable.ic_push_pin_24)
             setBackgroundColor(Color.TRANSPARENT)
             setColorFilter(if (entry.isPinned) Color.YELLOW else Color.GRAY)
             val size = dpToPx(32f)
@@ -198,7 +198,7 @@ class ClipboardHistoryPopupView(private val context: Context) {
 
         // Delete button
         val deleteButton = ImageButton(context).apply {
-            // TODO: Add delete icon drawable
+            setImageResource(R.drawable.ic_delete_24)
             setBackgroundColor(Color.TRANSPARENT)
             setColorFilter(Color.RED)
             val size = dpToPx(32f)
