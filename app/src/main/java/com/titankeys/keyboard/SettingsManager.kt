@@ -12,7 +12,7 @@ import java.io.FileOutputStream
 
 /**
  * Manages the app settings.
- * Centralizes access to SharedPreferences for Pastiera settings.
+ * Centralizes access to SharedPreferences for TitanKeys settings.
  */
 object SettingsManager {
     private const val TAG = "SettingsManager"
@@ -104,7 +104,7 @@ object SettingsManager {
     private const val MAX_TRACKPAD_SWIPE_THRESHOLD = 600f
 
     /**
-     * Returns the SharedPreferences instance for Pastiera.
+     * Returns the SharedPreferences instance for TitanKeys.
      */
     fun getPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

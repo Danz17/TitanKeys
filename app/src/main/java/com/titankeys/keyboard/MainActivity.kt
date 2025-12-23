@@ -42,7 +42,7 @@ import com.titankeys.keyboard.inputmethod.KeyboardEventTracker
 import com.titankeys.keyboard.inputmethod.NotificationHelper
 import com.titankeys.keyboard.inputmethod.subtype.AdditionalSubtypeUtils
 import com.titankeys.keyboard.ui.CustomTopBar
-import com.titankeys.keyboard.ui.theme.PastieraTheme
+import com.titankeys.keyboard.ui.theme.TitanKeysTheme
 import com.titankeys.keyboard.BuildConfig
 import com.titankeys.keyboard.update.checkForUpdate
 import com.titankeys.keyboard.update.showUpdateDialog
@@ -172,7 +172,7 @@ class MainActivity : ComponentActivity() {
         
         enableEdgeToEdge()
         setContent {
-            PastieraTheme {
+            TitanKeysTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                         KeyboardSetupScreen(
@@ -218,25 +218,25 @@ fun KeyboardSetupScreen(
     val lastKeyEvent by lastKeyEventState
     
     // State for IME status
-    var isPastieraEnabled by remember { mutableStateOf(false) }
-    var isPastieraSelected by remember { mutableStateOf(false) }
+    var isTitanKeysEnabled by remember { mutableStateOf(false) }
+    var isTitanKeysSelected by remember { mutableStateOf(false) }
     
     // Check IME status
     LaunchedEffect(Unit) {
         checkImeStatus(context) { enabled, selected ->
-            isPastieraEnabled = enabled
-            isPastieraSelected = selected
+            isTitanKeysEnabled = enabled
+            isTitanKeysSelected = selected
         }
     }
-    
+
     // Refresh IME status periodically and when activity resumes
     LaunchedEffect(Unit) {
         // Check status every 2 seconds when screen is visible
         while (true) {
             kotlinx.coroutines.delay(2000)
             checkImeStatus(context) { enabled, selected ->
-                isPastieraEnabled = enabled
-                isPastieraSelected = selected
+                isTitanKeysEnabled = enabled
+                isTitanKeysSelected = selected
             }
         }
     }
@@ -315,7 +315,7 @@ fun KeyboardSetupScreen(
             modifier = Modifier.fillMaxWidth()
         )
         
-        // Enable Pastiera button
+        // Enable TitanKeys button
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -346,12 +346,12 @@ fun KeyboardSetupScreen(
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = stringResource(R.string.enable_pastiera),
+                            text = stringResource(R.string.enable_titankeys),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium
                         )
                     }
-                    if (!isPastieraEnabled) {
+                    if (!isTitanKeysEnabled) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -363,7 +363,7 @@ fun KeyboardSetupScreen(
                                 modifier = Modifier.size(20.dp)
                             )
                             Text(
-                                text = stringResource(R.string.pastiera_not_enabled),
+                                text = stringResource(R.string.titankeys_not_enabled),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -415,7 +415,7 @@ fun KeyboardSetupScreen(
                             fontWeight = FontWeight.Medium
                         )
                     }
-                    if (isPastieraEnabled && !isPastieraSelected) {
+                    if (isTitanKeysEnabled && !isTitanKeysSelected) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -427,7 +427,7 @@ fun KeyboardSetupScreen(
                                 modifier = Modifier.size(20.dp)
                             )
                             Text(
-                                text = stringResource(R.string.pastiera_not_selected),
+                                text = stringResource(R.string.titankeys_not_selected),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -548,7 +548,7 @@ fun KeyboardSetupScreen(
 }
 
 /**
- * Checks if Pastiera IME is enabled and selected.
+ * Checks if TitanKeys IME is enabled and selected.
  * Uses InputMethodManager for Android 14+ compatibility.
  */
 private fun checkImeStatus(
@@ -557,17 +557,17 @@ private fun checkImeStatus(
 ) {
     try {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val pastieraPackageName = "com.titankeys.keyboard"
-        val pastieraImeId = "com.titankeys.keyboard/.inputmethod.PhysicalKeyboardInputMethodService"
-        
-        // Check if Pastiera is enabled using InputMethodManager
+        val titanKeysPackageName = "com.titankeys.keyboard"
+        val titanKeysImeId = "com.titankeys.keyboard/.inputmethod.PhysicalKeyboardInputMethodService"
+
+        // Check if TitanKeys is enabled using InputMethodManager
         val enabledInputMethods = imm.enabledInputMethodList
         val isEnabled = enabledInputMethods.any { inputMethodInfo ->
-            inputMethodInfo.packageName == pastieraPackageName ||
-            inputMethodInfo.id == pastieraImeId
+            inputMethodInfo.packageName == titanKeysPackageName ||
+            inputMethodInfo.id == titanKeysImeId
         }
-        
-        // Check if Pastiera is selected
+
+        // Check if TitanKeys is selected
         var isSelected = false
         if (isEnabled) {
             // Try to read DEFAULT_INPUT_METHOD
@@ -578,7 +578,7 @@ private fun checkImeStatus(
                     context.contentResolver,
                     android.provider.Settings.Secure.DEFAULT_INPUT_METHOD
                 ) ?: ""
-                isSelected = defaultInputMethod == pastieraImeId
+                isSelected = defaultInputMethod == titanKeysImeId
             } catch (e: SecurityException) {
                 // On Android 14+ (API 34+) with targetSdk 36, we can't read this setting
                 // Try alternative method: check if we can get current input method info
@@ -590,11 +590,11 @@ private fun checkImeStatus(
                         // If we have a subtype, check if it matches our package
                         // Note: This is a heuristic and may not be 100% accurate
                         val allInputMethods = imm.inputMethodList
-                        val pastieraInputMethod = allInputMethods.find { 
-                            it.packageName == pastieraPackageName || it.id == pastieraImeId 
+                        val titanKeysInputMethod = allInputMethods.find {
+                            it.packageName == titanKeysPackageName || it.id == titanKeysImeId
                         }
-                        // If Pastiera is the only enabled IME, assume it's selected
-                        if (pastieraInputMethod != null && enabledInputMethods.size == 1) {
+                        // If TitanKeys is the only enabled IME, assume it's selected
+                        if (titanKeysInputMethod != null && enabledInputMethods.size == 1) {
                             isSelected = true
                         } else {
                             // We can't reliably determine, so assume not selected to show warning
@@ -613,7 +613,7 @@ private fun checkImeStatus(
                 isSelected = false
             }
         }
-        
+
         callback(isEnabled, isSelected)
     } catch (e: Exception) {
         android.util.Log.e("MainActivity", "Error checking IME status", e)

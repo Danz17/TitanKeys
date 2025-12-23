@@ -41,7 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.titankeys.keyboard.ui.theme.PastieraTheme
+import com.titankeys.keyboard.ui.theme.TitanKeysTheme
 import com.titankeys.keyboard.BuildConfig
 import com.titankeys.keyboard.update.checkForUpdate
 import com.titankeys.keyboard.update.showUpdateDialog
@@ -51,7 +51,7 @@ class TutorialActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PastieraTheme {
+            TitanKeysTheme {
                 TutorialScreen(
                     onComplete = {
                         SettingsManager.setTutorialCompleted(this@TutorialActivity)
@@ -79,12 +79,12 @@ sealed class TutorialPageType {
         val iconTint: Color
     ) : TutorialPageType()
     
-    data class EnablePastiera(
+    data class EnableTitanKeys(
         val title: String,
         val description: String
     ) : TutorialPageType()
-    
-    data class SelectPastiera(
+
+    data class SelectTitanKeys(
         val title: String,
         val description: String
     ) : TutorialPageType()
@@ -102,11 +102,11 @@ fun TutorialScreen(
             description = stringResource(R.string.tutorial_page_welcome_description),
             imageRes = R.drawable.tutorial_welcome
         ),
-        TutorialPageType.EnablePastiera(
+        TutorialPageType.EnableTitanKeys(
             title = stringResource(R.string.tutorial_page_enable_title),
             description = stringResource(R.string.tutorial_page_enable_description)
         ),
-        TutorialPageType.SelectPastiera(
+        TutorialPageType.SelectTitanKeys(
             title = stringResource(R.string.tutorial_page_select_title),
             description = stringResource(R.string.tutorial_page_select_description)
         ),
@@ -140,22 +140,22 @@ fun TutorialScreen(
     val coroutineScope = rememberCoroutineScope()
     
     // Check IME status
-    var isPastieraEnabled by remember { mutableStateOf(false) }
-    var isPastieraSelected by remember { mutableStateOf(false) }
-    
+    var isTitanKeysEnabled by remember { mutableStateOf(false) }
+    var isTitanKeysSelected by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         checkImeStatus(context) { enabled, selected ->
-            isPastieraEnabled = enabled
-            isPastieraSelected = selected
+            isTitanKeysEnabled = enabled
+            isTitanKeysSelected = selected
         }
     }
-    
+
     LaunchedEffect(Unit) {
         while (true) {
             kotlinx.coroutines.delay(2000)
             checkImeStatus(context) { enabled, selected ->
-                isPastieraEnabled = enabled
-                isPastieraSelected = selected
+                isTitanKeysEnabled = enabled
+                isTitanKeysSelected = selected
             }
         }
     }
@@ -217,18 +217,18 @@ fun TutorialScreen(
                             modifier = Modifier.fillMaxSize()
                         )
                     }
-                    is TutorialPageType.EnablePastiera -> {
-                        TutorialEnablePastieraPageContent(
+                    is TutorialPageType.EnableTitanKeys -> {
+                        TutorialEnableTitanKeysPageContent(
                             page = pageType,
-                            isPastieraEnabled = isPastieraEnabled,
+                            isTitanKeysEnabled = isTitanKeysEnabled,
                             modifier = Modifier.fillMaxSize()
                         )
                     }
-                    is TutorialPageType.SelectPastiera -> {
-                        TutorialSelectPastieraPageContent(
+                    is TutorialPageType.SelectTitanKeys -> {
+                        TutorialSelectTitanKeysPageContent(
                             page = pageType,
-                            isPastieraEnabled = isPastieraEnabled,
-                            isPastieraSelected = isPastieraSelected,
+                            isTitanKeysEnabled = isTitanKeysEnabled,
+                            isTitanKeysSelected = isTitanKeysSelected,
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -497,13 +497,13 @@ fun TutorialStandardPageContent(
 }
 
 @Composable
-fun TutorialEnablePastieraPageContent(
-    page: TutorialPageType.EnablePastiera,
-    isPastieraEnabled: Boolean,
+fun TutorialEnableTitanKeysPageContent(
+    page: TutorialPageType.EnableTitanKeys,
+    isTitanKeysEnabled: Boolean,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    
+
     TutorialPageLayout(
         title = page.title,
         description = page.description,
@@ -516,7 +516,7 @@ fun TutorialEnablePastieraPageContent(
         }
     ) {
         Spacer(modifier = Modifier.height(20.dp))
-        
+
         Button(
             onClick = {
                 val intent = Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)
@@ -533,8 +533,8 @@ fun TutorialEnablePastieraPageContent(
             Spacer(modifier = Modifier.width(8.dp))
             Text(stringResource(R.string.tutorial_enable_button), style = MaterialTheme.typography.bodyMedium)
         }
-        
-        if (isPastieraEnabled) {
+
+        if (isTitanKeysEnabled) {
             Spacer(modifier = Modifier.height(12.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -559,14 +559,14 @@ fun TutorialEnablePastieraPageContent(
 }
 
 @Composable
-fun TutorialSelectPastieraPageContent(
-    page: TutorialPageType.SelectPastiera,
-    isPastieraEnabled: Boolean,
-    isPastieraSelected: Boolean,
+fun TutorialSelectTitanKeysPageContent(
+    page: TutorialPageType.SelectTitanKeys,
+    isTitanKeysEnabled: Boolean,
+    isTitanKeysSelected: Boolean,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    
+
     TutorialPageLayout(
         title = page.title,
         description = page.description,
@@ -579,14 +579,14 @@ fun TutorialSelectPastieraPageContent(
         }
     ) {
         Spacer(modifier = Modifier.height(20.dp))
-        
+
         Button(
             onClick = {
                 val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.showInputMethodPicker()
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = isPastieraEnabled,
+            enabled = isTitanKeysEnabled,
             contentPadding = PaddingValues(vertical = 12.dp)
         ) {
             Icon(
@@ -597,8 +597,8 @@ fun TutorialSelectPastieraPageContent(
             Spacer(modifier = Modifier.width(8.dp))
             Text(stringResource(R.string.tutorial_select_button), style = MaterialTheme.typography.bodyMedium)
         }
-        
-        if (!isPastieraEnabled) {
+
+        if (!isTitanKeysEnabled) {
             Spacer(modifier = Modifier.height(12.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -618,7 +618,7 @@ fun TutorialSelectPastieraPageContent(
                     textAlign = TextAlign.Center
                 )
             }
-        } else if (isPastieraSelected) {
+        } else if (isTitanKeysSelected) {
             Spacer(modifier = Modifier.height(12.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -643,7 +643,7 @@ fun TutorialSelectPastieraPageContent(
 }
 
 /**
- * Checks if Pastiera IME is enabled and selected.
+ * Checks if TitanKeys IME is enabled and selected.
  */
 private fun checkImeStatus(
     context: Context,
@@ -651,15 +651,15 @@ private fun checkImeStatus(
 ) {
     try {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val pastieraPackageName = "com.titankeys.keyboard"
-        val pastieraImeId = "com.titankeys.keyboard/.inputmethod.PhysicalKeyboardInputMethodService"
-        
+        val titanKeysPackageName = "com.titankeys.keyboard"
+        val titanKeysImeId = "com.titankeys.keyboard/.inputmethod.PhysicalKeyboardInputMethodService"
+
         val enabledInputMethods = imm.enabledInputMethodList
         val isEnabled = enabledInputMethods.any { inputMethodInfo ->
-            inputMethodInfo.packageName == pastieraPackageName ||
-            inputMethodInfo.id == pastieraImeId
+            inputMethodInfo.packageName == titanKeysPackageName ||
+            inputMethodInfo.id == titanKeysImeId
         }
-        
+
         var isSelected = false
         if (isEnabled) {
             try {
@@ -667,16 +667,16 @@ private fun checkImeStatus(
                     context.contentResolver,
                     Settings.Secure.DEFAULT_INPUT_METHOD
                 ) ?: ""
-                isSelected = defaultInputMethod == pastieraImeId
+                isSelected = defaultInputMethod == titanKeysImeId
             } catch (e: SecurityException) {
                 try {
                     val currentSubtype = imm.currentInputMethodSubtype
                     if (currentSubtype != null) {
                         val allInputMethods = imm.inputMethodList
-                        val pastieraInputMethod = allInputMethods.find { 
-                            it.packageName == pastieraPackageName || it.id == pastieraImeId 
+                        val titanKeysInputMethod = allInputMethods.find {
+                            it.packageName == titanKeysPackageName || it.id == titanKeysImeId
                         }
-                        if (pastieraInputMethod != null && enabledInputMethods.size == 1) {
+                        if (titanKeysInputMethod != null && enabledInputMethods.size == 1) {
                             isSelected = true
                         } else {
                             isSelected = false

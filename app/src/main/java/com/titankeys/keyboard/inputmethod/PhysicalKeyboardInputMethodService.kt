@@ -59,7 +59,7 @@ import rikka.shizuku.Shizuku
 class PhysicalKeyboardInputMethodService : InputMethodService() {
 
     companion object {
-        private const val TAG = "PastieraInputMethod"
+        private const val TAG = "TitanKeysIME"
         private const val TRACKPAD_DEBUG_TAG = "TrackpadDebug"
     }
 

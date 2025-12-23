@@ -46,22 +46,22 @@
     <string name="info_description">Les paramètres sont automatiquement enregistrés et appliqués immédiatement à la méthode de saisie.</string>
     
     <!-- Main Activity -->
-    <string name="keyboard_title">Clavier Pastiera</string>
+    <string name="keyboard_title">Clavier TitanKeys</string>
     <string name="keyboard_subtitle">Clavier physique avec support d\'appui long</string>
     <string name="settings_content_description">Paramètres</string>
     
     <!-- Installation Section -->
     <string name="installation_title">Installation</string>
     <string name="installation_step1">1. Cliquez sur le bouton ci-dessous pour ouvrir les paramètres</string>
-    <string name="installation_step2">2. Activez \'Clavier Physique Pastiera\'</string>
+    <string name="installation_step2">2. Activez \'Clavier Physique TitanKeys\'</string>
     <string name="installation_step3">3. Revenez ici et testez le clavier</string>
     <string name="open_keyboard_settings">Paramètres clavier</string>
     
     <!-- Main Activity - Enable/Select IME -->
-    <string name="enable_pastiera">Activer Pastiera</string>
-    <string name="pastiera_not_enabled">Pastiera n\'est pas activé</string>
+    <string name="enable_titankeys">Activer TitanKeys</string>
+    <string name="titankeys_not_enabled">TitanKeys n\'est pas activé</string>
     <string name="choose_input_method">Choisir la méthode de saisie</string>
-    <string name="pastiera_not_selected">Pastiera n\'est pas sélectionné</string>
+    <string name="titankeys_not_selected">TitanKeys n\'est pas sélectionné</string>
     
     <!-- Test Section -->
     <string name="test_keyboard_title">Test du Clavier</string>
@@ -191,7 +191,7 @@
     
     <!-- About Section -->
     <string name="about_github">GitHub</string>
-    <string name="about_build_info">Pastiera IME - Palsoftware 2025</string>
+    <string name="about_build_info">TitanKeys IME - Phenix 2025</string>
     <string name="about_title">À Propos</string>
     
     <!-- Launcher Shortcuts Section -->
@@ -221,8 +221,8 @@
     <string name="launcher_shortcut_assignment_key_name">Touche %1$d</string>
     
     <!-- Notification Helper -->
-    <string name="notification_nav_mode_channel_name">Pastiera Nav Mode</string>
-    <string name="notification_nav_mode_channel_description">Notifications pour le mode nav de Pastiera</string>
+    <string name="notification_nav_mode_channel_name">TitanKeys Nav Mode</string>
+    <string name="notification_nav_mode_channel_description">Notifications pour le mode nav de TitanKeys</string>
     <string name="notification_nav_mode_activated_title">Mode Nav Activé</string>
     <string name="notification_nav_mode_activated_text">Mode nav activé</string>
     
@@ -356,25 +356,25 @@
     <string name="tutorial_previous">Précédent</string>
     <string name="tutorial_next">Suivant</string>
     <string name="tutorial_finish">Terminer</string>
-    <string name="tutorial_page_welcome_title">Bienvenue dans Pastiera</string>
-    <string name="tutorial_page_welcome_description">Pastiera est une méthode de saisie avancée pour les appareils Android à clavier physique, avec support du mode Nav, des raccourcis, des mappings clavier personnalisés et bien plus.</string>
-    <string name="tutorial_page_enable_title">Activer Pastiera</string>
-    <string name="tutorial_page_enable_description">Pour commencer, vous devez activer Pastiera comme méthode de saisie dans les Paramètres Android. Appuyez sur le bouton ci-dessous pour ouvrir les paramètres.</string>
-    <string name="tutorial_page_select_title">Sélectionner Pastiera</string>
-    <string name="tutorial_page_select_description">Pour utiliser Pastiera, sélectionnez-la parmi les méthodes de saisie. Choisissez l’interface IME complète avec le commutateur &quot;Use on-screen keyboard&quot; sur ON ou l’interface minimale &quot;Pastierina&quot; avec le commutateur sur OFF.</string>
+    <string name="tutorial_page_welcome_title">Bienvenue dans TitanKeys</string>
+    <string name="tutorial_page_welcome_description">TitanKeys est une méthode de saisie avancée pour les appareils Android à clavier physique, avec support du mode Nav, des raccourcis, des mappings clavier personnalisés et bien plus.</string>
+    <string name="tutorial_page_enable_title">Activer TitanKeys</string>
+    <string name="tutorial_page_enable_description">Pour commencer, vous devez activer TitanKeys comme méthode de saisie dans les Paramètres Android. Appuyez sur le bouton ci-dessous pour ouvrir les paramètres.</string>
+    <string name="tutorial_page_select_title">Sélectionner TitanKeys</string>
+    <string name="tutorial_page_select_description">Pour utiliser TitanKeys, sélectionnez-la parmi les méthodes de saisie. Choisissez l\'interface IME complète avec le commutateur &quot;Use on-screen keyboard&quot; sur ON ou l\'interface minimale &quot;Pastierina&quot; avec le commutateur sur OFF.</string>
     <string name="tutorial_page_led_title">Indicateur LED</string>
-    <string name="tutorial_page_led_description">Pour tirer le meilleur parti de Pastiera, définissez la touche Fn comme Ctrl dans les paramètres système. La barre IME affiche quatre LED: elles deviennent bleues quand le modificateur est actif one-shot et orangées quand il est verrouillé. La LED du layout SYM est bleue sur la page emoji et orange sur la page symbols.</string>
+    <string name="tutorial_page_led_description">Pour tirer le meilleur parti de TitanKeys, définissez la touche Fn comme Ctrl dans les paramètres système. La barre IME affiche quatre LED: elles deviennent bleues quand le modificateur est actif one-shot et orangées quand il est verrouillé. La LED du layout SYM est bleue sur la page emoji et orange sur la page symbols.</string>
     <string name="tutorial_page_nav_mode_title">Mode Nav</string>
     <string name="tutorial_page_nav_mode_description">Le mode Nav vous fait naviguer dans l\'interface de l\'appareil avec des raccourcis comme IJKL ou ESDF.\nPour l\'activer:\n• Appuyez deux fois rapidement sur Ctrl\n• Les touches de lettres deviennent des contrôles de navigation\n• Appuyez encore sur Ctrl pour quitter\nChaque raccourci est reconfigurable dans les Paramètres avancés.</string>
     <string name="tutorial_page_customization_title">Personnalisation</string>
-    <string name="tutorial_page_customization_description">Pastiera offre de nombreuses options de personnalisation:\n• Dispositions de clavier personnalisables\n• Raccourcis du lanceur et Power Shortcuts\n• La barre IME peut servir de barre de swipe pour déplacer le curseur\n• Mappages personnalisés pour le mode Nav\nExplorez les paramètres pour trouver la configuration parfaite pour vous!</string>
+    <string name="tutorial_page_customization_description">TitanKeys offre de nombreuses options de personnalisation:\n• Dispositions de clavier personnalisables\n• Raccourcis du lanceur et Power Shortcuts\n• La barre IME peut servir de barre de swipe pour déplacer le curseur\n• Mappages personnalisés pour le mode Nav\nExplorez les paramètres pour trouver la configuration parfaite pour vous!</string>
     <string name="tutorial_page_ready_title">Prêt à Commencer</string>
-    <string name="tutorial_page_ready_description">Vous êtes maintenant prêt à utiliser Pastiera! N\'oubliez pas que vous pouvez toujours revenir aux paramètres pour personnaliser davantage le clavier selon vos besoins.</string>
-    <string name="tutorial_enable_button">Activer Pastiera</string>
-    <string name="tutorial_enabled_message">Pastiera est activé!</string>
-    <string name="tutorial_select_button">Sélectionner Pastiera</string>
-    <string name="tutorial_enable_first_message">Activez d\'abord Pastiera sur la page précédente</string>
-    <string name="tutorial_selected_message">Pastiera est sélectionné!</string>
+    <string name="tutorial_page_ready_description">Vous êtes maintenant prêt à utiliser TitanKeys! N\'oubliez pas que vous pouvez toujours revenir aux paramètres pour personnaliser davantage le clavier selon vos besoins.</string>
+    <string name="tutorial_enable_button">Activer TitanKeys</string>
+    <string name="tutorial_enabled_message">TitanKeys est activé!</string>
+    <string name="tutorial_select_button">Sélectionner TitanKeys</string>
+    <string name="tutorial_enable_first_message">Activez d\'abord TitanKeys sur la page précédente</string>
+    <string name="tutorial_selected_message">TitanKeys est sélectionné!</string>
     <string name="tutorial_show">Afficher le Tutoriel</string>
     <string name="tutorial_review_description">Revoir le tutoriel d\'introduction</string>
     
@@ -382,7 +382,7 @@
     <string name="backup_now">Sauvegarder maintenant</string>
     <string name="backup_now_description">Exporter tous les paramètres et les dispositions personnalisées vers un fichier ZIP</string>
     <string name="restore_from_file">Restaurer depuis un fichier</string>
-    <string name="restore_from_file_description">Importer un fichier ZIP de sauvegarde Pastiera</string>
+    <string name="restore_from_file_description">Importer un fichier ZIP de sauvegarde TitanKeys</string>
     <string name="backup_completed">Sauvegarde terminée</string>
     <string name="restore_completed">Restauration terminée</string>
     <string name="backup_failed">Échec de la sauvegarde : %1$s</string>
@@ -468,7 +468,7 @@
     <string name="trackpad_tutorial_how_it_works_title">Comment ça Marche</string>
     <string name="trackpad_tutorial_how_it_works_description">Le trackpad est divisé en trois sections :\n\n• Tiers gauche → Accepter la suggestion gauche\n• Tiers central → Accepter la suggestion centrale\n• Tiers droit → Accepter la suggestion droite\n\nGlissez simplement vers le haut dans la zone correspondante pour insérer cette suggestion.</string>
     <string name="trackpad_tutorial_shizuku_required_title">Shizuku Requis</string>
-    <string name="trackpad_tutorial_shizuku_required_description">Cette fonctionnalité nécessite Shizuku pour accéder aux événements du trackpad.\n\n1. Installez Shizuku depuis les versions GitHub\n2. Activez les options développeur dans les paramètres Android\n3. Branchez votre appareil à un PC avec ADB installé\n4. Exécutez la commande que Shizuku affiche dans son app\n5. Accordez la permission à Pastiera dans Shizuku\n\nLa fonctionnalité fonctionnera automatiquement une fois Shizuku en cours d\'exécution.</string>
+    <string name="trackpad_tutorial_shizuku_required_description">Cette fonctionnalité nécessite Shizuku pour accéder aux événements du trackpad.\n\n1. Installez Shizuku depuis les versions GitHub\n2. Activez les options développeur dans les paramètres Android\n3. Branchez votre appareil à un PC avec ADB installé\n4. Exécutez la commande que Shizuku affiche dans son app\n5. Accordez la permission à TitanKeys dans Shizuku\n\nLa fonctionnalité fonctionnera automatiquement une fois Shizuku en cours d\'exécution.</string>
     <string name="trackpad_tutorial_tips_title">Conseils</string>
     <string name="trackpad_tutorial_tips_description">• Assurez-vous que votre glissement soit principalement vertical\n• Le geste fonctionne mieux avec des glissements rapides et délibérés\n• Si d\'autres doigts sont sur le clavier, les gestes peuvent ne pas être détectés (rejet de paume matériel)\n• La fonctionnalité peut être activée/désactivée dans les Paramètres Avancés</string>
     <string name="trackpad_tutorial_complete">Compris</string>
@@ -515,9 +515,9 @@
     <string name="settings_update_check_failed">GitHub inaccessible.</string>
 
     <!-- Update notifications -->
-    <string name="notification_update_channel_name">Mises à jour Pastiera</string>
+    <string name="notification_update_channel_name">Mises à jour TitanKeys</string>
     <string name="notification_update_channel_description">Notifications de nouvelles versions</string>
-    <string name="notification_update_available_title">Pastiera - Mise à jour dispo</string>
+    <string name="notification_update_available_title">TitanKeys - Mise à jour dispo</string>
     <string name="notification_update_available_text">Nouvelle version disponible (%1$s)</string>
 
     <!-- Speech recognition errors -->

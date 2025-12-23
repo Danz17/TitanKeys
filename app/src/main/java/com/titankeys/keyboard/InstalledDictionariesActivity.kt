@@ -45,7 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.titankeys.keyboard.ui.theme.PastieraTheme
+import com.titankeys.keyboard.ui.theme.TitanKeysTheme
 import java.io.File
 import java.io.InputStream
 import java.util.Locale
@@ -68,7 +68,7 @@ class InstalledDictionariesActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         setContent {
-            PastieraTheme {
+            TitanKeysTheme {
                 InstalledDictionariesScreen(
                     modifier = Modifier.fillMaxSize(),
                     onBack = { finish() }

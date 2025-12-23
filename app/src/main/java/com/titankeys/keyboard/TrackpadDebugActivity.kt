@@ -25,7 +25,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.titankeys.keyboard.ui.theme.PastieraTheme
+import com.titankeys.keyboard.ui.theme.TitanKeysTheme
 import kotlinx.coroutines.launch
 
 class TrackpadDebugActivity : ComponentActivity() {
@@ -35,7 +35,7 @@ class TrackpadDebugActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PastieraTheme {
+            TitanKeysTheme {
                 TrackpadDebugScreen(
                     events = events,
                     onBackPressed = { finish() }

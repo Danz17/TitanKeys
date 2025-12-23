@@ -155,7 +155,7 @@ private fun getLanguageDisplayName(context: Context, languageCode: String): Stri
         return savedName
     }
     
-    // For standard languages, use simple locale display name (without "Pastiera")
+    // For standard languages, use simple locale display name
     val standardLanguages = mapOf(
         "en" to "English",
         "it" to "Italiano",

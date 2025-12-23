@@ -36,15 +36,15 @@ import androidx.compose.ui.unit.dp
 import com.titankeys.keyboard.R
 import kotlin.math.hypot
 
-// Pastiera colors inspired by the dessert
-private val PastieraBeige = Color(0xFF6B5435)
-private val PastieraBeigeDark = Color(0xFF8B6F47)
-private val PastieraOrangeLight = Color(0xFFFFB84D)
-private val PastieraYellow = Color(0xFFF2B24C)
+// TitanKeys theme colors
+private val TitanKeysBeige = Color(0xFF6B5435)
+private val TitanKeysBigeDark = Color(0xFF8B6F47)
+private val TitanKeysOrangeLight = Color(0xFFFFB84D)
+private val TitanKeysYellow = Color(0xFFF2B24C)
 
 /**
- * Custom top bar with Pastiera lattice pattern.
- * Features light diagonal stripes over a dark toasted gradient.
+ * Custom top bar with TitanKeys lattice pattern.
+ * Features light diagonal stripes over a dark gradient.
  */
 @Composable
 fun CustomTopBar(
@@ -64,9 +64,9 @@ fun CustomTopBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = PastieraBeigeDark)
+                .background(color = TitanKeysBigeDark)
         ) {
-            PastieraPattern(
+            TitanKeysPattern(
                 modifier = Modifier
                     .fillMaxWidth()
                     .matchParentSize()
@@ -83,13 +83,13 @@ fun CustomTopBar(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Pastiera",
+                        text = "TitanKeys",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Text(
-                        text = "La Tastiera per la tua Tastiera",
+                        text = "Physical Keyboard IME",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.9f),
                         fontWeight = FontWeight.Medium
@@ -104,7 +104,7 @@ fun CustomTopBar(
                         .size(64.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(
-                            color = PastieraBeige.copy(alpha = 0.9f)
+                            color = TitanKeysBeige.copy(alpha = 0.9f)
                         )
                 ) {
                     Icon(
@@ -120,7 +120,7 @@ fun CustomTopBar(
 }
 
 @Composable
-private fun PastieraPattern(
+private fun TitanKeysPattern(
     modifier: Modifier = Modifier,
     stripeWidth: Dp = 36.dp,
     stripeSpacing: Dp = 96.dp
@@ -129,7 +129,7 @@ private fun PastieraPattern(
     val widthPx = with(density) { stripeWidth.toPx() }
     val spacingPx = with(density) { stripeSpacing.toPx() }
 
-    val infiniteTransition = rememberInfiniteTransition(label = "pastieraPatternScroll")
+    val infiniteTransition = rememberInfiniteTransition(label = "titanKeysPatternScroll")
     val stripePhase by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = spacingPx,
@@ -141,7 +141,7 @@ private fun PastieraPattern(
     )
 
     Canvas(modifier = modifier) {
-        drawPastieraPattern(
+        drawTitanKeysPattern(
             stripeWidth = widthPx,
             stripeSpacing = spacingPx,
             phase = stripePhase
@@ -149,18 +149,18 @@ private fun PastieraPattern(
     }
 }
 
-private fun DrawScope.drawPastieraPattern(
+private fun DrawScope.drawTitanKeysPattern(
     stripeWidth: Float,
     stripeSpacing: Float,
     phase: Float
 ) {
-    // Base gradient now dark so the light stripes pop.
+    // Base gradient
     drawRect(
         brush = Brush.verticalGradient(
             colors = listOf(
-                PastieraBeigeDark.copy(alpha = 0.95f),
-                PastieraBeige.copy(alpha = 0.9f),
-                PastieraBeigeDark.copy(alpha = 0.98f)
+                TitanKeysBigeDark.copy(alpha = 0.95f),
+                TitanKeysBeige.copy(alpha = 0.9f),
+                TitanKeysBigeDark.copy(alpha = 0.98f)
             ),
             startY = 0f,
             endY = size.height
@@ -196,7 +196,7 @@ private fun DrawScope.drawPastieraPattern(
     withTransform({
         scale(scaleX = 1f, scaleY = verticalStretch, pivot = center)
     }) {
-        drawStripeSet(angle = 45f, color = PastieraYellow.copy(alpha = 0.75f))
-        drawStripeSet(angle = -45f, color = PastieraOrangeLight.copy(alpha = 0.7f))
+        drawStripeSet(angle = 45f, color = TitanKeysYellow.copy(alpha = 0.75f))
+        drawStripeSet(angle = -45f, color = TitanKeysOrangeLight.copy(alpha = 0.7f))
     }
 }

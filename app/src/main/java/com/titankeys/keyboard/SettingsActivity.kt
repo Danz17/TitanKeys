@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import com.titankeys.keyboard.ui.theme.PastieraTheme
+import com.titankeys.keyboard.ui.theme.TitanKeysTheme
 
 class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,7 +16,7 @@ class SettingsActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         setContent {
-            PastieraTheme {
+            TitanKeysTheme {
                 SettingsScreen(
                     modifier = Modifier.fillMaxSize()
                 )

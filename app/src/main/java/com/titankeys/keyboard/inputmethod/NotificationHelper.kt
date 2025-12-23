@@ -28,10 +28,10 @@ import com.titankeys.keyboard.update.GITHUB_LATEST_RELEASE_PAGE
  * Helper for managing app notifications.
  */
 object NotificationHelper {
-    private const val CHANNEL_ID = "pastiera_nav_mode_channel"
+    private const val CHANNEL_ID = "titankeys_nav_mode_channel"
     private const val NOTIFICATION_ID = 1
-    
-    private const val UPDATE_CHANNEL_ID = "pastiera_update_channel"
+
+    private const val UPDATE_CHANNEL_ID = "titankeys_update_channel"
     private const val UPDATE_NOTIFICATION_ID = 2
     
     /**

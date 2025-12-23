@@ -72,7 +72,7 @@ class UpdateCheckWorker(
     }
 
     companion object {
-        private const val UNIQUE_WORK_NAME = "pastiera_update_check"
+        private const val UNIQUE_WORK_NAME = "titankeys_update_check"
 
         /**
          * Schedules a periodic background update check every 24 hours.

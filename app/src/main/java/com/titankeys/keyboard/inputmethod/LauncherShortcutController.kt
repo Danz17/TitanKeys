@@ -16,7 +16,7 @@ class LauncherShortcutController(
     private val context: Context
 ) {
     companion object {
-        private const val TAG = "PastieraInputMethod"
+        private const val TAG = "TitanKeysIME"
         private const val POWER_SHORTCUT_TIMEOUT_MS = 5000L // 5 secondi di timeout
     }
 
