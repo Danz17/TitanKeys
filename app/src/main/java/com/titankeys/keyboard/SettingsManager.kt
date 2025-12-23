@@ -53,6 +53,10 @@ object SettingsManager {
     private const val KEY_TRACKPAD_GESTURES_ENABLED = "trackpad_gestures_enabled" // Whether trackpad gesture suggestions are enabled
     private const val KEY_TRACKPAD_SWIPE_THRESHOLD = "trackpad_swipe_threshold" // Threshold for swipe detection on trackpad
 
+    // Contextual AI settings
+    private const val KEY_CONTEXTUAL_AI_ENABLED = "contextual_ai_enabled" // Whether contextual AI suggestions are enabled
+    private const val KEY_CONTEXTUAL_AI_MODEL_ENABLED = "contextual_ai_model_enabled" // Whether the AI model is enabled (can be disabled for fallback testing)
+
     private const val VARIATIONS_FILE_NAME = "variations.json"
     
     // Default values
@@ -100,6 +104,10 @@ object SettingsManager {
     private const val DEFAULT_CLIPBOARD_RETENTION_TIME = 120L // 2 hours in minutes
     private const val DEFAULT_TRACKPAD_GESTURES_ENABLED = false
     private const val DEFAULT_TRACKPAD_SWIPE_THRESHOLD = 300f
+
+    // Contextual AI defaults
+    private const val DEFAULT_CONTEXTUAL_AI_ENABLED = false // Disabled by default for now
+    private const val DEFAULT_CONTEXTUAL_AI_MODEL_ENABLED = true
     private const val MIN_TRACKPAD_SWIPE_THRESHOLD = 120f
     private const val MAX_TRACKPAD_SWIPE_THRESHOLD = 600f
 
@@ -1786,6 +1794,47 @@ object SettingsManager {
     fun setCustomInputStyles(context: Context, stylesString: String) {
         getPreferences(context).edit()
             .putString(KEY_CUSTOM_INPUT_STYLES, stylesString)
+            .apply()
+    }
+
+    /**
+     * Returns whether contextual AI suggestions are enabled.
+     * @param context The context
+     * @return true if contextual AI is enabled, false otherwise
+     */
+    fun getContextualAIEnabled(context: Context): Boolean {
+        return getPreferences(context).getBoolean(KEY_CONTEXTUAL_AI_ENABLED, DEFAULT_CONTEXTUAL_AI_ENABLED)
+    }
+
+    /**
+     * Sets whether contextual AI suggestions are enabled.
+     * @param context The context
+     * @param enabled Whether to enable contextual AI suggestions
+     */
+    fun setContextualAIEnabled(context: Context, enabled: Boolean) {
+        getPreferences(context).edit()
+            .putBoolean(KEY_CONTEXTUAL_AI_ENABLED, enabled)
+            .apply()
+    }
+
+    /**
+     * Returns whether the contextual AI model is enabled.
+     * This can be disabled for testing fallback behavior.
+     * @param context The context
+     * @return true if the AI model is enabled, false otherwise
+     */
+    fun getContextualAIModelEnabled(context: Context): Boolean {
+        return getPreferences(context).getBoolean(KEY_CONTEXTUAL_AI_MODEL_ENABLED, DEFAULT_CONTEXTUAL_AI_MODEL_ENABLED)
+    }
+
+    /**
+     * Sets whether the contextual AI model is enabled.
+     * @param context The context
+     * @param enabled Whether to enable the AI model
+     */
+    fun setContextualAIModelEnabled(context: Context, enabled: Boolean) {
+        getPreferences(context).edit()
+            .putBoolean(KEY_CONTEXTUAL_AI_MODEL_ENABLED, enabled)
             .apply()
     }
 }

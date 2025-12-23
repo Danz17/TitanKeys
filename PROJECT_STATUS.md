@@ -130,16 +130,19 @@ This document consolidates all active development plans and tracks progress acro
 - Can extract bigrams and trigrams from text corpora
 - Supports frequency filtering
 
-#### 7.2 Dictionary Preprocessing
-**File**: `scripts/preprocess-dictionaries.main.kts`
+#### 7.2 Dictionary Preprocessing ✅
+**File**: `tools/dictionaries/preprocess-dictionaries.main.kts`
 
-**Tasks**:
-- [ ] Update preprocessing script to include n-gram data in serialized format
-- [ ] Add support for domain-specific word lists
-- [ ] Optimize n-gram data for fast lookup
-- [ ] Update serialization to handle new DictionaryIndex structure
+**Completed**:
+- ✅ Updated preprocessing script to include n-gram data in serialized format
+- ✅ Added support for domain-specific word lists (loads from `{lang}_domain_words.json`)
+- ✅ Added support for common phrases (loads from `{lang}_common_phrases.json`)
+- ✅ Optimized n-gram data with frequency filtering (minFreq=2 by default)
+- ✅ Enhanced file discovery to check multiple locations (`tools/corpora`, `corpora`, fallback)
+- ✅ Added comprehensive logging for n-gram statistics
+- ✅ Updated serialization to handle complete DictionaryIndex structure (bigrams, trigrams, domainWords, commonPhrases)
 
-**Status**: Not Started
+**Status**: Complete
 
 ---
 
@@ -175,9 +178,9 @@ This document consolidates all active development plans and tracks progress acro
 - Visual feedback
 - Swipe gesture for prediction selection
 
-### Phase 7: Dictionary Tools 🚧
+### Phase 7: Dictionary Tools ✅
 - N-gram extraction ✅
-- Preprocessing updates ⏳
+- Preprocessing updates ✅
 
 ### Phase 8: Settings UI ✅
 - UI controls in TextInputSettingsScreen
@@ -185,11 +188,16 @@ This document consolidates all active development plans and tracks progress acro
 
 ---
 
-## 🎯 Next Steps (Priority Order)
+## 🎯 Next Steps
 
-1. **Phase 7.2: Dictionary Preprocessing** (Remaining Task)
-   - Needed for production n-gram data
-   - Update preprocessing script to include n-gram data
+All planned phases are complete! 🎉
+
+**Optional Future Enhancements**:
+- Generate n-gram data from text corpora for all supported languages
+- Create domain-specific word lists (technical, medical, etc.)
+- Build common phrases databases
+- Performance testing and optimization
+- User acceptance testing on Titan 2 device
 
 ---
 
@@ -203,10 +211,10 @@ This document consolidates all active development plans and tracks progress acro
 | 4 | Adaptive System | ✅ Complete | 100% |
 | 5 | User Learning | ✅ Complete | 100% |
 | 6 | UI Integration | ✅ Complete | 100% |
-| 7 | Dictionary Tools | 🚧 Partial | 50% |
+| 7 | Dictionary Tools | ✅ Complete | 100% |
 | 8 | Settings UI | ✅ Complete | 100% |
 
-**Overall Progress**: ~95% Complete
+**Overall Progress**: ~100% Complete
 
 ---
 
@@ -225,11 +233,11 @@ This document consolidates all active development plans and tracks progress acro
 - Settings UI allows full configuration of prediction features
 
 **Pending Integration**:
-- Dictionary preprocessing for n-gram data inclusion (Phase 7.2)
+- None - All core features complete!
 
 ### Known Limitations
 
-1. **N-gram Data**: Currently, dictionaries don't include n-gram data yet. The system will work with empty n-grams (fallback to unigrams) until preprocessing is updated.
+1. **N-gram Data**: Preprocessing script now supports n-gram data. To use n-grams, place `{lang}_bigrams.json` and `{lang}_trigrams.json` files in `tools/corpora/` directory before running preprocessing.
 
 2. **Build Environment**: Requires JDK 11+ to build (Gradle 8.13 + Android Gradle Plugin 8.11).
 
@@ -258,22 +266,22 @@ This document consolidates all active development plans and tracks progress acro
 
 ## 🚀 Release Planning
 
-### v0.9-alpha (Current Target)
+### v0.9-alpha ✅ (Complete)
 - Core prediction system ✅
-- UI integration 🚧
-- Settings UI 🚧
-- Basic testing
+- UI integration ✅
+- Settings UI ✅
+- Dictionary preprocessing ✅
 
 ### v0.9-beta (Next Target)
-- Complete UI integration
-- Dictionary preprocessing with n-gram data
-- Comprehensive testing
+- Generate n-gram data for all languages
+- Comprehensive testing on Titan 2
 - Performance optimization
+- User acceptance testing
 
 ### v0.9-release (Final)
 - Production-ready dictionaries with n-grams
-- Full feature set
-- Documentation updates
+- Full feature set ✅
+- Documentation updates ✅
 - User guide updates
 
 ---

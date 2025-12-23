@@ -2,6 +2,35 @@
 
 ## New Features TitanKeys 0.9 (In Development)
 
+### Contextual AI Predictions (December 2025)
+- **TensorFlow Lite Integration**: Added TensorFlow Lite for on-device AI inference
+- **Contextual Predictor**: New transformer-based next-word prediction system with better context understanding
+- **Smart Fallback**: Automatically falls back to n-gram prediction if AI inference times out or fails
+- **Privacy-First Design**: Sensitive content detection to skip processing of passwords, credit card numbers, etc.
+- **Performance Caching**: Prediction caching for faster repeated queries (30s cache, 1000 entries max)
+- **Settings UI**: Toggle for enabling/disabling Contextual AI suggestions in Text Input settings
+
+### Grammar Correction Engine (December 2025)
+- **AI-Powered Grammar Check**: New grammar correction system using TensorFlow Lite models
+- **Multiple Fallback Levels**: Full AI, Hybrid (AI + rules), Rules-only, or Disabled modes
+- **Supported Error Types**: Verb tense, subject-verb agreement, article usage, preposition errors, and more
+- **Automatic Sentence Analysis**: Grammar suggestions appear after sentence completion
+- **Multi-Language Support**: Architecture supports English, Spanish, French, German, Italian models
+- **Performance Constraints**: 100ms timeout ensures grammar checking doesn't slow down typing
+
+### Dictionary Preprocessing Enhanced (December 2025)
+- **N-gram Data Support**: Preprocessing script now includes bigram and trigram data in serialized dictionaries
+- **Domain-Specific Words**: Support for loading domain-specific word lists from `{lang}_domain_words.json`
+- **Common Phrases**: Support for common phrases from `{lang}_common_phrases.json`
+- **Frequency Filtering**: N-gram data filtered by minimum frequency (default: 2) for quality
+- **Enhanced File Discovery**: Script checks multiple locations for corpora files
+- **Comprehensive Logging**: Detailed statistics output for n-gram counts and dictionary sizes
+
+### Clipboard UI Improvements (December 2025)
+- **Pin Icon**: Added Material Design push pin icon for clipboard pinning
+- **Delete Icon**: Added delete icon for clipboard item removal
+- **Visual Feedback**: Pin icon turns yellow when item is pinned, gray otherwise
+
 ### Keyboard Bar Layout Improvements (December 2025)
 - **Reorganized Button Layout**: New layout: [Hide Keyboard] ... [Voice][Clipboard] ... [Language Switcher]
 - **Hide Keyboard Button**: Added dedicated button to dismiss the virtual keyboard

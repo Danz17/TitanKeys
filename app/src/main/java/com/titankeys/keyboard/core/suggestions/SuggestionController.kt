@@ -42,7 +42,13 @@ class SuggestionController(
     private val userLearningStore = UserLearningStore(locale = currentLocale, debugLogging = debugLogging)
     private var ngramLanguageModel = NgramLanguageModel(dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
     private var nextWordPredictor = NextWordPredictor(ngramLanguageModel, userLearningStore, dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
+    private var contextualPredictor = ContextualPredictor(appContext, dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
     private val adaptiveMode = AdaptiveSuggestionMode(settingsProvider())
+
+    // Grammar correction components
+    private var grammarSettings = GrammarSettings()
+    private var grammarModelManager = GrammarModelManager(appContext, grammarSettings)
+    private var grammarCorrectionEngine = GrammarCorrectionEngine(appContext, grammarModelManager, grammarSettings)
     
     // Load user learning data
     init {
@@ -62,16 +68,24 @@ class SuggestionController(
                     contextLength = contextTracker.size(),
                     nextWordPredictionEnabled = settings.nextWordPredictionEnabled
                 )
-                
+
                 val suggestions = when (mode) {
                     SuggestionMode.CURRENT_WORD -> {
-                        // Current word suggestions
-                        suggestionEngine.suggest(word, settings.maxSuggestions, settings.accentMatching, settings.useKeyboardProximity, settings.useEditTypeRanking)
+                        // Current word suggestions + grammar corrections
+                        val wordSuggestions = suggestionEngine.suggest(word, settings.maxSuggestions, settings.accentMatching, settings.useKeyboardProximity, settings.useEditTypeRanking)
+                        val grammarSuggestions = getGrammarSuggestions(word)
+                        combineSuggestions(wordSuggestions, grammarSuggestions, settings.maxSuggestions)
                     }
                     SuggestionMode.NEXT_WORD -> {
                         // Next word predictions
                         val context = contextTracker.getContext()
-                        val predictions = nextWordPredictor.predict(context, settings.maxSuggestions)
+                        val predictions = if (settings.contextualAIEnabled && settings.contextualAIModelEnabled) {
+                            // Use contextual AI predictor with fallback to n-gram
+                            contextualPredictor.predict(context, settings.maxSuggestions, nextWordPredictor)
+                        } else {
+                            // Use traditional n-gram predictor
+                            nextWordPredictor.predict(context, settings.maxSuggestions)
+                        }
                         // Convert predictions to SuggestionResult format
                         predictions.mapIndexed { index, pred ->
                             SuggestionResult(
@@ -85,10 +99,18 @@ class SuggestionController(
                     SuggestionMode.HYBRID -> {
                         // Show both: current word suggestions if typing, otherwise next-word predictions
                         if (word.isNotBlank()) {
-                            suggestionEngine.suggest(word, settings.maxSuggestions, settings.accentMatching, settings.useKeyboardProximity, settings.useEditTypeRanking)
+                            val wordSuggestions = suggestionEngine.suggest(word, settings.maxSuggestions, settings.accentMatching, settings.useKeyboardProximity, settings.useEditTypeRanking)
+                            val grammarSuggestions = getGrammarSuggestions(word)
+                            combineSuggestions(wordSuggestions, grammarSuggestions, settings.maxSuggestions)
                         } else {
                             val context = contextTracker.getContext()
-                            val predictions = nextWordPredictor.predict(context, settings.maxSuggestions)
+                            val predictions = if (settings.contextualAIEnabled && settings.contextualAIModelEnabled) {
+                                // Use contextual AI predictor with fallback to n-gram
+                                contextualPredictor.predict(context, settings.maxSuggestions, nextWordPredictor)
+                            } else {
+                                // Use traditional n-gram predictor
+                                nextWordPredictor.predict(context, settings.maxSuggestions)
+                            }
                             predictions.mapIndexed { index, pred ->
                                 SuggestionResult(
                                     candidate = pred,
@@ -100,7 +122,7 @@ class SuggestionController(
                         }
                     }
                 }
-                
+
                 latestSuggestions.set(suggestions)
                 latestMode.set(mode)
                 suggestionsListener?.invoke(suggestions)
@@ -135,6 +157,20 @@ class SuggestionController(
         contextTracker.reset()
         ngramLanguageModel = NgramLanguageModel(dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
         nextWordPredictor = NextWordPredictor(ngramLanguageModel, userLearningStore, dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
+        contextualPredictor.shutdown() // Clean up old predictor
+        contextualPredictor = ContextualPredictor(appContext, dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
+
+        // Recreate grammar correction components
+        grammarCorrectionEngine.shutdown() // Clean up old engine
+        grammarCorrectionEngine = GrammarCorrectionEngine(appContext, grammarModelManager, grammarSettings)
+
+        // Initialize contextual predictor if enabled
+        val settings = settingsProvider()
+        if (settings.contextualAIEnabled && settings.contextualAIModelEnabled) {
+            loadScope.launch {
+                contextualPredictor.initialize()
+            }
+        }
         
         // Recreate tracker to use new engine (tracker captures suggestionEngine in closure)
         tracker = CurrentWordTracker(
@@ -304,6 +340,9 @@ class SuggestionController(
         val boundaryChar = event?.unicodeChar?.toChar()
         if (boundaryChar != null && (boundaryChar == '.' || boundaryChar == '!' || boundaryChar == '?' || boundaryChar == '\n')) {
             contextTracker.onSentenceBoundary()
+
+            // Trigger grammar check for completed sentence
+            onSentenceCompleted(inputConnection)
         }
         
         if (result.replaced) {
@@ -316,7 +355,13 @@ class SuggestionController(
         if (settings.nextWordPredictionEnabled && !completedWord.isBlank()) {
             val context = contextTracker.getContext()
             if (context.isNotEmpty()) {
-                val predictions = nextWordPredictor.predict(context, settings.maxSuggestions)
+                val predictions = if (settings.contextualAIEnabled && settings.contextualAIModelEnabled) {
+                    // Use contextual AI predictor with fallback to n-gram
+                    contextualPredictor.predict(context, settings.maxSuggestions, nextWordPredictor)
+                } else {
+                    // Use traditional n-gram predictor
+                    nextWordPredictor.predict(context, settings.maxSuggestions)
+                }
                 val predictionResults = predictions.mapIndexed { index, pred ->
                     SuggestionResult(
                         candidate = pred,
@@ -440,6 +485,117 @@ class SuggestionController(
 
     fun currentSuggestionMode(): SuggestionMode = latestMode.get()
 
+    /**
+     * Get grammar suggestions for the current word context
+     */
+    private fun getGrammarSuggestions(currentWord: String): List<SuggestionResult> {
+        if (!grammarSettings.grammarCheckEnabled || currentWord.isBlank()) {
+            return emptyList()
+        }
+
+        // For now, only check grammar when we have a complete sentence context
+        // In a full implementation, this would extract the sentence from input connection
+        val mockSentence = "$currentWord." // Simplified for demo
+
+        val corrections = grammarCorrectionEngine.analyzeSentence(mockSentence, currentWord.length)
+
+        return corrections.map { correction ->
+            SuggestionResult(
+                candidate = correction.suggestedText,
+                distance = 0, // Grammar corrections have no edit distance
+                score = correction.confidence * 2.0, // Grammar suggestions get higher priority
+                source = SuggestionSource.GRAMMAR
+            )
+        }
+    }
+
+    /**
+     * Combine word suggestions with grammar suggestions
+     */
+    private fun combineSuggestions(
+        wordSuggestions: List<SuggestionResult>,
+        grammarSuggestions: List<SuggestionResult>,
+        maxSuggestions: Int
+    ): List<SuggestionResult> {
+        // Prioritize grammar suggestions, then word suggestions
+        val combined = grammarSuggestions + wordSuggestions
+
+        // Remove duplicates and limit total suggestions
+        return combined
+            .distinctBy { it.candidate.lowercase() }
+            .sortedByDescending { it.score }
+            .take(maxSuggestions)
+    }
+
+    /**
+     * Trigger grammar check when a sentence is completed
+     */
+    fun onSentenceCompleted(inputConnection: InputConnection?) {
+        if (!grammarSettings.grammarCheckEnabled || !grammarSettings.automaticChecking) {
+            return
+        }
+
+        // Extract the completed sentence
+        val sentence = extractCompletedSentence(inputConnection) ?: return
+
+        // Run grammar analysis in background
+        loadScope.launch {
+            val corrections = grammarCorrectionEngine.analyzeSentence(sentence, sentence.length)
+
+            if (corrections.isNotEmpty()) {
+                // Convert to suggestion results and show them
+                val grammarResults = corrections.map { correction ->
+                    SuggestionResult(
+                        candidate = correction.suggestedText,
+                        distance = 0,
+                        score = correction.confidence * 2.0,
+                        source = SuggestionSource.GRAMMAR
+                    )
+                }
+
+                // Update suggestions on main thread
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    latestSuggestions.set(grammarResults)
+                    latestMode.set(SuggestionMode.CURRENT_WORD) // Or create GRAMMAR mode
+                    suggestionsListener?.invoke(grammarResults)
+                }
+            }
+        }
+    }
+
+    /**
+     * Extract the completed sentence from input connection
+     */
+    private fun extractCompletedSentence(inputConnection: InputConnection?): String? {
+        if (inputConnection == null) return null
+
+        return try {
+            // Get text before cursor, looking for sentence boundary
+            val beforeText = inputConnection.getTextBeforeCursor(200, 0)?.toString() ?: return null
+
+            // Find the last sentence boundary
+            val sentenceEndings = listOf('.', '!', '?', '\n')
+            var lastBoundaryIndex = -1
+
+            for (i in beforeText.indices.reversed()) {
+                if (beforeText[i] in sentenceEndings) {
+                    lastBoundaryIndex = i
+                    break
+                }
+            }
+
+            if (lastBoundaryIndex == -1) return null
+
+            // Extract from after previous boundary to current boundary
+            val sentenceStart = beforeText.lastIndexOfAny(sentenceEndings, lastBoundaryIndex - 1) + 1
+            val sentence = beforeText.substring(sentenceStart, lastBoundaryIndex + 1).trim()
+
+            if (sentence.length < 10) null else sentence
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     fun userDictionarySnapshot(): List<UserDictionaryStore.UserEntry> = userDictionaryStore.getSnapshot()
 
     /**
@@ -536,6 +692,12 @@ class SuggestionController(
                         dictionaryRepository.getBigrams(),
                         dictionaryRepository.getTrigrams()
                     )
+                }
+
+                // Initialize contextual predictor if enabled
+                val settings = settingsProvider()
+                if (settings.contextualAIEnabled && settings.contextualAIModelEnabled) {
+                    contextualPredictor.initialize()
                 }
             }
         }

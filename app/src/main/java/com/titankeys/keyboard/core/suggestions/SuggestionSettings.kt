@@ -11,5 +11,8 @@ data class SuggestionSettings(
     // Next-word prediction settings
     val nextWordPredictionEnabled: Boolean = true,
     val nextWordPredictionMode: SuggestionMode = SuggestionMode.NEXT_WORD,
-    val userLearningEnabled: Boolean = true
+    val userLearningEnabled: Boolean = true,
+    // Contextual AI settings
+    val contextualAIEnabled: Boolean = false,
+    val contextualAIModelEnabled: Boolean = true
 )

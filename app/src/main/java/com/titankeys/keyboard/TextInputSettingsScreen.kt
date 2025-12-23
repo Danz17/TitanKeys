@@ -79,6 +79,15 @@ fun TextInputSettingsScreen(
         mutableStateOf(SettingsManager.getUserLearningEnabled(context))
     }
 
+    // Contextual AI settings
+    var contextualAIEnabled by remember {
+        mutableStateOf(SettingsManager.getContextualAIEnabled(context))
+    }
+
+    var contextualAIModelEnabled by remember {
+        mutableStateOf(SettingsManager.getContextualAIModelEnabled(context))
+    }
+
     var showClearDialog by remember { mutableStateOf(false) }
 
     // Handle system back button
@@ -556,6 +565,89 @@ fun TextInputSettingsScreen(
                             SettingsManager.setUserLearningEnabled(context, enabled)
                         }
                     )
+                }
+            }
+
+            // Contextual AI Toggle
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Lightbulb,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Contextual AI Suggestions",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = "Use transformer model for better next-word prediction",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2
+                        )
+                    }
+                    Switch(
+                        checked = contextualAIEnabled,
+                        onCheckedChange = { enabled ->
+                            contextualAIEnabled = enabled
+                            SettingsManager.setContextualAIEnabled(context, enabled)
+                        }
+                    )
+                }
+            }
+
+            // AI Model Toggle (only shown if contextual AI is enabled)
+            if (contextualAIEnabled) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(72.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Spacer(modifier = Modifier.size(24.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Enable AI Model",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1
+                            )
+                            Text(
+                                text = "Load and use TensorFlow Lite model (can be disabled for testing)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 2
+                            )
+                        }
+                        Switch(
+                            checked = contextualAIModelEnabled,
+                            onCheckedChange = { enabled ->
+                                contextualAIModelEnabled = enabled
+                                SettingsManager.setContextualAIModelEnabled(context, enabled)
+                            }
+                        )
+                    }
                 }
             }
 
