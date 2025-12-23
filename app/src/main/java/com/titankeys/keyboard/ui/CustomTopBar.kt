@@ -38,7 +38,7 @@ import kotlin.math.hypot
 
 // TitanKeys theme colors
 private val TitanKeysBeige = Color(0xFF6B5435)
-private val TitanKeysBigeDark = Color(0xFF8B6F47)
+private val TitanKeysBeigeDark = Color(0xFF8B6F47)
 private val TitanKeysOrangeLight = Color(0xFFFFB84D)
 private val TitanKeysYellow = Color(0xFFF2B24C)
 
@@ -64,7 +64,7 @@ fun CustomTopBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = TitanKeysBigeDark)
+                .background(color = TitanKeysBeigeDark)
         ) {
             TitanKeysPattern(
                 modifier = Modifier
@@ -158,9 +158,9 @@ private fun DrawScope.drawTitanKeysPattern(
     drawRect(
         brush = Brush.verticalGradient(
             colors = listOf(
-                TitanKeysBigeDark.copy(alpha = 0.95f),
+                TitanKeysBeigeDark.copy(alpha = 0.95f),
                 TitanKeysBeige.copy(alpha = 0.9f),
-                TitanKeysBigeDark.copy(alpha = 0.98f)
+                TitanKeysBeigeDark.copy(alpha = 0.98f)
             ),
             startY = 0f,
             endY = size.height
