@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Complete devices.xml file with Unihertz Titan 2 hardware profile
+    
+    To use:
+    1. Backup your existing devices.xml:
+       Windows: %USERPROFILE%\.android\devices.xml
+       Linux/Mac: ~/.android/devices.xml
+    2. Replace it with this file (or merge manually)
+    3. Restart Android Studio
+-->
+<devices xmlns:d="http://schemas.android.com/sdk/devices/1">
+    <d:device>
+        <d:name>Unihertz Titan 2</d:name>
+        <d:manufacturer>Unihertz</d:manufacturer>
+        <d:meta>
+            <d:api-level>35</d:api-level>
+            <d:codename>Android 15</d:codename>
+            <d:tag-id>default</d:tag-id>
+            <d:abi>arm64-v8a</d:abi>
+        </d:meta>
+        <d:screen>
+            <d:screen-size>small</d:screen-size>
+            <d:diagonal-length>4.5</d:diagonal-length>
+            <d:pixel-density>xxhdpi</d:pixel-density>
+            <d:screen-ratio>notlong</d:screen-ratio>
+            <d:dimensions>
+                <d:x-dimension>1440</d:x-dimension>
+                <d:y-dimension>1440</d:y-dimension>
+            </d:dimensions>
+            <d:xdpi>458.0</d:xdpi>
+            <d:ydpi>458.0</d:ydpi>
+        </d:screen>
+        <d:hardware>
+            <d:keyboard>qwerty</d:keyboard>
+            <d:nav>dpad</d:nav>
+            <d:dpad>yes</d:dpad>
+            <d:trackball>no</d:trackball>
+            <d:network>wifi,bluetooth,cellular</d:network>
+            <d:bluetooth>yes</d:bluetooth>
+            <d:telephony>gsm</d:telephony>
+            <d:accelerometer>yes</d:accelerometer>
+            <d:gyroscope>yes</d:gyroscope>
+            <d:proximity>yes</d:proximity>
+            <d:light-sensor>yes</d:light-sensor>
+            <d:gps>yes</d:gps>
+            <d:battery>yes</d:battery>
+            <d:touch-screen>multi-touch</d:touch-screen>
+            <d:camera>back,front</d:camera>
+            <d:camera-back>1080p</d:camera-back>
+            <d:camera-front>720p</d:camera-front>
+            <d:microphone>yes</d:microphone>
+            <d:audio-output>yes</d:audio-output>
+            <d:ram>12288</d:ram>
+            <d:button-back>yes</d:button-back>
+            <d:button-home>yes</d:button-home>
+            <d:button-menu>no</d:button-menu>
+        </d:hardware>
+        <d:software>
+            <d:gl-version>3.0</d:gl-version>
+            <d:gl-extensions>GL_EXT_texture_format_BGRA8888 GL_OES_EGL_image_external</d:gl-extensions>
+        </d:software>
+        <d:state name="Portrait" default="true">
+            <d:description>Portrait orientation</d:description>
+        </d:state>
+        <d:state name="Landscape">
+            <d:description>Landscape orientation</d:description>
+        </d:state>
+    </d:device>
+</devices>
+
