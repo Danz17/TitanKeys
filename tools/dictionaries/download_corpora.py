@@ -3,7 +3,7 @@
 Download text corpora for dictionary and n-gram generation.
 
 This script downloads word frequency lists and text corpora from various sources
-to improve Pastiera keyboard dictionaries.
+to improve TitanKeys keyboard dictionaries.
 
 Usage:
     python download_corpora.py [--language LANG] [--output-dir DIR] [--source SOURCE]

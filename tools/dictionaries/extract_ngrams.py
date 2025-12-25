@@ -6,7 +6,7 @@ Usage:
     python extract_ngrams.py input.txt output_bigrams.json output_trigrams.json [--min-freq N]
 
 This script processes text files and extracts word sequences to build language models
-for next-word prediction in the Pastiera keyboard.
+for next-word prediction in the TitanKeys keyboard.
 """
 
 import json

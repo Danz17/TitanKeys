@@ -2,8 +2,12 @@ package com.titankeys.keyboard.inputmethod
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.content.pm.ShortcutInfo
+import android.os.Build
+import android.os.UserHandle
 import android.util.Log
 import com.titankeys.keyboard.R
 import com.titankeys.keyboard.SettingsManager
@@ -82,7 +86,112 @@ class LauncherShortcutController(
             return false
         }
     }
-    
+
+    /**
+     * Launch an Android shortcut using ShortcutManager.
+     * @param packageName The package that owns the shortcut
+     * @param shortcutId The shortcut ID
+     * @return true if launched successfully
+     */
+    private fun launchShortcut(packageName: String, shortcutId: String): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
+            Log.w(TAG, "Shortcuts not supported on this Android version")
+            return false
+        }
+
+        try {
+            val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+            val userHandle = android.os.Process.myUserHandle()
+
+            // Start the shortcut
+            launcherApps.startShortcut(packageName, shortcutId, null, null, userHandle)
+            Log.d(TAG, "Shortcut lanciato: $packageName/$shortcutId")
+            return true
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Security exception launching shortcut: $packageName/$shortcutId", e)
+            return false
+        } catch (e: IllegalStateException) {
+            Log.e(TAG, "Shortcut not found or not enabled: $packageName/$shortcutId", e)
+            return false
+        } catch (e: Exception) {
+            Log.e(TAG, "Error launching shortcut: $packageName/$shortcutId", e)
+            return false
+        }
+    }
+
+    /**
+     * Get all available shortcuts from installed apps.
+     * Can be used in a shortcut picker UI.
+     * @return List of available shortcuts
+     */
+    fun getAvailableShortcuts(): List<ShortcutInfo> {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
+            return emptyList()
+        }
+
+        val shortcuts = mutableListOf<ShortcutInfo>()
+        try {
+            val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+            val userHandle = android.os.Process.myUserHandle()
+
+            // Get all packages with shortcuts
+            val pm = context.packageManager
+            val mainIntent = Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_LAUNCHER)
+            }
+            val apps = pm.queryIntentActivities(mainIntent, 0)
+
+            for (app in apps) {
+                val packageName = app.activityInfo.packageName
+                try {
+                    // Query for pinned and dynamic shortcuts
+                    val query = LauncherApps.ShortcutQuery().apply {
+                        setPackage(packageName)
+                        setQueryFlags(
+                            LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED or
+                            LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC or
+                            LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST
+                        )
+                    }
+
+                    val appShortcuts = launcherApps.getShortcuts(query, userHandle)
+                    if (appShortcuts != null) {
+                        shortcuts.addAll(appShortcuts)
+                    }
+                } catch (e: SecurityException) {
+                    // This app doesn't allow shortcut queries
+                    continue
+                } catch (e: Exception) {
+                    Log.w(TAG, "Error querying shortcuts for $packageName", e)
+                    continue
+                }
+            }
+
+            Log.d(TAG, "Found ${shortcuts.size} total shortcuts")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting available shortcuts", e)
+        }
+
+        return shortcuts
+    }
+
+    /**
+     * Set a shortcut assignment for a key.
+     */
+    fun setShortcutAssignment(keyCode: Int, packageName: String, shortcutId: String, shortcutLabel: String) {
+        SettingsManager.setLauncherAction(
+            context,
+            keyCode,
+            SettingsManager.LauncherShortcut(
+                type = SettingsManager.LauncherShortcut.TYPE_SHORTCUT,
+                packageName = packageName,
+                appName = shortcutLabel,
+                data = shortcutId
+            )
+        )
+        Log.d(TAG, "Shortcut assegnato: tasto $keyCode -> $packageName/$shortcutId ($shortcutLabel)")
+    }
+
     /**
      * Handles launcher shortcuts when not in a text field.
      */
@@ -101,8 +210,16 @@ class LauncherShortcutController(
                     }
                 }
                 SettingsManager.LauncherShortcut.TYPE_SHORTCUT -> {
-                    // TODO: Gestire scorciatoie in futuro
-                    Log.d(TAG, "Tipo scorciatoia non ancora implementato: ${shortcut.type}")
+                    // Launch Android native shortcut
+                    if (shortcut.packageName != null && shortcut.data != null) {
+                        val success = launchShortcut(shortcut.packageName, shortcut.data)
+                        if (success) {
+                            Log.d(TAG, "Shortcut eseguito: tasto $keyCode -> ${shortcut.packageName}/${shortcut.data}")
+                            return true
+                        }
+                    } else {
+                        Log.w(TAG, "Shortcut non valido: packageName=${shortcut.packageName}, data=${shortcut.data}")
+                    }
                 }
                 else -> {
                     Log.d(TAG, "Tipo azione sconosciuto: ${shortcut.type}")
@@ -157,31 +274,31 @@ class LauncherShortcutController(
         isNavModeActive: Boolean = false
     ): Boolean {
         if (powerShortcutSymPressed) {
-            // Edge case: se già attivo, disattivalo
+            // Edge case: if already active, deactivate it
             resetPowerShortcutMode()
-            Log.d(TAG, "Power Shortcut mode disattivato da SYM")
+            Log.d(TAG, "Power Shortcut mode disabled by SYM")
             return false
         }
         
-        // Salva se nav mode era attivo e disabilitalo se necessario
+        // Save if nav mode was active and disable if needed
         navModeWasActive = isNavModeActive
         if (isNavModeActive) {
             exitNavModeCallback?.invoke()
-            Log.d(TAG, "Nav mode disabilitato per attivare Power Shortcut")
+            Log.d(TAG, "Nav mode disabled to activate Power Shortcut")
         }
         
-        // Attiva il mode
+        // Activate mode
         powerShortcutSymPressed = true
-        Log.d(TAG, "Power Shortcut mode attivato")
+        Log.d(TAG, "Power Shortcut mode activated")
         
-        // Mostra toast
+        // Show toast
         val message = context.getString(R.string.power_shortcuts_press_key)
         showToast(message)
         
-        // Cancella timeout precedente se esiste
+        // Cancel previous timeout if exists
         cancelPowerShortcutTimeout()
         
-        // Imposta timeout per resettare automaticamente
+        // Set timeout for automatic reset
         val handler = android.os.Handler(android.os.Looper.getMainLooper())
         powerShortcutTimeoutRunnable = Runnable {
             resetPowerShortcutMode()

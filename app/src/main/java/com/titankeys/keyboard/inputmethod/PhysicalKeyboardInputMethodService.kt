@@ -159,10 +159,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
     
     private val isNumericField: Boolean
         get() = inputContextState.isNumericField
-    
-    private val shouldDisableSmartFeatures: Boolean
-        get() = inputContextState.shouldDisableSmartFeatures
-    
+
     // Current package name
     private var currentPackageName: String? = null
     
@@ -183,6 +180,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
     private var skipNextSelectionUpdateAfterCommit: Boolean = false
     private lateinit var keyboardVisibilityController: KeyboardVisibilityController
     private lateinit var launcherShortcutController: LauncherShortcutController
+    private lateinit var fnKeyHandler: FnKeyHandler
     private lateinit var clipboardHistoryManager: ClipboardHistoryManager
     private var latestSuggestions: List<String> = emptyList()
     private var clearAltOnSpaceEnabled: Boolean = false
@@ -903,6 +901,12 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
             enterNavMode = { navModeController.enterNavMode() }
         )
 
+        // Initialize Fn key handler for programmable keys
+        fnKeyHandler = FnKeyHandler(this)
+        fnKeyHandler.loadSettings()
+        fnKeyHandler.launcherShortcutController = launcherShortcutController
+        fnKeyHandler.showToast = { msg -> showPowerShortcutToast(msg) }
+
         // Initialize keyboard layout
         loadKeyboardLayout()
         
@@ -1342,21 +1346,19 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
             shouldDisableAutoCapitalize = state.shouldDisableAutoCapitalize,
             shouldDisableDoubleSpaceToPeriod = state.shouldDisableDoubleSpaceToPeriod,
             shouldDisableVariations = state.shouldDisableVariations,
-            isEmailField = state.isEmailField,
-            // Legacy flag for backward compatibility
-            shouldDisableSmartFeatures = shouldDisableSmartFeatures
+            isEmailField = state.isEmailField
         )
-        // Passa anche la mappa emoji quando SYM è attivo (solo pagina 1)
+        // Also pass emoji map when SYM is active (page 1 only)
         val emojiMapText = symLayoutController.emojiMapText()
-        // Passa le mappature SYM per la griglia emoji/caratteri
+        // Pass SYM mappings for emoji/character grid
         val symMappings = symLayoutController.currentSymMappings()
-        // Passa l'inputConnection per rendere i pulsanti clickabili
+        // Pass inputConnection to make buttons clickable
         val inputConnection = currentInputConnection
         candidatesBarController.updateStatusBars(snapshot, emojiMapText, inputConnection, symMappings)
     }
     
     /**
-     * Disattiva le variazioni.
+     * Deactivates variations.
      */
     private fun deactivateVariations() {
         if (::variationStateController.isInitialized) {
@@ -2053,6 +2055,20 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
             keyCode == KeyEvent.KEYCODE_ALT_LEFT ||
             keyCode == KeyEvent.KEYCODE_ALT_RIGHT
 
+        // Handle Fn key (KEYCODE_FUNCTION = 119)
+        if (keyCode == KeyEvent.KEYCODE_FUNCTION) {
+            if (fnKeyHandler.onFnKeyDown()) {
+                return true
+            }
+        }
+
+        // Handle Fn+key combos when Fn is held
+        if (fnKeyHandler.isFnPressed() && keyCode != KeyEvent.KEYCODE_FUNCTION) {
+            if (fnKeyHandler.handleFnCombo(keyCode)) {
+                return true
+            }
+        }
+
         multiTapController.resetForNewKey(keyCode)
         if (!isModifierKey) {
             modifierStateController.registerNonModifierKey()
@@ -2255,12 +2271,19 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        // Handle Fn key release
+        if (keyCode == KeyEvent.KEYCODE_FUNCTION) {
+            if (fnKeyHandler.onFnKeyUp()) {
+                return true
+            }
+        }
+
         // Check if we have an editable field at the start (same logic as onKeyDown)
         val info = currentInputEditorInfo
         val ic = currentInputConnection
         val inputType = info?.inputType ?: EditorInfo.TYPE_NULL
         val hasEditableField = ic != null && inputType != EditorInfo.TYPE_NULL
-        
+
         // If NO editable field is active, handle ONLY nav mode Ctrl release
         if (!hasEditableField) {
             return inputEventRouter.handleKeyUpWithNoEditableField(
@@ -2445,7 +2468,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
             symPage == 0 &&
             latestSuggestions.isNotEmpty() &&
             SettingsManager.getSuggestionsEnabled(this) &&
-            !shouldDisableSmartFeatures
+            !inputContextState.shouldDisableSuggestions
         if (!allowGesture) {
             Log.d(
                 TAG,
@@ -2501,7 +2524,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
             val forceLeadingCapital = AutoCapitalizeHelper.shouldAutoCapitalizeAtCursor(
                 context = this,
                 inputConnection = ic,
-                shouldDisableAutoCapitalize = shouldDisableSmartFeatures
+                shouldDisableAutoCapitalize = inputContextState.shouldDisableAutoCapitalize
             ) && SettingsManager.getAutoCapitalizeFirstLetter(this)
 
             Log.d(TAG, "Accepting suggestion '$suggestion' from third=$third (index=$suggestionIndex)")

@@ -32,6 +32,12 @@ assembla_release.sh
 
 # Tools folder - corpora data (generated, large files)
 tools/corpora/
+corpora/
+
+# Model files (large, hosted on GitHub Releases)
+tools/models/downloaded/
+tools/models/output/*.tflite
+tools/models/output/tf_model_*/
 
 # Ideas folder (research notes, not for version control)
 ideas/

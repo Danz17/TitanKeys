@@ -82,11 +82,6 @@ data class InputContextState(
      */
     val requiresCapSentences: Boolean
         get() = (inputType and InputType.TYPE_TEXT_FLAG_CAP_SENTENCES) != 0
-    
-    // Legacy flag for backward compatibility (maps to shouldDisableSuggestions)
-    // TODO: Gradually replace all usages with specific flags
-    val shouldDisableSmartFeatures: Boolean
-        get() = shouldDisableSuggestions
 
     val isPasswordField: Boolean
         get() = restrictedReason == RestrictedReason.PASSWORD
@@ -301,7 +296,6 @@ data class InputContextState(
                 |shouldDisableAutoCapitalize: ${state.shouldDisableAutoCapitalize}
                 |shouldDisableDoubleSpaceToPeriod: ${state.shouldDisableDoubleSpaceToPeriod}
                 |shouldDisableVariations: ${state.shouldDisableVariations}
-                |shouldDisableSmartFeatures (legacy): ${state.shouldDisableSmartFeatures}
                 |============================
             """.trimMargin())
 
