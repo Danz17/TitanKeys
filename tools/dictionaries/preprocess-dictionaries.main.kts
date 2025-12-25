@@ -227,41 +227,15 @@ fun main(args: Array<String>) {
             // Load n-gram data if available
             var bigrams: Map<String, Map<String, Int>>? = null
             var trigrams: Map<String, Map<String, Map<String, Int>>>? = null
-            var domainWords: Map<String, List<String>>? = null
-            var commonPhrases: List<PhraseEntry>? = null
             
-            // Check for n-gram files in multiple possible locations
-            val corporaDirs = listOf(
-                File(projectRoot, "tools/corpora"),  // New tools structure
-                File(projectRoot, "corpora"),        // Legacy location
-                dictionariesDir.parent               // Fallback
-            )
+            // Check for n-gram files in corpora directory or dictionaries directory
+            val corporaDir = File(projectRoot, "corpora")
+            val bigramsFile = File(corporaDir, "${language}_bigrams.json")
+            val trigramsFile = File(corporaDir, "${language}_trigrams.json")
             
-            var bigramsFile: File? = null
-            var trigramsFile: File? = null
-            var domainWordsFile: File? = null
-            var commonPhrasesFile: File? = null
-            
-            for (corporaDir in corporaDirs) {
-                if (corporaDir.exists() && corporaDir.isDirectory) {
-                    if (bigramsFile == null) {
-                        val testFile = File(corporaDir, "${language}_bigrams.json")
-                        if (testFile.exists()) bigramsFile = testFile
-                    }
-                    if (trigramsFile == null) {
-                        val testFile = File(corporaDir, "${language}_trigrams.json")
-                        if (testFile.exists()) trigramsFile = testFile
-                    }
-                    if (domainWordsFile == null) {
-                        val testFile = File(corporaDir, "${language}_domain_words.json")
-                        if (testFile.exists()) domainWordsFile = testFile
-                    }
-                    if (commonPhrasesFile == null) {
-                        val testFile = File(corporaDir, "${language}_common_phrases.json")
-                        if (testFile.exists()) commonPhrasesFile = testFile
-                    }
-                }
-            }
+            // Also check in dictionaries directory
+            val bigramsFileAlt = File(dictionariesDir.parent, "${language}_bigrams.json")
+            val trigramsFileAlt = File(dictionariesDir.parent, "${language}_trigrams.json")
             
             fun loadBigrams(file: File): Map<String, Map<String, Int>>? {
                 if (!file.exists()) return null
@@ -312,125 +286,14 @@ fun main(args: Array<String>) {
                 }
             }
             
-            fun loadDomainWords(file: File): Map<String, List<String>>? {
-                if (!file.exists()) return null
-                try {
-                    val jsonString = file.readText()
-                    val jsonObj = JSONObject(jsonString)
-                    val result = mutableMapOf<String, MutableList<String>>()
-                    jsonObj.keys().forEach { domain ->
-                        val wordsArray = jsonObj.getJSONArray(domain)
-                        val wordList = mutableListOf<String>()
-                        for (i in 0 until wordsArray.length()) {
-                            wordList.add(wordsArray.getString(i))
-                        }
-                        result[domain] = wordList
-                    }
-                    log("  Loaded domain words: ${result.size} domains")
-                    return result
-                } catch (e: Exception) {
-                    log("  Warning: Could not load domain words from ${file.name}: ${e.message}")
-                    return null
-                }
-            }
-            
-            fun loadCommonPhrases(file: File): List<PhraseEntry>? {
-                if (!file.exists()) return null
-                try {
-                    val jsonString = file.readText()
-                    val jsonArray = JSONArray(jsonString)
-                    val result = mutableListOf<PhraseEntry>()
-                    for (i in 0 until jsonArray.length()) {
-                        val obj = jsonArray.getJSONObject(i)
-                        val phrase = obj.getString("phrase")
-                        val frequency = obj.optInt("frequency", 1)
-                        val wordsArray = obj.getJSONArray("words")
-                        val words = mutableListOf<String>()
-                        for (j in 0 until wordsArray.length()) {
-                            words.add(wordsArray.getString(j))
-                        }
-                        result.add(PhraseEntry(phrase, frequency, words))
-                    }
-                    log("  Loaded common phrases: ${result.size} entries")
-                    return result
-                } catch (e: Exception) {
-                    log("  Warning: Could not load common phrases from ${file.name}: ${e.message}")
-                    return null
-                }
-            }
-            
-            // Optimize n-grams by filtering low-frequency entries
-            fun optimizeBigrams(bigrams: Map<String, Map<String, Int>>, minFreq: Int = 2): Map<String, Map<String, Int>> {
-                val optimized = mutableMapOf<String, MutableMap<String, Int>>()
-                var totalEntries = 0
-                var filteredEntries = 0
-                
-                bigrams.forEach { (word1, word2Map) ->
-                    val optimizedMap = mutableMapOf<String, Int>()
-                    word2Map.forEach { (word2, freq) ->
-                        totalEntries++
-                        if (freq >= minFreq) {
-                            optimizedMap[word2] = freq
-                        } else {
-                            filteredEntries++
-                        }
-                    }
-                    if (optimizedMap.isNotEmpty()) {
-                        optimized[word1] = optimizedMap
-                    }
-                }
-                
-                log("  Optimized bigrams: ${totalEntries} -> ${totalEntries - filteredEntries} entries (filtered ${filteredEntries} with freq < $minFreq)")
-                return optimized
-            }
-            
-            fun optimizeTrigrams(trigrams: Map<String, Map<String, Map<String, Int>>>, minFreq: Int = 2): Map<String, Map<String, Map<String, Int>>> {
-                val optimized = mutableMapOf<String, MutableMap<String, MutableMap<String, Int>>>()
-                var totalEntries = 0
-                var filteredEntries = 0
-                
-                trigrams.forEach { (word1, word2Map) ->
-                    val optimizedWord2Map = mutableMapOf<String, MutableMap<String, Int>>()
-                    word2Map.forEach { (word2, word3Map) ->
-                        val optimizedWord3Map = mutableMapOf<String, Int>()
-                        word3Map.forEach { (word3, freq) ->
-                            totalEntries++
-                            if (freq >= minFreq) {
-                                optimizedWord3Map[word3] = freq
-                            } else {
-                                filteredEntries++
-                            }
-                        }
-                        if (optimizedWord3Map.isNotEmpty()) {
-                            optimizedWord2Map[word2] = optimizedWord3Map
-                        }
-                    }
-                    if (optimizedWord2Map.isNotEmpty()) {
-                        optimized[word1] = optimizedWord2Map
-                    }
-                }
-                
-                log("  Optimized trigrams: ${totalEntries} -> ${totalEntries - filteredEntries} entries (filtered ${filteredEntries} with freq < $minFreq)")
-                return optimized
-            }
-            
-            // Load n-grams with optimization (filter low-frequency entries)
-            bigrams = bigramsFile?.let { loadBigrams(it) }?.let { optimizeBigrams(it) }
-            trigrams = trigramsFile?.let { loadTrigrams(it) }?.let { optimizeTrigrams(it) }
-            
-            // Load domain-specific words if available
-            domainWords = domainWordsFile?.let { loadDomainWords(it) }
-            
-            // Load common phrases if available
-            commonPhrases = commonPhrasesFile?.let { loadCommonPhrases(it) }
+            bigrams = loadBigrams(bigramsFile) ?: loadBigrams(bigramsFileAlt)
+            trigrams = loadTrigrams(trigramsFile) ?: loadTrigrams(trigramsFileAlt)
             
             val serializableIndex = DictionaryIndex(
                 normalizedIndex = normalizedIndex,
                 prefixCache = prefixCache,
                 bigrams = bigrams,
-                trigrams = trigrams,
-                domainWords = domainWords,
-                commonPhrases = commonPhrases
+                trigrams = trigrams
             )
             
             val json = Json {
@@ -449,18 +312,7 @@ fun main(args: Array<String>) {
             
             log("  Created ${outputFile.name}")
             log("  Size: ${originalSize / 1024}KB -> ${newSize / 1024}KB (${String.format("%.1f", compressionRatio)}% reduction)")
-            log("  Indexes: ${normalizedIndex.size} normalized, ${prefixCache.size} prefixes")
-            if (bigrams != null) {
-                val bigramCount = bigrams.values.sumOf { it.size }
-                log("  N-grams: ${bigramCount} bigrams, ${trigrams?.values?.sumOf { it.values.sumOf { it.size } } ?: 0} trigrams")
-            }
-            if (domainWords != null) {
-                log("  Domain words: ${domainWords.size} domains")
-            }
-            if (commonPhrases != null) {
-                log("  Common phrases: ${commonPhrases.size} phrases")
-            }
-            log("")
+            log("  Indexes: ${normalizedIndex.size} normalized, ${prefixCache.size} prefixes\n")
         } catch (e: Exception) {
             log("  ERROR processing ${jsonFile.name}: ${e.message}")
             e.printStackTrace()

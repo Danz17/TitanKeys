@@ -9,6 +9,7 @@ import org.json.JSONObject
 import java.io.InputStream
 import java.io.File
 import java.io.FileOutputStream
+import com.titankeys.keyboard.inputmethod.ui.BarLayoutConfig
 
 /**
  * Manages the app settings.
@@ -50,12 +51,20 @@ object SettingsManager {
     private const val KEY_ADDITIONAL_IME_SUBTYPES = "additional_ime_subtypes" // Comma-separated list of language codes for additional IME subtypes
     private const val KEY_CLIPBOARD_HISTORY_ENABLED = "clipboard_history_enabled" // Whether clipboard history is enabled
     private const val KEY_CLIPBOARD_RETENTION_TIME = "clipboard_retention_time" // How long to keep clipboard entries (in minutes)
+    private const val KEY_CLIPBOARD_PINNED_FIRST = "clipboard_pinned_first" // Whether pinned items appear first in clipboard history
     private const val KEY_TRACKPAD_GESTURES_ENABLED = "trackpad_gestures_enabled" // Whether trackpad gesture suggestions are enabled
     private const val KEY_TRACKPAD_SWIPE_THRESHOLD = "trackpad_swipe_threshold" // Threshold for swipe detection on trackpad
 
     // Contextual AI settings
     private const val KEY_CONTEXTUAL_AI_ENABLED = "contextual_ai_enabled" // Whether contextual AI suggestions are enabled
     private const val KEY_CONTEXTUAL_AI_MODEL_ENABLED = "contextual_ai_model_enabled" // Whether the AI model is enabled (can be disabled for fallback testing)
+
+    // Grammar AI settings
+    private const val KEY_GRAMMAR_AI_ENABLED = "grammar_ai_enabled" // Whether grammar AI correction is enabled
+    private const val KEY_GRAMMAR_MODEL_DOWNLOADED = "grammar_model_downloaded" // Comma-separated list of downloaded language models
+
+    // Bar layout settings
+    private const val KEY_BAR_LAYOUT_CONFIG = "bar_layout_config" // JSON config for customizable bar layout
 
     private const val VARIATIONS_FILE_NAME = "variations.json"
     
@@ -108,6 +117,9 @@ object SettingsManager {
     // Contextual AI defaults
     private const val DEFAULT_CONTEXTUAL_AI_ENABLED = false // Disabled by default for now
     private const val DEFAULT_CONTEXTUAL_AI_MODEL_ENABLED = true
+
+    // Grammar AI defaults
+    private const val DEFAULT_GRAMMAR_AI_ENABLED = false // Disabled by default, requires model download
     private const val MIN_TRACKPAD_SWIPE_THRESHOLD = 120f
     private const val MAX_TRACKPAD_SWIPE_THRESHOLD = 600f
 
@@ -1619,6 +1631,26 @@ object SettingsManager {
     }
 
     /**
+     * Returns whether pinned items should appear first in clipboard history.
+     * @param context The context
+     * @return true if pinned items appear first (default), false for chronological order
+     */
+    fun getClipboardPinnedFirst(context: Context): Boolean {
+        return getPreferences(context).getBoolean(KEY_CLIPBOARD_PINNED_FIRST, true)
+    }
+
+    /**
+     * Sets whether pinned items should appear first in clipboard history.
+     * @param context The context
+     * @param pinnedFirst true for pinned items first, false for chronological order
+     */
+    fun setClipboardPinnedFirst(context: Context, pinnedFirst: Boolean) {
+        getPreferences(context).edit()
+            .putBoolean(KEY_CLIPBOARD_PINNED_FIRST, pinnedFirst)
+            .apply()
+    }
+
+    /**
      * Returns whether trackpad gesture suggestions are enabled.
      * @param context The context
      * @return Whether trackpad gestures are enabled
@@ -1836,5 +1868,154 @@ object SettingsManager {
         getPreferences(context).edit()
             .putBoolean(KEY_CONTEXTUAL_AI_MODEL_ENABLED, enabled)
             .apply()
+    }
+
+    // ==================== GRAMMAR AI SETTINGS ====================
+
+    /**
+     * Returns whether grammar AI correction is enabled.
+     * @param context The context
+     * @return true if grammar AI is enabled, false otherwise
+     */
+    fun getGrammarAIEnabled(context: Context): Boolean {
+        return getPreferences(context).getBoolean(KEY_GRAMMAR_AI_ENABLED, DEFAULT_GRAMMAR_AI_ENABLED)
+    }
+
+    /**
+     * Sets whether grammar AI correction is enabled.
+     * @param context The context
+     * @param enabled Whether to enable grammar AI correction
+     */
+    fun setGrammarAIEnabled(context: Context, enabled: Boolean) {
+        getPreferences(context).edit()
+            .putBoolean(KEY_GRAMMAR_AI_ENABLED, enabled)
+            .apply()
+    }
+
+    /**
+     * Returns the set of downloaded grammar model language codes.
+     * @param context The context
+     * @return Set of language codes (e.g., "en", "de", "es")
+     */
+    fun getDownloadedGrammarModels(context: Context): Set<String> {
+        val modelsString = getPreferences(context).getString(KEY_GRAMMAR_MODEL_DOWNLOADED, null)
+        return if (modelsString.isNullOrBlank()) {
+            emptySet()
+        } else {
+            modelsString.split(",").toSet()
+        }
+    }
+
+    /**
+     * Adds a grammar model language to the downloaded set.
+     * @param context The context
+     * @param languageCode The language code to add (e.g., "en")
+     */
+    fun addDownloadedGrammarModel(context: Context, languageCode: String) {
+        val current = getDownloadedGrammarModels(context).toMutableSet()
+        current.add(languageCode)
+        getPreferences(context).edit()
+            .putString(KEY_GRAMMAR_MODEL_DOWNLOADED, current.joinToString(","))
+            .apply()
+    }
+
+    /**
+     * Removes a grammar model language from the downloaded set.
+     * @param context The context
+     * @param languageCode The language code to remove (e.g., "en")
+     */
+    fun removeDownloadedGrammarModel(context: Context, languageCode: String) {
+        val current = getDownloadedGrammarModels(context).toMutableSet()
+        current.remove(languageCode)
+        getPreferences(context).edit()
+            .putString(KEY_GRAMMAR_MODEL_DOWNLOADED, current.joinToString(","))
+            .apply()
+    }
+
+    /**
+     * Checks if a specific grammar model is downloaded.
+     * @param context The context
+     * @param languageCode The language code to check (e.g., "en")
+     * @return true if the model is downloaded, false otherwise
+     */
+    fun isGrammarModelDownloaded(context: Context, languageCode: String): Boolean {
+        return getDownloadedGrammarModels(context).contains(languageCode)
+    }
+
+    /**
+     * Returns the directory where grammar models are stored.
+     * @param context The context
+     * @return File pointing to the models directory
+     */
+    fun getGrammarModelsDir(context: Context): java.io.File {
+        val modelsDir = java.io.File(context.filesDir, "models/grammar")
+        if (!modelsDir.exists()) {
+            modelsDir.mkdirs()
+        }
+        return modelsDir
+    }
+
+    /**
+     * Returns the File for a specific grammar model.
+     * @param context The context
+     * @param languageCode The language code (e.g., "en")
+     * @return File pointing to the model file
+     */
+    fun getGrammarModelFile(context: Context, languageCode: String): java.io.File {
+        return java.io.File(getGrammarModelsDir(context), "grammar_$languageCode.tflite")
+    }
+
+    // ==================== BAR LAYOUT SETTINGS ====================
+
+    /**
+     * Returns the bar layout configuration.
+     * @param context The context
+     * @return BarLayoutConfig with the current bar layout settings
+     */
+    fun getBarLayoutConfig(context: Context): BarLayoutConfig {
+        val jsonString = getPreferences(context).getString(KEY_BAR_LAYOUT_CONFIG, null)
+        return if (jsonString != null) {
+            try {
+                BarLayoutConfig.fromJson(JSONObject(jsonString))
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading bar layout config", e)
+                BarLayoutConfig.default()
+            }
+        } else {
+            BarLayoutConfig.default()
+        }
+    }
+
+    /**
+     * Saves the bar layout configuration.
+     * @param context The context
+     * @param config The bar layout configuration to save
+     */
+    fun setBarLayoutConfig(context: Context, config: BarLayoutConfig) {
+        try {
+            getPreferences(context).edit()
+                .putString(KEY_BAR_LAYOUT_CONFIG, config.toJson().toString())
+                .apply()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving bar layout config", e)
+        }
+    }
+
+    /**
+     * Resets the bar layout configuration to default.
+     * @param context The context
+     */
+    fun resetBarLayoutConfig(context: Context) {
+        getPreferences(context).edit()
+            .remove(KEY_BAR_LAYOUT_CONFIG)
+            .apply()
+    }
+
+    /**
+     * Returns true if a custom bar layout config exists.
+     * @param context The context
+     */
+    fun hasCustomBarLayoutConfig(context: Context): Boolean {
+        return getPreferences(context).contains(KEY_BAR_LAYOUT_CONFIG)
     }
 }

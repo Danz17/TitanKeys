@@ -68,6 +68,28 @@ class CandidatesBarController(
             candidatesStatusBar.onQuickPasteRequested = value
         }
 
+    // New callbacks for bar layout customization
+    var onEmojiRequested: (() -> Unit)? = null
+        set(value) {
+            field = value
+            inputStatusBar.onEmojiRequested = value
+            candidatesStatusBar.onEmojiRequested = value
+        }
+
+    var onSettingsRequested: (() -> Unit)? = null
+        set(value) {
+            field = value
+            inputStatusBar.onSettingsRequested = value
+            candidatesStatusBar.onSettingsRequested = value
+        }
+
+    var onAppLaunchRequested: ((String) -> Unit)? = null
+        set(value) {
+            field = value
+            inputStatusBar.onAppLaunchRequested = value
+            candidatesStatusBar.onAppLaunchRequested = value
+        }
+
     fun getInputView(emojiMapText: String = ""): LinearLayout {
         return inputStatusBar.getOrCreateLayout(emojiMapText)
     }
@@ -120,5 +142,13 @@ class CandidatesBarController(
     fun flashSuggestionSlot(suggestionIndex: Int) {
         inputStatusBar.flashSuggestionSlot(suggestionIndex)
         candidatesStatusBar.flashSuggestionSlot(suggestionIndex)
+    }
+
+    /**
+     * Reloads the bar layout configuration from settings.
+     */
+    fun reloadBarLayoutConfig() {
+        inputStatusBar.reloadBarLayoutConfig()
+        candidatesStatusBar.reloadBarLayoutConfig()
     }
 }

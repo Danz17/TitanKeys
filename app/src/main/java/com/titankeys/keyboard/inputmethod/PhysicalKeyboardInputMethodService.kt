@@ -791,6 +791,37 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
             }
             // If clipboard is empty, do nothing (user can long-press for history)
         }
+
+        // Register new callbacks for configurable bar layout
+        candidatesBarController.onEmojiRequested = {
+            // Toggle SYM page (cycles through emoji/symbols)
+            ensureInputViewCreated()
+            symLayoutController.toggleSymPage()
+            updateStatusBarText()
+        }
+
+        candidatesBarController.onSettingsRequested = {
+            // Open settings activity
+            val intent = android.content.Intent(this, com.titankeys.keyboard.SettingsActivity::class.java)
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        }
+
+        candidatesBarController.onAppLaunchRequested = { packageName ->
+            // Launch the specified app
+            try {
+                val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+                if (launchIntent != null) {
+                    launchIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(launchIntent)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e(TAG, "Failed to launch app: $packageName", e)
+            }
+        }
+
+        // Load bar layout configuration
+        candidatesBarController.reloadBarLayoutConfig()
         val postClipboardBadgeUpdate: () -> Unit = {
             val count = clipboardHistoryManager.getHistorySize()
             uiHandler.post {
@@ -2267,9 +2298,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
                     updateStatusBarText()
                 }
             }
-            return super.onKeyUp(keyCode, event)
+            // Consume to prevent system popup for modifier keys
+            return true
         }
-        
+
         // Handle Ctrl release for double-tap
         if (keyCode == KeyEvent.KEYCODE_CTRL_LEFT || keyCode == KeyEvent.KEYCODE_CTRL_RIGHT) {
             if (ctrlPressed) {
@@ -2278,9 +2310,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
                     updateStatusBarText()
                 }
             }
-            return super.onKeyUp(keyCode, event)
+            // Consume to prevent system popup for modifier keys
+            return true
         }
-        
+
         // Handle Alt release for double-tap
         if (keyCode == KeyEvent.KEYCODE_ALT_LEFT || keyCode == KeyEvent.KEYCODE_ALT_RIGHT) {
             if (altPressed) {
@@ -2289,7 +2322,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
                     updateStatusBarText()
                 }
             }
-            return super.onKeyUp(keyCode, event)
+            // Consume to prevent system popup for modifier keys
+            return true
         }
         
         // Handle SYM key release (nothing to do; it is a toggle)

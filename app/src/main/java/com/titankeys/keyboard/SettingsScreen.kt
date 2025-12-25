@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Spellcheck
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Engineering
+import androidx.compose.material.icons.filled.ViewColumn
 import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
@@ -57,6 +58,7 @@ sealed class SettingsDestination {
     object Advanced : SettingsDestination()
     object About : SettingsDestination()
     object CustomInputStyles : SettingsDestination()
+    object BarLayout : SettingsDestination()
 }
 
 /**
@@ -149,7 +151,8 @@ fun SettingsScreen(
                     onAdvancedClick = { navigateTo(SettingsDestination.Advanced) },
                     onAboutClick = { navigateTo(SettingsDestination.About) },
                     onBackClick = { navigateBack() },
-                    onCustomInputStylesClick = { navigateTo(SettingsDestination.CustomInputStyles) }
+                    onCustomInputStylesClick = { navigateTo(SettingsDestination.CustomInputStyles) },
+                    onBarLayoutClick = { navigateTo(SettingsDestination.BarLayout) }
                 )
             }
             is SettingsDestination.KeyboardTiming -> {
@@ -194,6 +197,12 @@ fun SettingsScreen(
                     onBack = { navigateBack() }
                 )
             }
+            is SettingsDestination.BarLayout -> {
+                BarLayoutSettingsScreen(
+                    modifier = modifier,
+                    onBack = { navigateBack() }
+                )
+            }
         }
     }
 }
@@ -216,7 +225,8 @@ private fun SettingsMainScreen(
     onAdvancedClick: () -> Unit,
     onAboutClick: () -> Unit,
     onBackClick: () -> Unit,
-    onCustomInputStylesClick: () -> Unit
+    onCustomInputStylesClick: () -> Unit,
+    onBarLayoutClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -433,7 +443,49 @@ private fun SettingsMainScreen(
                         )
                     }
                 }
-            
+
+                // Bar Layout
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .clickable(onClick = onBarLayoutClick)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ViewColumn,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Bar Layout",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1
+                            )
+                            Text(
+                                text = "Customize suggestion bar slots",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
                 // Advanced
                 Surface(
                     modifier = Modifier

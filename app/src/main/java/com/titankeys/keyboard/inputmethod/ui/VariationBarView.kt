@@ -39,6 +39,9 @@ import com.titankeys.keyboard.inputmethod.SpeechRecognitionActivity
 import com.titankeys.keyboard.data.variation.VariationRepository
 import android.graphics.Paint
 import kotlin.math.abs
+import com.titankeys.keyboard.inputmethod.ui.BarLayoutConfig
+import com.titankeys.keyboard.inputmethod.ui.BarSlotAction
+import com.titankeys.keyboard.inputmethod.ui.BarSlotConfig
 import kotlin.math.max
 import kotlin.math.min
 import android.content.res.AssetManager
@@ -65,6 +68,7 @@ class VariationBarView(
     var onAddUserWord: ((String) -> Unit)? = null
     var onLanguageSwitchRequested: (() -> Unit)? = null
     var onClipboardRequested: (() -> Unit)? = null
+    var onClipboardLongPressed: (() -> Unit)? = null
     var onQuickPasteRequested: ((android.view.inputmethod.InputConnection?) -> Unit)? = null
 
     /**
@@ -195,6 +199,7 @@ class VariationBarView(
     private var currentMicrophoneDrawable: GradientDrawable? = null
     private var lastDisplayedVariations: List<String> = emptyList()
     private var isSymModeActive = false
+    private var isActivelyTyping = false
     private var isShowingSpeechRecognitionHint: Boolean = false
     private var originalHintText: CharSequence? = null
     private var isSwipeInProgress = false
@@ -217,6 +222,19 @@ class VariationBarView(
     private var clipboardFlashOverlay: View? = null
     private var clipboardFlashAnimator: ValueAnimator? = null
     private var lastClipboardCount: Int? = null
+    private var variationsContainerHeight: Int = 0
+    private var variationsVerticalPadding: Int = 0
+
+    // Two-layer bar system
+    private var barLayoutConfig: BarLayoutConfig = BarLayoutConfig.default()
+    private var underlayContainer: LinearLayout? = null
+    private var suggestionsOverlay: LinearLayout? = null
+    private var underlaySlotViews: MutableList<View> = mutableListOf()
+
+    // Action callbacks for slot actions
+    var onEmojiRequested: (() -> Unit)? = null
+    var onSettingsRequested: (() -> Unit)? = null
+    var onAppLaunchRequested: ((String) -> Unit)? = null
 
     fun ensureView(): FrameLayout {
         if (wrapper != null) {
@@ -230,12 +248,12 @@ class VariationBarView(
         ).toInt()
         val leftPadding = basePadding // 64dp to avoid Android system [˅] button
         val rightPadding = basePadding // 64dp to avoid Android system [⌨] button
-        val variationsVerticalPadding = TypedValue.applyDimension(
+        variationsVerticalPadding = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             8f,
             context.resources.displayMetrics
         ).toInt()
-        val variationsContainerHeight = TypedValue.applyDimension(
+        variationsContainerHeight = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             55f,
             context.resources.displayMetrics
@@ -243,7 +261,7 @@ class VariationBarView(
 
         container = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER  // Center the buttons horizontally
+            gravity = Gravity.CENTER_VERTICAL  // Only vertical centering, buttons pushed to corners by spacers
             setPadding(leftPadding, variationsVerticalPadding, rightPadding, variationsVerticalPadding)
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -252,12 +270,12 @@ class VariationBarView(
             visibility = View.GONE
         }
 
-        // Single centered container for all fixed buttons [voice] [clipboard] [language]
+        // Full-width container: [Voice] ... [Suggestions] ... [Clipboard]
         buttonsContainer = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         }
@@ -301,6 +319,22 @@ class VariationBarView(
             hideSwipeIndicator(immediate = true)
             hideSwipeHintImmediate()
             overlay?.visibility = View.GONE
+        }
+    }
+
+    /**
+     * Sets the typing state. When not actively typing, the swipe hint will be shown.
+     */
+    fun setTypingState(typing: Boolean) {
+        isActivelyTyping = typing
+        if (!typing) {
+            // Show swipe hint when not actively typing
+            shouldShowSwipeHint = true
+            updateSwipeHintVisibility(animate = true)
+        } else {
+            // Hide swipe hint when typing (suggestions will show instead)
+            shouldShowSwipeHint = false
+            updateSwipeHintVisibility(animate = true)
         }
     }
 
@@ -380,33 +414,42 @@ class VariationBarView(
     }
 
     fun showVariations(snapshot: StatusBarController.StatusSnapshot, inputConnection: android.view.inputmethod.InputConnection?) {
-        val containerView = container ?: return
-        val wrapperView = wrapper ?: return
-        val overlayView = overlay ?: return
+        val containerView = container ?: run {
+            Log.w(TAG, "showVariations: container is null")
+            return
+        }
+        val wrapperView = wrapper ?: run {
+            Log.w(TAG, "showVariations: wrapper is null")
+            return
+        }
+        val overlayView = overlay ?: run {
+            Log.w(TAG, "showVariations: overlay is null")
+            return
+        }
+
+        Log.d(TAG, "showVariations called: variations=${snapshot.variations.size}, suggestions=${snapshot.suggestions.size}")
 
         currentInputConnection = inputConnection
 
         // Decide whether to use suggestions, dynamic variations (from cursor) or static utility keys.
         val staticModeEnabled = SettingsManager.isStaticVariationBarModeEnabled(context)
-        // Variations are controlled separately from suggestions
         val canShowVariations = !snapshot.shouldDisableVariations
         val canShowSuggestions = !snapshot.shouldDisableSuggestions
-        // Legacy variations: always honor them when present, independent of suggestions.
         val hasDynamicVariations = canShowVariations && snapshot.variations.isNotEmpty()
         val hasSuggestions = canShowSuggestions && snapshot.suggestions.isNotEmpty()
         val useDynamicVariations = !staticModeEnabled && hasDynamicVariations
-        val allowStaticFallback = staticModeEnabled || snapshot.shouldDisableVariations
+        val allowStaticFallback = staticModeEnabled || snapshot.shouldDisableVariations ||
+            (!hasDynamicVariations && !hasSuggestions)
 
         val effectiveVariations: List<String>
         val isStaticContent: Boolean
-        // Legacy behavior: give priority to letter variations when available, otherwise suggestions.
         when {
-            useDynamicVariations -> {
-                effectiveVariations = snapshot.variations
-                isStaticContent = false
-            }
             hasSuggestions -> {
                 effectiveVariations = snapshot.suggestions
+                isStaticContent = false
+            }
+            useDynamicVariations -> {
+                effectiveVariations = snapshot.variations
                 isStaticContent = false
             }
             allowStaticFallback -> {
@@ -425,7 +468,6 @@ class VariationBarView(
                 isStaticContent = true
             }
             else -> {
-                // Keep the bar visible (mic/settings) but show empty placeholders in the variation row.
                 effectiveVariations = emptyList()
                 isStaticContent = false
             }
@@ -461,74 +503,95 @@ class VariationBarView(
         val leftPadding = containerView.paddingLeft
         val rightPadding = containerView.paddingRight
         val availableWidth = screenWidth - leftPadding - rightPadding
-
-        val spacingBetweenButtons = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            3f,
-            context.resources.displayMetrics
-        ).toInt()
-
-        // Fixed-size square buttons (clipboard, mic, language)
-        val fixedButtonSize = max(1, (availableWidth - spacingBetweenButtons * 10) / 10)
-        val fixedButtonsTotalWidth = fixedButtonSize * 3
-        // Spacing: clipboard->variations, variations->mic, mic->language
-        val fixedButtonsSpacing = spacingBetweenButtons * 3
-
-        val variationCount = limitedVariations.size
-        val variationsAvailableWidth = availableWidth - fixedButtonsTotalWidth - fixedButtonsSpacing
-
-        val baseButtonWidth = if (variationCount > 0) {
-            max(1, (variationsAvailableWidth - spacingBetweenButtons * (variationCount - 1)) / variationCount)
-        } else {
-            // If no variations, fall back to fixed button size to avoid division by zero
-            fixedButtonSize
-        }
-        val buttonWidth: Int
-        val maxButtonWidth: Int
-        if (variationCount < 7 && variationCount > 0) {
-            buttonWidth = baseButtonWidth
-            maxButtonWidth = baseButtonWidth
-        } else {
-            buttonWidth = baseButtonWidth
-            maxButtonWidth = baseButtonWidth * 3 // Cap at 3x when we have 7 variations
-        }
+        val containerHeight = variationsContainerHeight - (variationsVerticalPadding * 2)
 
         lastDisplayedVariations = limitedVariations
         lastInputConnectionUsed = inputConnection
         lastIsStaticContent = isStaticContent
 
-        // BOTTOM BAR: Only [EN] language button centered between Android [˅] and [⌨]
         val buttonsContainerView = buttonsContainer ?: return
         buttonsContainerView.removeAllViews()
+        buttonsContainerView.visibility = View.VISIBLE
 
-        // Language switch button only
-        val languageButton = languageButtonView ?: createLanguageButton(fixedButtonSize)
-        languageButtonView = languageButton
-        (languageButton.parent as? ViewGroup)?.removeView(languageButton)
-        val languageParams = LinearLayout.LayoutParams(fixedButtonSize, fixedButtonSize)
-        buttonsContainerView.addView(languageButton, languageParams)
-        updateLanguageButtonText(languageButton)
-        languageButton.setOnClickListener {
-            val now = System.currentTimeMillis()
-            if (now - lastLanguageSwitchTime < LANGUAGE_SWITCH_DEBOUNCE_MS) {
-                return@setOnClickListener
+        // === TWO-LAYER SYSTEM ===
+        // Create a FrameLayout to hold underlay and overlay
+        val twoLayerContainer = FrameLayout(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+
+        // --- UNDERLAY: Uniform-width slots from config ---
+        val slotCount = barLayoutConfig.slotCount
+        val slotWidth = availableWidth / slotCount
+
+        val underlayLayout = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+        underlayContainer = underlayLayout
+        underlaySlotViews.clear()
+
+        for (i in 0 until slotCount) {
+            val slotConfig = barLayoutConfig.getSlot(i)
+            val slotView = createSlotButton(slotConfig, slotWidth, containerHeight, inputConnection)
+            underlaySlotViews.add(slotView)
+            underlayLayout.addView(slotView)
+        }
+
+        twoLayerContainer.addView(underlayLayout)
+
+        // --- OVERLAY: Suggestions (shown when available) ---
+        val displayVariations = limitedVariations.take(3)
+        val hasSuggestionsToShow = displayVariations.isNotEmpty() && !isStaticContent
+
+        if (hasSuggestionsToShow) {
+            val spacingBetweenButtons = dpToPx(3f)
+            val totalSpacing = spacingBetweenButtons * (displayVariations.size - 1).coerceAtLeast(0)
+            val suggestionWidth = max(1, (availableWidth - totalSpacing) / displayVariations.size)
+
+            val overlayLayout = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER
+                setBackgroundColor(Color.argb(240, 17, 17, 17)) // Semi-opaque background
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
             }
-            lastLanguageSwitchTime = now
-            languageButton.isEnabled = false
-            languageButton.alpha = 0.5f
-            onLanguageSwitchRequested?.invoke()
-            Handler(Looper.getMainLooper()).postDelayed({
-                languageButton.isEnabled = true
-                languageButton.alpha = 1f
-                updateLanguageButtonText(languageButton)
-            }, 300)
+            suggestionsOverlay = overlayLayout
+
+            for ((index, variation) in displayVariations.withIndex()) {
+                val isAddCandidate = snapshot.addWordCandidate == variation
+                val variationButton = createVariationButton(
+                    variation,
+                    inputConnection,
+                    suggestionWidth,
+                    suggestionWidth,
+                    false,
+                    isAddCandidate
+                )
+                variationButtons.add(variationButton)
+                val params = LinearLayout.LayoutParams(suggestionWidth, LinearLayout.LayoutParams.MATCH_PARENT)
+                if (index > 0) {
+                    params.marginStart = spacingBetweenButtons
+                }
+                overlayLayout.addView(variationButton, params)
+            }
+
+            twoLayerContainer.addView(overlayLayout)
+        } else {
+            suggestionsOverlay = null
         }
-        languageButton.setOnLongClickListener {
-            openSettings()
-            true
-        }
-        languageButton.alpha = 1f
-        languageButton.visibility = View.VISIBLE
+
+        buttonsContainerView.addView(twoLayerContainer)
+
+        Log.d(TAG, "showVariations: slots=$slotCount x $slotWidth, suggestions=${displayVariations.size}, hasSuggestions=$hasSuggestionsToShow")
     }
 
     private fun installOverlayTouchListener(overlayView: FrameLayout) {
@@ -1309,6 +1372,291 @@ class VariationBarView(
     fun invalidateStaticVariations() {
         staticVariations = emptyList()
         emailVariations = emptyList()
+    }
+
+    /**
+     * Updates the bar layout configuration.
+     * Call this when settings change or on initialization.
+     */
+    fun updateBarLayoutConfig(config: BarLayoutConfig) {
+        barLayoutConfig = config
+        // Force rebuild of the bar on next showVariations call
+        lastDisplayedVariations = emptyList()
+        lastInputConnectionUsed = null
+        lastIsStaticContent = null
+    }
+
+    /**
+     * Executes the action configured for a slot.
+     */
+    private fun executeSlotAction(action: BarSlotAction, param: String?, inputConnection: android.view.inputmethod.InputConnection?) {
+        when (action) {
+            BarSlotAction.NONE -> { /* no-op */ }
+            BarSlotAction.VOICE -> onSpeechRecognitionRequested?.invoke()
+            BarSlotAction.CLIPBOARD -> onQuickPasteRequested?.invoke(inputConnection)
+            BarSlotAction.CLIPBOARD_HISTORY -> onClipboardRequested?.invoke()
+            BarSlotAction.EMOJI -> onEmojiRequested?.invoke()
+            BarSlotAction.SETTINGS -> onSettingsRequested?.invoke()
+            BarSlotAction.LANGUAGE_SWITCH -> onLanguageSwitchRequested?.invoke()
+            BarSlotAction.APP_LAUNCH -> param?.let { onAppLaunchRequested?.invoke(it) }
+        }
+    }
+
+    /**
+     * Gets the icon resource for a slot action.
+     */
+    private fun getSlotActionIcon(action: BarSlotAction): Int? {
+        return when (action) {
+            BarSlotAction.VOICE -> R.drawable.ic_baseline_mic_24
+            BarSlotAction.CLIPBOARD, BarSlotAction.CLIPBOARD_HISTORY -> R.drawable.ic_content_paste_24
+            BarSlotAction.EMOJI -> android.R.drawable.ic_menu_slideshow // TODO: Add emoji icon
+            BarSlotAction.SETTINGS -> R.drawable.ic_settings_24
+            BarSlotAction.LANGUAGE_SWITCH -> null // Uses text label
+            BarSlotAction.APP_LAUNCH -> android.R.drawable.ic_menu_share // TODO: Load app icon
+            BarSlotAction.NONE -> null
+        }
+    }
+
+    /**
+     * Creates a slot button with the configured action.
+     * Also tracks special buttons (microphone, clipboard) for feature integration.
+     */
+    private fun createSlotButton(
+        slotConfig: BarSlotConfig,
+        slotWidth: Int,
+        slotHeight: Int,
+        inputConnection: android.view.inputmethod.InputConnection?
+    ): View {
+        val normalDrawable = GradientDrawable().apply {
+            setColor(Color.rgb(17, 17, 17))
+            cornerRadius = 0f
+        }
+        val pressedDrawable = GradientDrawable().apply {
+            setColor(PRESSED_BLUE)
+            cornerRadius = 0f
+        }
+        val stateList = android.graphics.drawable.StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_pressed), pressedDrawable)
+            addState(intArrayOf(), normalDrawable)
+        }
+
+        val iconRes = getSlotActionIcon(slotConfig.tapAction)
+
+        // Special handling for VOICE action - track the button for audio feedback
+        if (slotConfig.tapAction == BarSlotAction.VOICE) {
+            val micButton = ImageView(context).apply {
+                setImageResource(R.drawable.ic_baseline_mic_24)
+                setColorFilter(Color.WHITE)
+                background = stateList
+                scaleType = ImageView.ScaleType.CENTER
+                isClickable = true
+                isFocusable = true
+                layoutParams = LinearLayout.LayoutParams(slotWidth, slotHeight)
+
+                setOnClickListener {
+                    executeSlotAction(slotConfig.tapAction, slotConfig.tapParam, inputConnection)
+                }
+
+                if (slotConfig.longPressAction != BarSlotAction.NONE) {
+                    isLongClickable = true
+                    setOnLongClickListener {
+                        executeSlotAction(slotConfig.longPressAction, slotConfig.longPressParam, inputConnection)
+                        true
+                    }
+                }
+            }
+            microphoneButtonView = micButton
+            return micButton
+        }
+
+        // Special handling for CLIPBOARD actions - wrap in container for badge
+        if (slotConfig.tapAction == BarSlotAction.CLIPBOARD || slotConfig.tapAction == BarSlotAction.CLIPBOARD_HISTORY) {
+            val clipButton = ImageView(context).apply {
+                setImageResource(R.drawable.ic_content_paste_24)
+                setColorFilter(Color.WHITE)
+                background = stateList
+                scaleType = ImageView.ScaleType.CENTER
+                isClickable = true
+                isFocusable = true
+
+                setOnClickListener {
+                    executeSlotAction(slotConfig.tapAction, slotConfig.tapParam, inputConnection)
+                }
+
+                if (slotConfig.longPressAction != BarSlotAction.NONE) {
+                    isLongClickable = true
+                    setOnLongClickListener {
+                        executeSlotAction(slotConfig.longPressAction, slotConfig.longPressParam, inputConnection)
+                        true
+                    }
+                }
+            }
+            clipboardButtonView = clipButton
+
+            // Create container with badge
+            val clipContainer = FrameLayout(context).apply {
+                layoutParams = LinearLayout.LayoutParams(slotWidth, slotHeight)
+            }
+            clipboardContainer = clipContainer
+
+            clipContainer.addView(clipButton, FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            ))
+
+            // Flash overlay
+            val flashOverlay = View(context).apply {
+                setBackgroundColor(Color.WHITE)
+                alpha = 0f
+                visibility = View.GONE
+            }
+            clipboardFlashOverlay = flashOverlay
+            clipContainer.addView(flashOverlay, FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            ))
+
+            // Badge
+            val badge = clipboardBadgeView ?: createClipboardBadge()
+            clipboardBadgeView = badge
+            (badge.parent as? ViewGroup)?.removeView(badge)
+            clipContainer.addView(badge, FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply { gravity = Gravity.TOP or Gravity.END })
+
+            return clipContainer
+        }
+
+        // Standard icon button
+        if (iconRes != null) {
+            return ImageView(context).apply {
+                setImageResource(iconRes)
+                setColorFilter(Color.WHITE)
+                background = stateList
+                scaleType = ImageView.ScaleType.CENTER
+                isClickable = true
+                isFocusable = true
+                layoutParams = LinearLayout.LayoutParams(slotWidth, slotHeight)
+
+                setOnClickListener {
+                    executeSlotAction(slotConfig.tapAction, slotConfig.tapParam, inputConnection)
+                }
+
+                if (slotConfig.longPressAction != BarSlotAction.NONE) {
+                    isLongClickable = true
+                    setOnLongClickListener {
+                        executeSlotAction(slotConfig.longPressAction, slotConfig.longPressParam, inputConnection)
+                        true
+                    }
+                }
+            }
+        }
+
+        // Language switch button (text-based)
+        if (slotConfig.tapAction == BarSlotAction.LANGUAGE_SWITCH) {
+            return createLanguageButton(slotWidth).apply {
+                updateLanguageButtonText(this)
+                layoutParams = LinearLayout.LayoutParams(slotWidth, slotHeight)
+                setOnClickListener {
+                    executeSlotAction(slotConfig.tapAction, slotConfig.tapParam, inputConnection)
+                }
+                if (slotConfig.longPressAction != BarSlotAction.NONE) {
+                    isLongClickable = true
+                    setOnLongClickListener {
+                        executeSlotAction(slotConfig.longPressAction, slotConfig.longPressParam, inputConnection)
+                        true
+                    }
+                }
+            }
+        }
+
+        // Empty/transparent slot (NONE action)
+        return View(context).apply {
+            background = null
+            isClickable = false
+            isFocusable = false
+            layoutParams = LinearLayout.LayoutParams(slotWidth, slotHeight)
+        }
+    }
+
+    /**
+     * Builds the underlay with configurable slots.
+     */
+    private fun buildUnderlay(
+        availableWidth: Int,
+        slotHeight: Int,
+        inputConnection: android.view.inputmethod.InputConnection?
+    ): LinearLayout {
+        underlaySlotViews.clear()
+
+        val slotCount = barLayoutConfig.slotCount
+        val slotWidth = availableWidth / slotCount
+
+        return LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+
+            for (i in 0 until slotCount) {
+                val slotConfig = barLayoutConfig.getSlot(i)
+                val button = createSlotButton(slotConfig, slotWidth, slotHeight, inputConnection)
+                underlaySlotViews.add(button)
+                addView(button)
+            }
+        }
+    }
+
+    /**
+     * Builds the suggestions overlay.
+     */
+    private fun buildSuggestionsOverlay(
+        suggestions: List<String>,
+        availableWidth: Int,
+        slotHeight: Int,
+        inputConnection: android.view.inputmethod.InputConnection?,
+        isStaticContent: Boolean,
+        addWordCandidate: String?
+    ): LinearLayout {
+        val spacingBetweenButtons = dpToPx(3f)
+        val displaySuggestions = suggestions.take(3)
+
+        val totalSpacing = spacingBetweenButtons * (displaySuggestions.size - 1).coerceAtLeast(0)
+        val suggestionWidth = if (displaySuggestions.isNotEmpty()) {
+            max(1, (availableWidth - totalSpacing) / displaySuggestions.size)
+        } else {
+            0
+        }
+
+        return LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setBackgroundColor(Color.argb(230, 17, 17, 17)) // Semi-transparent so underlay peeks through
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+
+            for ((index, suggestion) in displaySuggestions.withIndex()) {
+                val isAddCandidate = !isStaticContent && addWordCandidate == suggestion
+                val button = createVariationButton(
+                    suggestion,
+                    inputConnection,
+                    suggestionWidth,
+                    suggestionWidth,
+                    isStaticContent,
+                    isAddCandidate
+                )
+                val params = LinearLayout.LayoutParams(suggestionWidth, LinearLayout.LayoutParams.MATCH_PARENT)
+                if (index > 0) {
+                    params.marginStart = spacingBetweenButtons
+                }
+                addView(button, params)
+            }
+        }
     }
 
     /**

@@ -32,7 +32,6 @@ import kotlin.math.abs
 import com.titankeys.keyboard.inputmethod.ui.ClipboardHistoryView
 import com.titankeys.keyboard.inputmethod.ui.LedStatusView
 import com.titankeys.keyboard.inputmethod.ui.VariationBarView
-import com.titankeys.keyboard.inputmethod.suggestions.ui.FullSuggestionsBar
 import com.titankeys.keyboard.core.suggestions.SuggestionMode
 import android.content.res.AssetManager
 import androidx.core.view.ViewCompat
@@ -73,7 +72,7 @@ class StatusBarController(
     var onSpeechRecognitionRequested: (() -> Unit)? = null
         set(value) {
             field = value
-            fullSuggestionsBar?.onSpeechRecognitionRequested = value
+            variationBarView?.onSpeechRecognitionRequested = value
         }
 
     var onAddUserWord: ((String) -> Unit)? = null
@@ -91,12 +90,31 @@ class StatusBarController(
     var onClipboardRequested: (() -> Unit)? = null
         set(value) {
             field = value
-            fullSuggestionsBar?.onClipboardRequested = value
+            variationBarView?.onClipboardRequested = value
         }
     var onQuickPasteRequested: ((android.view.inputmethod.InputConnection?) -> Unit)? = null
         set(value) {
             field = value
-            fullSuggestionsBar?.onQuickPasteRequested = value
+            variationBarView?.onQuickPasteRequested = value
+        }
+
+    // New callbacks for bar layout customization
+    var onEmojiRequested: (() -> Unit)? = null
+        set(value) {
+            field = value
+            variationBarView?.onEmojiRequested = value
+        }
+
+    var onSettingsRequested: (() -> Unit)? = null
+        set(value) {
+            field = value
+            variationBarView?.onSettingsRequested = value
+        }
+
+    var onAppLaunchRequested: ((String) -> Unit)? = null
+        set(value) {
+            field = value
+            variationBarView?.onAppLaunchRequested = value
         }
 
     // Callback for speech recognition state changes (active/inactive)
@@ -108,6 +126,22 @@ class StatusBarController(
     
     fun invalidateStaticVariations() {
         variationBarView?.invalidateStaticVariations()
+    }
+
+    /**
+     * Updates the bar layout configuration.
+     * Call this when settings change or on initialization.
+     */
+    fun updateBarLayoutConfig(config: com.titankeys.keyboard.inputmethod.ui.BarLayoutConfig) {
+        variationBarView?.updateBarLayoutConfig(config)
+    }
+
+    /**
+     * Reloads the bar layout configuration from settings.
+     */
+    fun reloadBarLayoutConfig() {
+        val config = SettingsManager.getBarLayoutConfig(context)
+        updateBarLayoutConfig(config)
     }
     
     /**
@@ -137,7 +171,7 @@ class StatusBarController(
      * Updates only the clipboard badge count without re-rendering variations.
      */
     fun updateClipboardCount(count: Int) {
-        fullSuggestionsBar?.updateClipboardCount(count)
+        variationBarView?.updateClipboardCount(count)
     }
 
     /**
@@ -145,7 +179,7 @@ class StatusBarController(
      * ordering (0=center, 1=right, 2=left). Used for trackpad/swipe commits.
      */
     fun flashSuggestionSlot(suggestionIndex: Int) {
-        fullSuggestionsBar?.flashSuggestionAtIndex(suggestionIndex)
+        // TODO: Implement in VariationBarView if needed
     }
 
     companion object {
@@ -209,7 +243,6 @@ class StatusBarController(
     private val variationBarView: VariationBarView? = if (mode == Mode.FULL) VariationBarView(context, assets, imeServiceClass) else null
     private var variationsWrapper: View? = null
     private var forceMinimalUi: Boolean = false
-    private var fullSuggestionsBar: FullSuggestionsBar? = null
     private var baseBottomPadding: Int = 0
 
     fun setForceMinimalUi(force: Boolean) {
@@ -315,21 +348,10 @@ class StatusBarController(
             val ledStrip = ledStatusView.ensureView()
 
             statusBarLayout?.apply {
-                // Full-width suggestions bar above the rest
-                fullSuggestionsBar = FullSuggestionsBar(context)
-                // Set subtype cycling parameters if available
-                if (assets != null && imeServiceClass != null) {
-                    fullSuggestionsBar?.setSubtypeCyclingParams(assets, imeServiceClass)
-                }
-                // Wire callbacks that may have been set before layout creation
-                fullSuggestionsBar?.onSpeechRecognitionRequested = onSpeechRecognitionRequested
-                fullSuggestionsBar?.onClipboardRequested = onClipboardRequested
-                fullSuggestionsBar?.onQuickPasteRequested = onQuickPasteRequested
-                addView(fullSuggestionsBar?.ensureView())
                 addView(modifiersContainer)
                 addView(emojiKeyboardContainer) // Emoji grid
+                variationsWrapper?.let { addView(it) } // Variation bar with Voice/Clipboard/Suggestions
                 addView(ledStrip) // LED strip
-                // EN button removed - language switching via long-press on settings
             }
             statusBarLayout?.let { ViewCompat.requestApplyInsets(it) }
         } else if (emojiMapText.isNotEmpty()) {
@@ -1070,26 +1092,6 @@ class StatusBarController(
         ledStatusView.update(snapshot)
         val variationsBar = if (!forceMinimalUi) variationBarView else null
         val variationsWrapperView = if (!forceMinimalUi) variationsWrapper else null
-        val experimentalEnabled = SettingsManager.isExperimentalSuggestionsEnabled(context)
-        val suggestionsEnabledSetting = SettingsManager.getSuggestionsEnabled(context)
-        // Show full suggestions bar when conditions are met (including minimal UI mode)
-        val showFullBar =
-            experimentalEnabled &&
-            suggestionsEnabledSetting &&
-            !snapshot.shouldDisableSuggestions &&
-            snapshot.symPage == 0 &&
-            !snapshot.clipboardOverlay
-        fullSuggestionsBar?.update(
-            snapshot.suggestions,
-            showFullBar,
-            inputConnection,
-            onVariationSelectedListener,
-            snapshot.shouldDisableSuggestions,
-            snapshot.addWordCandidate,
-            onAddUserWord,
-            snapshot.suggestionMode
-        )
-        
         if (snapshot.clipboardOverlay) {
             // Show clipboard as dedicated overlay (not part of SYM pages)
             updateClipboardView(inputConnection)
@@ -1188,10 +1190,7 @@ class StatusBarController(
                     isEnabled = true
                     isClickable = true
                 }
-                val snapshotForVariations = if (snapshot.suggestions.isNotEmpty()) {
-                    snapshot.copy(suggestions = emptyList(), addWordCandidate = null)
-                } else snapshot
-                variationsBar?.showVariations(snapshotForVariations, inputConnection)
+                variationsBar?.showVariations(snapshot, inputConnection)
             }
             symShown = false
             wasSymActive = false
@@ -1202,10 +1201,7 @@ class StatusBarController(
                 isEnabled = true
                 isClickable = true
             }
-            val snapshotForVariations = if (snapshot.suggestions.isNotEmpty()) {
-                snapshot.copy(suggestions = emptyList(), addWordCandidate = null)
-            } else snapshot
-            variationsBar?.showVariations(snapshotForVariations, inputConnection)
+            variationsBar?.showVariations(snapshot, inputConnection)
             symShown = false
             wasSymActive = false
         }
