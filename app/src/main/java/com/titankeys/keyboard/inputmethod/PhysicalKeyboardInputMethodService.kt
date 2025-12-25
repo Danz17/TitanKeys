@@ -1633,12 +1633,15 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
                             
                             // Convert to hash codes for setExplicitlyEnabledInputMethodSubtypes
                             val validEnabledHashCodes = validSubtypes.map { it.hashCode() }.toIntArray()
-                            
+
                             // Always update enabled subtypes, even if empty (to disable removed ones)
-                            imm.setExplicitlyEnabledInputMethodSubtypes(
-                                updatedInfo.id,
-                                validEnabledHashCodes
-                            )
+                            // Requires API 34+
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                imm.setExplicitlyEnabledInputMethodSubtypes(
+                                    updatedInfo.id,
+                                    validEnabledHashCodes
+                                )
+                            }
                             val removedBase = allSubtypes.count { !AdditionalSubtypeUtils.isAdditionalSubtype(it) } - 
                                              validSubtypes.count { !AdditionalSubtypeUtils.isAdditionalSubtype(it) }
                             val removedAdditional = subtypes.size - validSubtypes.count { AdditionalSubtypeUtils.isAdditionalSubtype(it) }
@@ -1678,12 +1681,14 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
                                 }
                                 
                                 val validEnabledHashCodes = validSubtypes.map { it.hashCode() }.toIntArray()
-                                
-                                // Always update to disable removed subtypes
-                                imm.setExplicitlyEnabledInputMethodSubtypes(
-                                    updatedInfo.id,
-                                    validEnabledHashCodes
-                                )
+
+                                // Always update to disable removed subtypes (API 34+)
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                                    imm.setExplicitlyEnabledInputMethodSubtypes(
+                                        updatedInfo.id,
+                                        validEnabledHashCodes
+                                    )
+                                }
                                 Log.d(TAG, "Filtered base subtypes: kept ${validEnabledHashCodes.size}, removed ${allSubtypes.size - validSubtypes.size}")
                             }
                         } catch (e: Exception) {

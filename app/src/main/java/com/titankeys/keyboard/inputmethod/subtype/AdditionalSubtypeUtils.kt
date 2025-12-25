@@ -631,8 +631,9 @@ object AdditionalSubtypeUtils {
                                 }
                             }
                             
-                            // Enable all subtypes (original + additional)
-                            if (enabledHashCodes.isNotEmpty()) {
+                            // Enable all subtypes (original + additional) - API 34+
+                            if (enabledHashCodes.isNotEmpty() &&
+                                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                                 imm.setExplicitlyEnabledInputMethodSubtypes(
                                     updatedInfo.id,
                                     enabledHashCodes.toIntArray()
@@ -662,7 +663,8 @@ object AdditionalSubtypeUtils {
                                 isAdditionalSubtype(subtype)
                             }
                             
-                            if (systemSubtypes.isNotEmpty()) {
+                            if (systemSubtypes.isNotEmpty() &&
+                                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                                 val systemHashCodes = systemSubtypes.map { it.hashCode() }.toIntArray()
                                 imm.setExplicitlyEnabledInputMethodSubtypes(
                                     updatedInfo.id,
