@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.os.SystemClock
 import android.util.Log
+import com.titankeys.keyboard.SettingsManager
 import java.io.File
 
 /**
@@ -124,7 +125,24 @@ class ClipboardDao private constructor(
 
     fun count() = cache.size
 
-    fun sort() = cache.sort()
+    /**
+     * Sort clipboard entries based on pinnedFirst setting.
+     * When pinnedFirst=true: Pinned items first, then by timestamp (most recent first)
+     * When pinnedFirst=false: Pure chronological order (most recent first)
+     */
+    fun sort() {
+        val pinnedFirst = SettingsManager.getClipboardPinnedFirst(context)
+        cache.sortWith { a, b ->
+            if (pinnedFirst) {
+                // Pinned items first, then by timestamp
+                val pinnedCompare = b.isPinned.compareTo(a.isPinned)
+                if (pinnedCompare != 0) pinnedCompare else b.timeStamp.compareTo(a.timeStamp)
+            } else {
+                // Pure chronological order (most recent first)
+                b.timeStamp.compareTo(a.timeStamp)
+            }
+        }
+    }
 
     fun togglePinned(id: Long) {
         val entry = cache.firstOrNull { it.id == id } ?: return

@@ -259,7 +259,7 @@ class ContextualPredictor(
      * Checks if a prediction is valid (exists in dictionary).
      */
     private fun isValidPrediction(word: String): Boolean {
-        return dictionaryRepository.getExactEntry(word) != null
+        return dictionaryRepository.getExactWordFrequency(word) > 0
     }
 
     /**

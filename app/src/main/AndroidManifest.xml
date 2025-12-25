@@ -2,19 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permesso per le notifiche (richiesto da Android 13+) -->
+    <!-- Notification permission (required by Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    
-    <!-- Permesso per la vibrazione (richiesto per haptic feedback) -->
+
+    <!-- Vibration permission (required for haptic feedback) -->
     <uses-permission android:name="android.permission.VIBRATE" />
-    
-    <!-- Permesso per il riconoscimento vocale -->
+
+    <!-- Speech recognition permission -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    
-    <!-- Permesso per l'accesso a Internet (richiesto per il controllo aggiornamenti) -->
+
+    <!-- Internet access permission (required for update checks) -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Permesso per mostrare finestre overlay (per debug trackpad) -->
+    <!-- Overlay window permission (for trackpad debug) -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <!-- Permission to read screenshots from MediaStore -->
@@ -22,14 +22,14 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
-    <!-- Query per vedere tutte le app installate che possono essere avviate -->
+    <!-- Query to see all installed apps that can be launched -->
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
-        
-        <!-- Query per vedere i launcher -->
+
+        <!-- Query to see launchers -->
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.HOME" />
@@ -63,21 +63,21 @@
             </intent-filter>
         </activity>
         
-        <!-- Activity per la personalizzazione SYM -->
+        <!-- Activity for SYM customization -->
         <activity
             android:name=".SymCustomizationActivity"
             android:exported="false"
             android:label="@string/sym_customize_title"
             android:theme="@style/Theme.TitanKeys" />
         
-        <!-- Activity per le impostazioni -->
+        <!-- Activity for settings -->
         <activity
             android:name=".SettingsActivity"
             android:exported="true"
             android:label="@string/settings_title"
             android:theme="@style/Theme.TitanKeys" />
         
-        <!-- Activity per gestire le lingue degli input method subtypes -->
+        <!-- Activity for managing input method subtype languages -->
         <activity
             android:name=".LanguagesActivity"
             android:exported="false"
@@ -99,7 +99,7 @@
             android:excludeFromRecents="true"
             android:launchMode="singleInstance" />
 
-        <!-- Servizio di immissione per tastiera fisica -->
+        <!-- Physical keyboard input method service -->
         <service
             android:name=".inputmethod.PhysicalKeyboardInputMethodService"
             android:label="@string/input_method_name"
@@ -113,7 +113,7 @@
                 android:resource="@xml/method" />
         </service>
 
-        <!-- Attività helper per il riconoscimento vocale -->
+        <!-- Helper activity for speech recognition -->
         <activity
             android:name=".inputmethod.SpeechRecognitionActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
@@ -122,7 +122,7 @@
             android:launchMode="singleTask"
             android:taskAffinity="com.google.android.inputmethod.latin" />
         
-        <!-- Attività helper per richiedere il permesso del microfono -->
+        <!-- Helper activity for requesting microphone permission -->
         <activity
             android:name=".inputmethod.PermissionRequestActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
@@ -131,7 +131,7 @@
             android:launchMode="singleTask"
             android:taskAffinity="" />
         
-        <!-- Attività per assegnare scorciatoie del launcher -->
+        <!-- Activity for assigning launcher shortcuts -->
         <activity
             android:name=".inputmethod.LauncherShortcutAssignmentActivity"
             android:theme="@style/Theme.TitanKeys.OverlayDialog"

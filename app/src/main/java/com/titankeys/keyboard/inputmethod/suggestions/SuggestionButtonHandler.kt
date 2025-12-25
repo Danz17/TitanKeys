@@ -59,6 +59,8 @@ object SuggestionButtonHandler {
         val after = inputConnection.getTextAfterCursor(64, 0)?.toString().orEmpty()
         val boundaryChars = " \t\n\r" + com.titankeys.keyboard.core.Punctuation.BOUNDARY
 
+        Log.d(TAG, "replaceCurrentWord: before='$before', after='$after', suggestion='$suggestion'")
+
         fun isApostropheWithinWord(prev: Char?, next: Char?): Boolean {
             if (prev?.isLetterOrDigit() != true) return false
             return next == null || next.isLetterOrDigit()
@@ -101,19 +103,42 @@ object SuggestionButtonHandler {
         val wordAfterCursor = after.substring(0, end)
         val currentWord = wordBeforeCursor + wordAfterCursor
 
+        Log.d(TAG, "Word detection: wordBefore='$wordBeforeCursor', wordAfter='$wordAfterCursor', currentWord='$currentWord'")
+
         // Delete the full word around the cursor
         val deleteBefore = wordBeforeCursor.length
         val deleteAfter = wordAfterCursor.length
+
+        // If no word detected, don't try to replace - just insert
+        if (deleteBefore == 0 && deleteAfter == 0) {
+            Log.w(TAG, "No word detected at cursor - inserting suggestion without deletion")
+            val textToCommit = suggestion + " "
+            val committed = inputConnection.commitText(textToCommit, 1)
+            if (committed) {
+                AutoSpaceTracker.markAutoSpace()
+            }
+            return committed
+        }
+
         val replacement = CasingHelper.applyCasing(suggestion, currentWord, forceLeadingCapital)
         val nextChar = after.getOrNull(end)
         val shouldAppendSpace = !replacement.endsWith("'") &&
             (nextChar == null || (!nextChar.isWhitespace() && !boundaryChars.contains(nextChar)))
 
+        Log.d(TAG, "Attempting to delete $deleteBefore chars before and $deleteAfter chars after cursor")
+
         val deleted = inputConnection.deleteSurroundingText(deleteBefore, deleteAfter)
         if (deleted) {
             Log.d(TAG, "Deleted ${deleteBefore + deleteAfter} chars ('$currentWord') before inserting suggestion")
         } else {
-            Log.w(TAG, "Unable to delete surrounding word; inserting anyway")
+            Log.w(TAG, "deleteSurroundingText returned false - some apps don't support this")
+            // Try alternative: use setSelection + commitText to replace
+            // First, select the word by moving selection
+            val selectedText = inputConnection.getSelectedText(0)
+            if (selectedText == null || selectedText.isEmpty()) {
+                // No selection, try to create one
+                Log.d(TAG, "Trying alternative selection approach")
+            }
         }
 
         val textToCommit = if (shouldAppendSpace) "$replacement " else replacement
@@ -122,7 +147,7 @@ object SuggestionButtonHandler {
             AutoSpaceTracker.markAutoSpace()
             Log.d(TAG, "Suggestion auto-space marked")
         }
-        Log.d(TAG, "Suggestion inserted as '$textToCommit' (committed=$committed)")
+        Log.d(TAG, "Suggestion inserted as '$textToCommit' (committed=$committed, deleted=$deleted)")
         return committed
     }
 }

@@ -81,6 +81,8 @@ import rikka.shizuku.Shizuku
 import androidx.compose.runtime.LaunchedEffect
 import android.content.pm.PackageManager
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Download
 
 /**
  * Advanced settings screen.
@@ -109,6 +111,15 @@ fun AdvancedSettingsScreen(
     }
     var clipboardRetentionTime by remember {
         mutableStateOf(SettingsManager.getClipboardRetentionTime(context).toString())
+    }
+    var clipboardPinnedFirst by remember {
+        mutableStateOf(SettingsManager.getClipboardPinnedFirst(context))
+    }
+    var grammarAIEnabled by remember {
+        mutableStateOf(SettingsManager.getGrammarAIEnabled(context))
+    }
+    val downloadedGrammarModels by remember {
+        mutableStateOf(SettingsManager.getDownloadedGrammarModels(context))
     }
     var shizukuStatus by remember { mutableStateOf(ShizukuStatus.NotConnected) }
     var navigationDirection by remember { mutableStateOf(AdvancedNavigationDirection.Push) }
@@ -694,7 +705,119 @@ fun AdvancedSettingsScreen(
                                 }
                             }
                         }
-                    
+
+                        // Clipboard Pinned First Toggle
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(72.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.History,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Pinned Items First",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Medium,
+                                        maxLines = 1
+                                    )
+                                    Text(
+                                        text = if (clipboardPinnedFirst) "Pinned items appear at top" else "Chronological order",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1
+                                    )
+                                }
+                                Switch(
+                                    checked = clipboardPinnedFirst,
+                                    onCheckedChange = { enabled ->
+                                        clipboardPinnedFirst = enabled
+                                        SettingsManager.setClipboardPinnedFirst(context, enabled)
+                                    }
+                                )
+                            }
+                        }
+
+                        // Grammar AI Correction Toggle
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { navigateTo(AdvancedDestination.GrammarAI) }
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Psychology,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = "Grammar AI Correction",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Medium,
+                                            maxLines = 1
+                                        )
+                                        Text(
+                                            text = "AI-powered grammar checking",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1
+                                        )
+                                    }
+                                    Switch(
+                                        checked = grammarAIEnabled,
+                                        onCheckedChange = { enabled ->
+                                            grammarAIEnabled = enabled
+                                            SettingsManager.setGrammarAIEnabled(context, enabled)
+                                        }
+                                    )
+                                }
+                                // Model status row
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 36.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    val modelCount = downloadedGrammarModels.size
+                                    Icon(
+                                        imageVector = if (modelCount > 0) Icons.Filled.CheckCircle else Icons.Filled.Download,
+                                        contentDescription = null,
+                                        tint = if (modelCount > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Text(
+                                        text = if (modelCount > 0) "$modelCount language(s) downloaded" else "No models downloaded",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (modelCount > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
                         // IME Test Screen (only in debug builds)
                         if (BuildConfig.DEBUG) {
                             Surface(
@@ -809,6 +932,13 @@ fun AdvancedSettingsScreen(
                 )
             }
 
+            AdvancedDestination.GrammarAI -> {
+                GrammarModelDownloadScreen(
+                    modifier = modifier,
+                    onBack = { navigateBack() }
+                )
+            }
+
         }
     }
 }
@@ -818,6 +948,7 @@ private sealed class AdvancedDestination {
     object LauncherShortcuts : AdvancedDestination()
     object ImeTest : AdvancedDestination()
     object TrackpadGestures : AdvancedDestination()
+    object GrammarAI : AdvancedDestination()
 }
 
 private enum class AdvancedNavigationDirection {

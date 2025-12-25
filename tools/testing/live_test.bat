@@ -1,11 +1,11 @@
 @echo off
-REM Complete live testing workflow for Pastiera
+REM Complete live testing workflow for TitanKeys
 REM Builds, installs, and launches the app with wireless ADB support
 
 setlocal enabledelayedexpansion
 
 echo ========================================
-echo Pastiera Live Testing Workflow
+echo TitanKeys Live Testing Workflow
 echo ========================================
 echo.
 
@@ -54,7 +54,7 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo.
 echo [4/5] Launching app...
-adb shell am start -n it.palsoftware.pastiera/.MainActivity
+adb shell am start -n com.titankeys.keyboard/.MainActivity
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo WARNING: Could not launch app automatically
@@ -65,11 +65,11 @@ echo.
 echo [5/5] Starting logcat (Press Ctrl+C to stop)...
 echo.
 echo ========================================
-echo Logcat Output (filtered for Pastiera)
+echo Logcat Output (filtered for TitanKeys)
 echo ========================================
 echo.
 adb logcat -c
-adb logcat | findstr /I "Pastiera SuggestionController DictionaryRepo NgramLanguageModel ClipboardHistoryManager"
+adb logcat | findstr /I "TitanKeys SuggestionController DictionaryRepo NgramLanguageModel ClipboardHistoryManager"
 
 endlocal
 

@@ -1655,7 +1655,9 @@ class VariationBarView(
                     suggestionWidth,
                     suggestionWidth,
                     isStaticContent,
-                    isAddCandidate
+                    isAddCandidate,
+                    isSuggestion = !isStaticContent,  // Use SuggestionButtonHandler for word suggestions
+                    shouldDisableAutoCapitalize = false
                 )
                 val params = LinearLayout.LayoutParams(suggestionWidth, LinearLayout.LayoutParams.MATCH_PARENT)
                 if (index > 0) {

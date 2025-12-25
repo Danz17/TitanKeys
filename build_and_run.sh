@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "========================================"
-echo "Compilazione e installazione Pastiera"
+echo "Compilazione e installazione TitanKeys"
 echo "========================================"
 echo ""
 
@@ -84,7 +84,7 @@ if [ $? -eq 0 ]; then
     echo "Avvio dell'app sul dispositivo..."
     
     # Launch the app on Android device
-    "$ADB_PATH" shell am start -n it.palsoftware.pastiera/.MainActivity
+    "$ADB_PATH" shell am start -n com.titankeys.keyboard/.MainActivity
     
     if [ $? -eq 0 ]; then
         echo ""

@@ -34,15 +34,14 @@ data class ClipboardHistoryEntry(
     val displayText: String get() = text ?: "[Image]"
 
     /**
-     * Comparator for sorting clipboard entries:
-     * - Pinned items come first (or last depending on settings)
+     * Default comparator for sorting clipboard entries:
+     * - Pinned items come first
      * - Within same pinned state, sort by timestamp (most recent first)
+     * Note: ClipboardDao.sort() uses a custom comparator that respects user settings.
      */
     override fun compareTo(other: ClipboardHistoryEntry): Int {
         val result = other.isPinned.compareTo(isPinned)
         if (result == 0) return other.timeStamp.compareTo(timeStamp)
-        // TODO: Add setting for pinnedFirst vs pinnedLast
-        // For now, pinned items always come first
         return result
     }
 }

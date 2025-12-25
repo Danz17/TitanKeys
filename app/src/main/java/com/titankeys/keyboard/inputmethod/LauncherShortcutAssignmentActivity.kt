@@ -160,17 +160,17 @@ private fun LauncherShortcutAssignmentBottomSheet(
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
-    // Focus requester per il campo di ricerca
+    // Focus requester for search field
     val searchFocusRequester = remember { FocusRequester() }
     
-    // Carica le app installate
+    // Load installed apps
     val installedApps by remember {
         mutableStateOf(AppListHelper.getInstalledApps(context))
     }
     
     var searchQuery by remember { mutableStateOf("") }
     
-    // Dai il focus al campo di ricerca quando il bottom sheet è completamente aperto
+    // Give focus to search field when bottom sheet is fully open
     LaunchedEffect(sheetState.targetValue) {
         if (sheetState.targetValue == SheetValue.Expanded) {
             kotlinx.coroutines.delay(100)
@@ -178,7 +178,7 @@ private fun LauncherShortcutAssignmentBottomSheet(
         }
     }
     
-    // Funzione helper per ottenere la lettera del tasto
+    // Helper function to get key letter
     fun getKeyLetter(keyCode: Int): Char? {
         return when (keyCode) {
             KeyEvent.KEYCODE_Q -> 'Q'
@@ -211,7 +211,7 @@ private fun LauncherShortcutAssignmentBottomSheet(
         }
     }
     
-    // Filtra e ordina le app in base alla query di ricerca e alla lettera del tasto
+    // Filter and sort apps based on search query and key letter
     val filteredApps = remember(installedApps, searchQuery, keyCode) {
         val apps = if (searchQuery.isBlank()) {
             installedApps
@@ -222,7 +222,7 @@ private fun LauncherShortcutAssignmentBottomSheet(
             }
         }
         
-        // Ordina: prima le app che iniziano con la lettera del tasto, poi le altre
+        // Sort: first apps starting with key letter, then others
         val keyLetter = getKeyLetter(keyCode)?.lowercaseChar()
         if (keyLetter != null && searchQuery.isBlank()) {
             val appsStartingWithLetter = apps.filter { 
@@ -235,12 +235,12 @@ private fun LauncherShortcutAssignmentBottomSheet(
             
             appsStartingWithLetter + otherApps
         } else {
-            // Se c'è una ricerca attiva, ordina normalmente
+            // If there's an active search, sort normally
             apps.sortedBy { it.appName.lowercase() }
         }
     }
     
-    // Funzione helper per ottenere il nome del tasto
+    // Helper function to get key name
     @Composable
     fun getKeyName(keyCode: Int): String {
         val keyName = when (keyCode) {

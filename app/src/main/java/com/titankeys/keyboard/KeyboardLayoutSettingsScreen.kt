@@ -214,7 +214,7 @@ fun KeyboardLayoutSettingsScreen(
                         .fillMaxWidth()
                         .clickable {
                             try {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://pastierakeyedit.vercel.app/"))
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://titankeys-keyedit.vercel.app/"))
                                 context.startActivity(intent)
                             } catch (e: Exception) {
                                 // Handle error silently or show snackbar

@@ -10,6 +10,7 @@ enum class GrammarErrorType {
     ARTICLE_USAGE,
     PREPOSITION_ERROR,
     WORD_ORDER,
+    WORD_CHOICE,  // For confusion pairs like your/you're, their/there/they're
     PLURALIZATION,
     CAPITALIZATION,
     PUNCTUATION,
@@ -71,9 +72,4 @@ data class GrammarPerformanceMetric(
     val sentenceLength: Int? = null
 )
 
-enum class SuggestionSource {
-    MAIN,       // Main dictionary
-    USER,       // User dictionary
-    GRAMMAR,    // Grammar correction
-    NEXT_WORD   // Next word prediction
-}
+// SuggestionSource is defined in DictionaryEntry.kt

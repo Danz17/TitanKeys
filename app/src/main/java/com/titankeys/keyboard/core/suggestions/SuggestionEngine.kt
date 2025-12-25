@@ -430,7 +430,8 @@ class SuggestionEngine(
             if (d != 0) return@Comparator d
             val scoreCmp = b.score.compareTo(a.score)
             if (scoreCmp != 0) return@Comparator scoreCmp
-            a.candidate.length.compareTo(b.candidate.length)
+            // Prefer longer words for better completions (e.g., "however" over "howe")
+            b.candidate.length.compareTo(a.candidate.length)
         }
 
         fun consider(

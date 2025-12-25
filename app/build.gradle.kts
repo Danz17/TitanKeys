@@ -212,6 +212,9 @@ dependencies {
     // TensorFlow Lite for AI-powered grammar correction
     implementation("org.tensorflow:tensorflow-lite:2.14.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+    implementation(libs.androidx.legacy.support.v4)
+    implementation(libs.androidx.fragment)
+    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

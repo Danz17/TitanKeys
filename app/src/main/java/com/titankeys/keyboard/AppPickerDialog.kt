@@ -28,7 +28,7 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 
 /**
- * Dialog per selezionare un'app installata.
+ * Dialog for selecting an installed app.
  */
 @Composable
 fun AppPickerDialog(
@@ -37,14 +37,14 @@ fun AppPickerDialog(
 ) {
     val context = LocalContext.current
     
-    // Carica le app installate
+    // Load installed apps
     val installedApps by remember {
         mutableStateOf(AppListHelper.getInstalledApps(context))
     }
     
     var searchQuery by remember { mutableStateOf("") }
     
-    // Filtra le app in base alla query di ricerca
+    // Filter apps based on search query
     val filteredApps = remember(installedApps, searchQuery) {
         if (searchQuery.isBlank()) {
             installedApps
@@ -91,7 +91,7 @@ fun AppPickerDialog(
                 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                 
-                // Campo di ricerca
+                // Search field
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
@@ -102,7 +102,7 @@ fun AppPickerDialog(
                     singleLine = true
                 )
                 
-                // Lista delle app
+                // App list
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -125,7 +125,7 @@ fun AppPickerDialog(
 }
 
 /**
- * Item della lista per un'app.
+ * List item for an app.
  */
 @Composable
 private fun AppListItem(
@@ -145,7 +145,7 @@ private fun AppListItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icona app usando AndroidView per visualizzare direttamente il Drawable
+            // App icon using AndroidView to display Drawable directly
             Box(
                 modifier = Modifier.size(48.dp),
                 contentAlignment = Alignment.Center
@@ -165,7 +165,7 @@ private fun AppListItem(
                 )
             }
             
-            // Nome app e package
+            // App name and package
             Column(
                 modifier = Modifier.weight(1f)
             ) {

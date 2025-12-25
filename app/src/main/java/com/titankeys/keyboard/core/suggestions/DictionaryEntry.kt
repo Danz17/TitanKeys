@@ -7,6 +7,8 @@ data class DictionaryEntry(
 )
 
 enum class SuggestionSource {
-    MAIN,
-    USER
+    MAIN,       // Main dictionary
+    USER,       // User dictionary
+    GRAMMAR,    // Grammar correction
+    NEXT_WORD   // Next word prediction
 }

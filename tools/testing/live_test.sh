@@ -1,11 +1,11 @@
 #!/bin/bash
-# Complete live testing workflow for Pastiera
+# Complete live testing workflow for TitanKeys
 # Builds, installs, and launches the app with wireless ADB support
 
 set -e
 
 echo "========================================"
-echo "Pastiera Live Testing Workflow"
+echo "TitanKeys Live Testing Workflow"
 echo "========================================"
 echo ""
 
@@ -69,7 +69,7 @@ fi
 
 echo ""
 echo "[4/5] Launching app..."
-"$ADB_PATH" shell am start -n it.palsoftware.pastiera/.MainActivity
+"$ADB_PATH" shell am start -n com.titankeys.keyboard/.MainActivity
 if [ $? -ne 0 ]; then
     echo ""
     echo "WARNING: Could not launch app automatically"
@@ -80,9 +80,9 @@ echo ""
 echo "[5/5] Starting logcat (Press Ctrl+C to stop)..."
 echo ""
 echo "========================================"
-echo "Logcat Output (filtered for Pastiera)"
+echo "Logcat Output (filtered for TitanKeys)"
 echo "========================================"
 echo ""
 "$ADB_PATH" logcat -c
-"$ADB_PATH" logcat | grep -iE "Pastiera|SuggestionController|DictionaryRepo|NgramLanguageModel|ClipboardHistoryManager"
+"$ADB_PATH" logcat | grep -iE "TitanKeys|SuggestionController|DictionaryRepo|NgramLanguageModel|ClipboardHistoryManager"
 

@@ -587,7 +587,7 @@ class SuggestionController(
             if (lastBoundaryIndex == -1) return null
 
             // Extract from after previous boundary to current boundary
-            val sentenceStart = beforeText.lastIndexOfAny(sentenceEndings, lastBoundaryIndex - 1) + 1
+            val sentenceStart = beforeText.lastIndexOfAny(sentenceEndings.toCharArray(), lastBoundaryIndex - 1) + 1
             val sentence = beforeText.substring(sentenceStart, lastBoundaryIndex + 1).trim()
 
             if (sentence.length < 10) null else sentence

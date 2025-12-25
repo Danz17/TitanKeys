@@ -142,7 +142,7 @@ class InputEventRouter(
             }
         }
 
-        // Launcher Shortcuts (logica esistente - mantieni per compatibilità)
+        // Launcher Shortcuts (existing logic - keep for compatibility)
         if (!ctrlLatchActive && SettingsManager.getLauncherShortcutsEnabled(context)) {
             val packageName = editorInfo?.packageName ?: currentPackageName
             if (callbacks.isLauncherPackage(packageName) && callbacks.isAlphabeticKey(keyCode)) {
@@ -274,7 +274,8 @@ class InputEventRouter(
                     callbacks.refreshStatusBar()
                 }
             }
-            return EditableFieldRoutingResult.CallSuper
+            // Consume to prevent system popup for modifier keys
+            return EditableFieldRoutingResult.Consume
         }
 
         if (keyCode == KeyEvent.KEYCODE_CTRL_LEFT || keyCode == KeyEvent.KEYCODE_CTRL_RIGHT) {
@@ -304,7 +305,8 @@ class InputEventRouter(
                     callbacks.updateStatusBar()
                 }
             }
-            return EditableFieldRoutingResult.CallSuper
+            // Consume to prevent system popup for modifier keys
+            return EditableFieldRoutingResult.Consume
         }
 
         if (keyCode == KeyEvent.KEYCODE_ALT_LEFT || keyCode == KeyEvent.KEYCODE_ALT_RIGHT) {

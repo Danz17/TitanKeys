@@ -183,7 +183,7 @@ class AltSymManager(
 
         // For unmapped keys, apply case conversion if needed (fallback only)
         if (normalChar.isNotEmpty() && !LayoutMappingRepository.isMapped(keyCode)) {
-            // Gestisci shiftOneShot: se è attivo e il carattere è una lettera, rendilo maiuscolo
+            // Handle shiftOneShot: if active and character is a letter, make it uppercase
             if (shiftOneShot && normalChar.isNotEmpty() && normalChar[0].isLetter()) {
                 normalChar = normalChar.uppercase()
             } else if (capsLockEnabled && event?.isShiftPressed != true) {
@@ -252,8 +252,8 @@ class AltSymManager(
         val wasLongPressActivated = longPressActivated.remove(keyCode) ?: false
         val insertedChar = insertedNormalChars.remove(keyCode)
         
-        // Non cancellare il long press se shift è ancora premuto
-        // Questo permette al long press di completarsi anche se il tasto viene rilasciato mentre shift è premuto
+        // Don't cancel long press if shift is still pressed
+        // This allows long press to complete even if key is released while shift is pressed
         if (!shiftPressed) {
             longPressRunnables.remove(keyCode)?.let { handler.removeCallbacks(it) }
         }

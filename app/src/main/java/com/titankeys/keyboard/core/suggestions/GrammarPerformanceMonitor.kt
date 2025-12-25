@@ -1,6 +1,7 @@
 package com.titankeys.keyboard.core.suggestions
 
 import android.util.Log
+import kotlin.math.min
 
 /**
  * Monitors performance metrics for grammar correction operations

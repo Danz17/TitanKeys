@@ -3,8 +3,8 @@ package com.titankeys.keyboard.core.suggestions
 import java.util.Locale
 
 /**
- * Helper per applicare la capitalizzazione corretta ai suggerimenti
- * in base al pattern della parola digitata dall'utente.
+ * Helper to apply correct capitalization to suggestions
+ * based on the pattern of the word typed by the user.
  */
 object CasingHelper {
 
@@ -17,12 +17,12 @@ object CasingHelper {
     }
 
     /**
-     * Applica la capitalizzazione del suggerimento in base al pattern della parola originale.
-     * 
-     * @param candidate La parola suggerita (es. "Parenzo")
-     * @param original La parola digitata dall'utente (es. "parenz", "Parenz", "PARENZ")
-     * @param forceLeadingCapital Se true, forza la prima lettera maiuscola (per auto-capitalize)
-     * @return La parola con la capitalizzazione corretta
+     * Applies suggestion capitalization based on the pattern of the original word.
+     *
+     * @param candidate The suggested word (e.g. "Parenzo")
+     * @param original The word typed by the user (e.g. "parenz", "Parenz", "PARENZ")
+     * @param forceLeadingCapital If true, forces first letter uppercase (for auto-capitalize)
+     * @return The word with correct capitalization
      */
     fun applyCasing(
         candidate: String,
@@ -49,27 +49,27 @@ object CasingHelper {
         val firstUpper = firstLetter.isUpperCase()
         val restLower = restLetters.all { it.isLowerCase() }
 
-        // Se il candidato contiene maiuscole e non siamo in caso "allUpper" (>=2 lettere maiuscole),
-        // rispetta il casing del dizionario così com'è.
+        // If candidate contains uppercase and we're not in "allUpper" case (>=2 uppercase letters),
+        // respect the dictionary casing as-is.
         val candidateHasUpper = candidate.any { it.isUpperCase() }
         val candidateLettersUpperCount = candidate.count { it.isUpperCase() }
         if (!forceLeadingCapital && candidateHasUpper && candidateLettersUpperCount < 2) {
             return candidate
         }
-        // Se l'originale è tutto minuscolo ma il candidato ha maiuscole (es. "mccartney" -> "McCartney"),
-        // preserva il casing del candidato.
+        // If original is all lowercase but candidate has uppercase (e.g. "mccartney" -> "McCartney"),
+        // preserve the candidate casing.
         if (allLower && candidateHasUpper) {
             return candidate
         }
         
         return when {
-            // Caso: PARENZ -> PARENZO (tutto maiuscolo)
+            // Case: PARENZ -> PARENZO (all uppercase)
             allUpper -> candidate.uppercase(Locale.getDefault())
-            // Caso: Parenz -> Parenzo (prima maiuscola, resto minuscolo)
+            // Case: Parenz -> Parenzo (first uppercase, rest lowercase)
             firstUpper && restLower -> capitalizeFirstLetter(candidate)
-            // Caso: parenz -> parenzo (tutto minuscolo)
+            // Case: parenz -> parenzo (all lowercase)
             allLower -> candidate.lowercase(Locale.getDefault())
-            // Altri casi: usa il suggerimento così com'è
+            // Other cases: use suggestion as-is
             else -> candidate
         }
     }
