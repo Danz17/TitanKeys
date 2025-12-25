@@ -60,7 +60,7 @@ jadx -d ideas/decompiled/touchsensor ideas/apks/touchsensor.apk
 | P3 | Android Native Shortcuts (TYPE_SHORTCUT) | Medium | Medium | ✅ Done |
 | P3 | N-gram Data Generation | High | High | ✅ Wikipedia data merged |
 | P4 | InputContextState Cleanup | Low | Low | ✅ Done |
-| P4 | Code Refactoring (Phase 7A/7B) | High | Medium | 🔴 Not Started |
+| P4 | Code Refactoring (Phase 7A/7B) | High | Medium | ✅ Done (controllers exist) |
 
 ---
 
