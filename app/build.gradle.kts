@@ -158,6 +158,10 @@ android {
     lint {
         checkReleaseBuilds = false
         abortOnError = false
+        // Disable translation checks - requires native speakers to add translations
+        disable += "MissingTranslation"
+        // Create baseline for existing issues we'll address incrementally
+        baseline = file("lint-baseline.xml")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
