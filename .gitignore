@@ -27,6 +27,12 @@ keystore.properties
 # Claude Code local settings
 .claude/
 
+# KiloCode settings
+.kilocode/
+
+# Kotlin compiler errors
+.kotlin/
+
 # Build scripts (local)
 assembla_release.sh
 
