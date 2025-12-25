@@ -35,6 +35,7 @@ import com.titankeys.keyboard.inputmethod.StatusBarController
 import com.titankeys.keyboard.inputmethod.TextSelectionHelper
 import com.titankeys.keyboard.inputmethod.NotificationHelper
 import com.titankeys.keyboard.inputmethod.VariationButtonHandler
+import com.titankeys.keyboard.inputmethod.suggestions.SuggestionButtonHandler
 import com.titankeys.keyboard.inputmethod.SpeechRecognitionActivity
 import com.titankeys.keyboard.data.variation.VariationRepository
 import android.graphics.Paint
@@ -513,58 +514,41 @@ class VariationBarView(
         buttonsContainerView.removeAllViews()
         buttonsContainerView.visibility = View.VISIBLE
 
-        // === TWO-LAYER SYSTEM ===
-        // Create a FrameLayout to hold underlay and overlay
-        val twoLayerContainer = FrameLayout(context).apply {
+        // === THREE-PART LAYOUT: [Voice] [Middle/Suggestions] [Clipboard] ===
+        // Voice and Clipboard are ALWAYS visible at the edges
+        val edgeButtonWidth = dpToPx(48f)
+        val middleWidth = availableWidth - (edgeButtonWidth * 2)
+
+        // Main horizontal container
+        val mainRow = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
             )
         }
 
-        // --- UNDERLAY: Uniform-width slots from config ---
-        val slotCount = barLayoutConfig.slotCount
-        val slotWidth = availableWidth / slotCount
+        // --- LEFT EDGE: Voice button (always visible) ---
+        val voiceSlotConfig = barLayoutConfig.getSlot(0)  // Slot 0 is Voice by default
+        val voiceButton = createSlotButton(voiceSlotConfig, edgeButtonWidth, containerHeight, inputConnection)
+        mainRow.addView(voiceButton)
 
-        val underlayLayout = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-        }
-        underlayContainer = underlayLayout
-        underlaySlotViews.clear()
-
-        for (i in 0 until slotCount) {
-            val slotConfig = barLayoutConfig.getSlot(i)
-            val slotView = createSlotButton(slotConfig, slotWidth, containerHeight, inputConnection)
-            underlaySlotViews.add(slotView)
-            underlayLayout.addView(slotView)
-        }
-
-        twoLayerContainer.addView(underlayLayout)
-
-        // --- OVERLAY: Suggestions (shown when available) ---
+        // --- MIDDLE: Suggestions or empty space ---
         val displayVariations = limitedVariations.take(3)
         val hasSuggestionsToShow = displayVariations.isNotEmpty() && !isStaticContent
+
+        val middleContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setBackgroundColor(Color.argb(240, 17, 17, 17))  // Match bar background
+            layoutParams = LinearLayout.LayoutParams(middleWidth, LinearLayout.LayoutParams.MATCH_PARENT)
+        }
 
         if (hasSuggestionsToShow) {
             val spacingBetweenButtons = dpToPx(3f)
             val totalSpacing = spacingBetweenButtons * (displayVariations.size - 1).coerceAtLeast(0)
-            val suggestionWidth = max(1, (availableWidth - totalSpacing) / displayVariations.size)
-
-            val overlayLayout = LinearLayout(context).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER
-                setBackgroundColor(Color.argb(240, 17, 17, 17)) // Semi-opaque background
-                layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
-            }
-            suggestionsOverlay = overlayLayout
+            val suggestionWidth = max(1, (middleWidth - totalSpacing) / displayVariations.size)
 
             for ((index, variation) in displayVariations.withIndex()) {
                 val isAddCandidate = snapshot.addWordCandidate == variation
@@ -574,24 +558,36 @@ class VariationBarView(
                     suggestionWidth,
                     suggestionWidth,
                     false,
-                    isAddCandidate
+                    isAddCandidate,
+                    isSuggestion = true,  // These are word suggestions, not accent variations
+                    shouldDisableAutoCapitalize = snapshot.shouldDisableAutoCapitalize
                 )
                 variationButtons.add(variationButton)
                 val params = LinearLayout.LayoutParams(suggestionWidth, LinearLayout.LayoutParams.MATCH_PARENT)
                 if (index > 0) {
                     params.marginStart = spacingBetweenButtons
                 }
-                overlayLayout.addView(variationButton, params)
+                middleContainer.addView(variationButton, params)
             }
-
-            twoLayerContainer.addView(overlayLayout)
-        } else {
-            suggestionsOverlay = null
         }
+        suggestionsOverlay = middleContainer
+        mainRow.addView(middleContainer)
 
-        buttonsContainerView.addView(twoLayerContainer)
+        // --- RIGHT EDGE: Clipboard button (always visible) ---
+        val lastSlotIndex = barLayoutConfig.slotCount - 1
+        val clipboardSlotConfig = barLayoutConfig.getSlot(lastSlotIndex)  // Last slot is Clipboard by default
+        val clipboardButton = createSlotButton(clipboardSlotConfig, edgeButtonWidth, containerHeight, inputConnection)
+        mainRow.addView(clipboardButton)
 
-        Log.d(TAG, "showVariations: slots=$slotCount x $slotWidth, suggestions=${displayVariations.size}, hasSuggestions=$hasSuggestionsToShow")
+        // Store references for underlay
+        underlayContainer = mainRow
+        underlaySlotViews.clear()
+        underlaySlotViews.add(voiceButton)
+        underlaySlotViews.add(clipboardButton)
+
+        buttonsContainerView.addView(mainRow)
+
+        Log.d(TAG, "showVariations: 3-part layout, middle=$middleWidth, suggestions=${displayVariations.size}, hasSuggestions=$hasSuggestionsToShow")
     }
 
     private fun installOverlayTouchListener(overlayView: FrameLayout) {
@@ -995,7 +991,9 @@ class VariationBarView(
         buttonWidth: Int,
         maxButtonWidth: Int,
         isStatic: Boolean,
-        isAddCandidate: Boolean
+        isAddCandidate: Boolean,
+        isSuggestion: Boolean = false,
+        shouldDisableAutoCapitalize: Boolean = false
     ): TextView {
         val dp2 = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
@@ -1077,7 +1075,16 @@ class VariationBarView(
                         context,
                         onVariationSelectedListener
                     )
+                } else if (isSuggestion) {
+                    // Use SuggestionButtonHandler for word suggestions (replaces full word)
+                    SuggestionButtonHandler.createSuggestionClickListener(
+                        variation,
+                        inputConnection,
+                        onVariationSelectedListener,
+                        shouldDisableAutoCapitalize
+                    )
                 } else {
+                    // Use VariationButtonHandler for accent variations (replaces 1 char)
                     VariationButtonHandler.createVariationClickListener(
                         variation,
                         inputConnection,
