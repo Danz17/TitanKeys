@@ -224,7 +224,7 @@
     <string name="launcher_shortcut_assignment_title">Assegna app al tasto</string>
     <string name="launcher_shortcut_assignment_key">Tasto %1$s</string>
     <string name="launcher_shortcut_assignment_header">Shortcut</string>
-    <string name="launcher_shortcut_assignment_search_placeholder">Cerca app...</string>
+    <string name="launcher_shortcut_assignment_search_placeholder">Cerca app…</string>
     <string name="launcher_shortcut_assignment_search_description">Cerca</string>
     <string name="launcher_shortcut_assignment_close">Chiudi</string>
     <string name="launcher_shortcut_assignment_no_apps">Nessuna app trovata</string>
@@ -249,7 +249,7 @@
     <string name="notification_update_available_text">Una nuova versione di TitanKeys è disponibile (%1$s)</string>
     
     <!-- Speech Recognition -->
-    <string name="speech_recognition_prompt">Parla ora...</string>
+    <string name="speech_recognition_prompt">Parla ora…</string>
     <string name="speech_recognition_error_no_match">Nessun testo riconosciuto. Riprova.</string>
     <string name="speech_recognition_error_timeout">Nessun input vocale rilevato.</string>
     <string name="speech_recognition_error_permission">Permesso microfono negato.</string>
@@ -261,7 +261,7 @@
     <string name="static_variation_bar_mode_description">Mostra sempre una serie fissa di tasti di utilità nella barra variazioni invece delle variazioni contestuali.</string>
     
     <!-- Auto Correct Edit Screen -->
-    <string name="auto_correct_search_placeholder">Cerca correzioni...</string>
+    <string name="auto_correct_search_placeholder">Cerca correzioni…</string>
     <string name="auto_correct_search_description">Cerca</string>
     <string name="auto_correct_clear_search">Cancella ricerca</string>
     <string name="auto_correct_no_corrections_found">Nessuna correzione trovata</string>
@@ -323,7 +323,7 @@
     <!-- App Picker Dialog -->
     <string name="app_picker_title">Seleziona un\'app</string>
     <string name="app_picker_cancel">Annulla</string>
-    <string name="app_picker_search_placeholder">Cerca app...</string>
+    <string name="app_picker_search_placeholder">Cerca app…</string>
     
     <!-- Settings Screen -->
     <string name="settings_support_ko_fi">Supporta su Ko-fi</string>

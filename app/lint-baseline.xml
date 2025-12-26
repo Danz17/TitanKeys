@@ -41,7 +41,7 @@
         errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/titankeys/keyboard/AdvancedSettingsScreen.kt"
-            line="619"
+            line="620"
             column="51"/>
     </issue>
 
@@ -52,7 +52,7 @@
         errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/titankeys/keyboard/inputmethod/NotificationHelper.kt"
-            line="105"
+            line="100"
             column="38"/>
     </issue>
 
@@ -401,7 +401,7 @@
         errorLine2="                         ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/titankeys/keyboard/inputmethod/PhysicalKeyboardInputMethodService.kt"
-            line="2450"
+            line="2439"
             column="26"/>
     </issue>
 
@@ -483,177 +483,12 @@
     <issue
         id="ObsoleteSdkInt"
         message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/subtype/AdditionalSubtypeUtils.kt"
-            line="454"
-            column="17"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {"
-        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/clipboard/ClipboardHistoryManager.kt"
-            line="139"
-            column="30"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/clipboard/ClipboardHistoryManager.kt"
-            line="216"
-            column="17"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/CustomInputStylesScreen.kt"
-            line="748"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is never &lt; 29"
-        errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.N_MR1) {"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/LauncherShortcutController.kt"
-            line="97"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is never &lt; 29"
-        errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.N_MR1) {"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/LauncherShortcutController.kt"
-            line="128"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/NotificationHelper.kt"
-            line="77"
-            column="17"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/NotificationHelper.kt"
-            line="137"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/NotificationHelper.kt"
-            line="169"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/NotificationHelper.kt"
-            line="244"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/NotificationHelper.kt"
-            line="255"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is never &lt; 29"
-        errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.O) {"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/NotificationHelper.kt"
-            line="282"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/PermissionRequestActivity.kt"
-            line="79"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/PhysicalKeyboardInputMethodService.kt"
-            line="1812"
-            column="17"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
         errorLine1="        val contentUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {"
         errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/titankeys/keyboard/clipboard/ScreenshotObserver.kt"
             line="58"
             column="30"/>
-    </issue>
-
-    <issue
-        id="ObsoleteSdkInt"
-        message="Unnecessary; `SDK_INT` is always >= 29"
-        errorLine1="        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/inputmethod/SpeechRecognitionActivity.kt"
-            line="190"
-            column="13"/>
     </issue>
 
     <issue
@@ -683,105 +518,6 @@
             file="src/main/java/com/titankeys/keyboard/core/suggestions/ContextualPredictor.kt"
             line="191"
             column="81"/>
-    </issue>
-
-    <issue
-        id="AutoboxingStateCreation"
-        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
-        errorLine1="        mutableStateOf(SettingsManager.getSwipeIncrementalThreshold(context))"
-        errorLine2="        ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/AdvancedSettingsScreen.kt"
-            line="110"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="AutoboxingStateCreation"
-        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
-        errorLine1="        mutableStateOf(SettingsManager.getMaxAutoReplaceDistance(context))"
-        errorLine2="        ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/AutoCorrectionCategoryScreen.kt"
-            line="67"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="AutoboxingStateCreation"
-        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
-        errorLine1="    var refreshTrigger by remember { mutableStateOf(0) }"
-        errorLine2="                                     ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/KeyboardLayoutSettingsScreen.kt"
-            line="64"
-            column="38"/>
-    </issue>
-
-    <issue
-        id="AutoboxingStateCreation"
-        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
-        errorLine1="        mutableStateOf(SettingsManager.getLongPressThreshold(context))"
-        errorLine2="        ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/KeyboardTimingSettingsScreen.kt"
-            line="39"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="AutoboxingStateCreation"
-        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
-        errorLine1="    var selectedTab by remember { mutableStateOf(0) }"
-        errorLine2="                                  ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/SymCustomizationScreen.kt"
-            line="59"
-            column="35"/>
-    </issue>
-
-    <issue
-        id="AutoboxingStateCreation"
-        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
-        errorLine1="        mutableStateOf(SettingsManager.getNextWordPredictionMode(context))"
-        errorLine2="        ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/TextInputSettingsScreen.kt"
-            line="75"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="AutoboxingStateCreation"
-        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
-        errorLine1="        mutableStateOf(SettingsManager.getTrackpadSwipeThreshold(context))"
-        errorLine2="        ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/TrackpadGestureSettingsScreen.kt"
-            line="38"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="AutoboxingStateCreation"
-        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
-        errorLine1="    var currentPage by remember { mutableStateOf(0) }"
-        errorLine2="                                  ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/TrackpadGestureSettingsScreen.kt"
-            line="317"
-            column="35"/>
-    </issue>
-
-    <issue
-        id="AutoboxingStateCreation"
-        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
-        errorLine1="    var dragOffsetX by remember { mutableStateOf(0f) }"
-        errorLine2="                                  ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/titankeys/keyboard/VariationCustomizationScreen.kt"
-            line="407"
-            column="35"/>
     </issue>
 
     <issue
@@ -1870,215 +1606,6 @@
     </issue>
 
     <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;test_field_placeholder&quot;>Գրեք այստեղ ֆիզիկական ստեղնաշարով...&lt;/string>"
-        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-hy/strings.xml"
-            line="44"
-            column="43"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;test_field_placeholder&quot;>Печатайте тут на физической клавиатуре...&lt;/string>"
-        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-ru/strings.xml"
-            line="44"
-            column="43"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;launcher_shortcut_assignment_search_placeholder&quot;>Ծրագրերի որոնում...&lt;/string>"
-        errorLine2="                                                                   ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-hy/strings.xml"
-            line="170"
-            column="68"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;launcher_shortcut_assignment_search_placeholder&quot;>Поиск приложений...&lt;/string>"
-        errorLine2="                                                                   ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-ru/strings.xml"
-            line="171"
-            column="68"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;auto_correct_search_placeholder&quot;>Փնտրել ուղղումները...&lt;/string>"
-        errorLine2="                                                   ~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-hy/strings.xml"
-            line="188"
-            column="52"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;speech_recognition_prompt&quot;>Говорите...&lt;/string>"
-        errorLine2="                                             ~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-ru/strings.xml"
-            line="188"
-            column="46"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;auto_correct_search_placeholder&quot;>Найти коррекции...&lt;/string>"
-        errorLine2="                                                   ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-ru/strings.xml"
-            line="189"
-            column="52"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;app_picker_search_placeholder&quot;>Փնտրել ծրագրեր...&lt;/string>"
-        errorLine2="                                                 ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-hy/strings.xml"
-            line="221"
-            column="50"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;app_picker_search_placeholder&quot;>Искать приложения...&lt;/string>"
-        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-ru/strings.xml"
-            line="222"
-            column="50"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;settings_update_checking&quot;>Ստուգում եմ թարմացումները...&lt;/string>"
-        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-hy/strings.xml"
-            line="227"
-            column="45"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;launcher_shortcut_assignment_search_placeholder&quot;>Cerca app...&lt;/string>"
-        errorLine2="                                                                   ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-it/strings.xml"
-            line="227"
-            column="68"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;settings_update_checking&quot;>Проверяю обновления...&lt;/string>"
-        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-ru/strings.xml"
-            line="228"
-            column="45"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;speech_recognition_prompt&quot;>Parla ora...&lt;/string>"
-        errorLine2="                                             ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-it/strings.xml"
-            line="252"
-            column="46"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;launcher_shortcut_assignment_search_placeholder&quot;>Search apps...&lt;/string>"
-        errorLine2="                                                                   ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="263"
-            column="68"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;auto_correct_search_placeholder&quot;>Cerca correzioni...&lt;/string>"
-        errorLine2="                                                   ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-it/strings.xml"
-            line="264"
-            column="52"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;speech_recognition_prompt&quot;>Speak now...&lt;/string>"
-        errorLine2="                                             ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="288"
-            column="46"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;auto_correct_search_placeholder&quot;>Search corrections...&lt;/string>"
-        errorLine2="                                                   ~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="297"
-            column="52"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;app_picker_search_placeholder&quot;>Cerca app...&lt;/string>"
-        errorLine2="                                                 ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-it/strings.xml"
-            line="326"
-            column="50"/>
-    </issue>
-
-    <issue
-        id="TypographyEllipsis"
-        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
-        errorLine1="    &lt;string name=&quot;app_picker_search_placeholder&quot;>Search apps...&lt;/string>"
-        errorLine2="                                                 ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="363"
-            column="50"/>
-    </issue>
-
-    <issue
         id="MonochromeLauncherIcon"
         message="The application adaptive icon is missing a monochrome tag"
         errorLine1="&lt;adaptive-icon xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
@@ -2264,7 +1791,7 @@
         errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/titankeys/keyboard/inputmethod/NotificationHelper.kt"
-            line="200"
+            line="190"
             column="22"/>
     </issue>
 
@@ -2275,7 +1802,7 @@
         errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/titankeys/keyboard/inputmethod/NotificationHelper.kt"
-            line="250"
+            line="237"
             column="49"/>
     </issue>
 

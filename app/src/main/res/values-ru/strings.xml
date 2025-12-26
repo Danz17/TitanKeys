@@ -41,7 +41,7 @@
     <string name="test_keyboard_normal">• Нормальное нажатие: вставляет символ</string>
     <string name="test_keyboard_long_press">• Долгое нажатие (500мс): вставляет альтернативный символ</string>
     <string name="test_field_label">Поле для теста</string>
-    <string name="test_field_placeholder">Печатайте тут на физической клавиатуре...</string>
+    <string name="test_field_placeholder">Печатайте тут на физической клавиатуре…</string>
     <string name="last_keyboard_event_title">Последнее событие</string>
     <string name="no_event_yet">Пока нет событий</string>
     <string name="long_press_mappings_title">Карта долгих нажатий:</string>
@@ -168,7 +168,7 @@
     <string name="launcher_shortcuts_action_type">Действие: %1$s</string>
     <string name="launcher_shortcut_assignment_title">Назначить приложение на клавишу</string>
     <string name="launcher_shortcut_assignment_key">Клавиша %1$s</string>
-    <string name="launcher_shortcut_assignment_search_placeholder">Поиск приложений...</string>
+    <string name="launcher_shortcut_assignment_search_placeholder">Поиск приложений…</string>
     <string name="launcher_shortcut_assignment_search_description">Поиск</string>
     <string name="launcher_shortcut_assignment_close">Закрыть</string>
     <string name="launcher_shortcut_assignment_no_apps">Приложения не найдены</string>
@@ -185,8 +185,8 @@
     <string name="notification_update_channel_description">Уведомления о новых версиях TitanKeys</string>
     <string name="notification_update_available_title">TitanKeys - Доступно обновление</string>
     <string name="notification_update_available_text">Доступна новая версия TitanKeys (%1$s)</string>
-    <string name="speech_recognition_prompt">Говорите...</string>
-    <string name="auto_correct_search_placeholder">Найти коррекции...</string>
+    <string name="speech_recognition_prompt">Говорите…</string>
+    <string name="auto_correct_search_placeholder">Найти коррекции…</string>
     <string name="auto_correct_search_description">Поиск</string>
     <string name="auto_correct_clear_search">Очистить поиск</string>
     <string name="auto_correct_no_corrections_found">Коррекции не найдены</string>
@@ -219,13 +219,13 @@
     <string name="sym_tab_characters">Символы</string>
     <string name="app_picker_title">Выбрать приложение</string>
     <string name="app_picker_cancel">Отмена</string>
-    <string name="app_picker_search_placeholder">Искать приложения...</string>
+    <string name="app_picker_search_placeholder">Искать приложения…</string>
     <string name="settings_support_ko_fi">Поддержать на Ko-fi</string>
     <string name="settings_nav_mode_configure">Настроить раскладку режима навигации</string>
     <string name="settings_update_section_title">Обновления</string>
     <string name="settings_update_section_description">Проверить новый релиз на GitHub</string>
     <string name="settings_update_button">Проверить обновления</string>
-    <string name="settings_update_checking">Проверяю обновления...</string>
+    <string name="settings_update_checking">Проверяю обновления…</string>
     <string name="settings_update_up_to_date">Приложение последней версии.</string>
     <string name="settings_update_check_failed">GitHub недоступен.</string>
     <string name="settings_category_keyboard_timing">Клавиатура &amp; Тайминг</string>

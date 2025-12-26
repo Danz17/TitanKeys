@@ -260,7 +260,7 @@
     <string name="launcher_shortcut_assignment_title">Assign app to key</string>
     <string name="launcher_shortcut_assignment_key">Key %1$s</string>
     <string name="launcher_shortcut_assignment_header">Shortcut</string>
-    <string name="launcher_shortcut_assignment_search_placeholder">Search apps...</string>
+    <string name="launcher_shortcut_assignment_search_placeholder">Search apps…</string>
     <string name="launcher_shortcut_assignment_search_description">Search</string>
     <string name="launcher_shortcut_assignment_close">Close</string>
     <string name="launcher_shortcut_assignment_no_apps">No apps found</string>
@@ -285,7 +285,7 @@
     <string name="notification_update_available_text">A new version of TitanKeys is available (%1$s)</string>
     
     <!-- Speech Recognition -->
-    <string name="speech_recognition_prompt">Speak now...</string>
+    <string name="speech_recognition_prompt">Speak now…</string>
     <string name="speech_recognition_error_no_match">No text recognized. Try again.</string>
     <string name="speech_recognition_error_timeout">No speech input detected.</string>
     <string name="speech_recognition_error_permission">Microphone permission denied.</string>
@@ -294,7 +294,7 @@
     <string name="speech_recognition_error_not_available">Speech recognition not available.</string>
     
     <!-- Auto Correct Edit Screen -->
-    <string name="auto_correct_search_placeholder">Search corrections...</string>
+    <string name="auto_correct_search_placeholder">Search corrections…</string>
     <string name="auto_correct_search_description">Search</string>
     <string name="auto_correct_clear_search">Clear search</string>
     <string name="auto_correct_no_corrections_found">No corrections found</string>
@@ -360,7 +360,7 @@
     <!-- App Picker Dialog -->
     <string name="app_picker_title">Select an app</string>
     <string name="app_picker_cancel">Cancel</string>
-    <string name="app_picker_search_placeholder">Search apps...</string>
+    <string name="app_picker_search_placeholder">Search apps…</string>
     
     <!-- Settings Screen -->
     <string name="settings_support_ko_fi">Support on Ko-fi</string>

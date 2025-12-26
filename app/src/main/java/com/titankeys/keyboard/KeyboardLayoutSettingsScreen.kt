@@ -61,7 +61,7 @@ fun KeyboardLayoutSettingsScreen(
     }
     
     // Refresh trigger for custom layouts
-    var refreshTrigger by remember { mutableStateOf(0) }
+    var refreshTrigger by remember { mutableIntStateOf(0) }
     
     // Get all keyboard layouts (assets + custom, excluding qwerty as it's the default)
     val allLayouts = remember(refreshTrigger) {

@@ -94,11 +94,6 @@ class LauncherShortcutController(
      * @return true if launched successfully
      */
     private fun launchShortcut(packageName: String, shortcutId: String): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
-            Log.w(TAG, "Shortcuts not supported on this Android version")
-            return false
-        }
-
         try {
             val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
             val userHandle = android.os.Process.myUserHandle()
@@ -125,10 +120,6 @@ class LauncherShortcutController(
      * @return List of available shortcuts
      */
     fun getAvailableShortcuts(): List<ShortcutInfo> {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
-            return emptyList()
-        }
-
         val shortcuts = mutableListOf<ShortcutInfo>()
         try {
             val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps

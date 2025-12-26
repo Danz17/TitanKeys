@@ -136,15 +136,10 @@ class ClipboardHistoryManager(
      */
     private fun saveImageFromUri(uri: Uri, timeStamp: Long, retentionMinutes: Long): Boolean {
         return try {
-            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val source = ImageDecoder.createSource(context.contentResolver, uri)
-                ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                    decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-                    decoder.isMutableRequired = true
-                }
-            } else {
-                @Suppress("DEPRECATION")
-                MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+            val source = ImageDecoder.createSource(context.contentResolver, uri)
+            val bitmap = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                decoder.isMutableRequired = true
             }
 
             if (bitmap == null) {
@@ -212,10 +207,7 @@ class ClipboardHistoryManager(
     fun clearHistory() {
         clipboardDao?.clearNonPinned()
         try {
-            // Clear system clipboard (API 28+)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                clipboardManager.clearPrimaryClip()
-            }
+            clipboardManager.clearPrimaryClip()
         } catch (e: Exception) {
             Log.w(TAG, "Failed to clear system clipboard", e)
         }

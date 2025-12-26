@@ -35,7 +35,7 @@ fun TrackpadGestureSettingsScreen(
         mutableStateOf(SettingsManager.getTrackpadGesturesEnabled(context))
     }
     var swipeThreshold by remember {
-        mutableStateOf(SettingsManager.getTrackpadSwipeThreshold(context))
+        mutableFloatStateOf(SettingsManager.getTrackpadSwipeThreshold(context))
     }
     var showTutorialDialog by remember { mutableStateOf(false) }
     var shizukuStatus by remember { mutableStateOf(ShizukuStatus.NotConnected) }
@@ -314,7 +314,7 @@ fun TrackpadGestureSettingsScreen(
 fun TrackpadTutorialDialog(
     onDismiss: () -> Unit
 ) {
-    var currentPage by remember { mutableStateOf(0) }
+    var currentPage by remember { mutableIntStateOf(0) }
     val pages = listOf(
         TutorialPage(
             title = stringResource(R.string.trackpad_tutorial_welcome_title),

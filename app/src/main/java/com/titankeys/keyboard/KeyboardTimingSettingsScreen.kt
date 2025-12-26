@@ -35,8 +35,8 @@ fun KeyboardTimingSettingsScreen(
 ) {
     val context = LocalContext.current
     
-    var longPressThreshold by remember { 
-        mutableStateOf(SettingsManager.getLongPressThreshold(context))
+    var longPressThreshold by remember {
+        mutableLongStateOf(SettingsManager.getLongPressThreshold(context))
     }
     
     var longPressModifier by remember { 

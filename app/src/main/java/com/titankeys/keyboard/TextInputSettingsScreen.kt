@@ -72,7 +72,7 @@ fun TextInputSettingsScreen(
     }
 
     var nextWordPredictionMode by remember {
-        mutableStateOf(SettingsManager.getNextWordPredictionMode(context))
+        mutableIntStateOf(SettingsManager.getNextWordPredictionMode(context))
     }
 
     var userLearningEnabled by remember {

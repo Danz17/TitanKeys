@@ -1809,20 +1809,9 @@ class PhysicalKeyboardInputMethodService : InputMethodService() {
         val locales = mutableSetOf<String>()
         try {
             val config = resources.configuration
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                // Android N+ (API 24+)
-                val localeList = config.locales
-                for (i in 0 until localeList.size()) {
-                    val locale = localeList[i]
-                    val localeStr = formatLocaleStringForSystem(locale)
-                    if (localeStr.isNotEmpty()) {
-                        locales.add(localeStr)
-                    }
-                }
-            } else {
-                // Pre-Android N
-                @Suppress("DEPRECATION")
-                val locale = config.locale
+            val localeList = config.locales
+            for (i in 0 until localeList.size()) {
+                val locale = localeList[i]
                 val localeStr = formatLocaleStringForSystem(locale)
                 if (localeStr.isNotEmpty()) {
                     locales.add(localeStr)

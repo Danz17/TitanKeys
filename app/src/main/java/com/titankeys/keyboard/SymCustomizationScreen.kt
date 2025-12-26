@@ -56,7 +56,7 @@ fun SymCustomizationScreen(
     }
     
     // Selected tab (0 = Emoji, 1 = Characters)
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(0) }
     
     // Helper to load mappings from JSON
     fun loadMappingsFromJson(filePath: String): Map<Int, String> {
