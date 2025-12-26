@@ -46,6 +46,83 @@
     </issue>
 
     <issue
+        id="MissingDefaultResource"
+        message="The color &quot;purple_200&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier"
+        errorLine1="    &lt;color name=&quot;purple_200&quot;>#FFBB86FC&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-night/colors.xml"
+            line="3"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The color &quot;purple_500&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier"
+        errorLine1="    &lt;color name=&quot;purple_500&quot;>#FF6200EE&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-night/colors.xml"
+            line="4"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The color &quot;purple_700&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier"
+        errorLine1="    &lt;color name=&quot;purple_700&quot;>#FF3700B3&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-night/colors.xml"
+            line="5"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The color &quot;teal_200&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier"
+        errorLine1="    &lt;color name=&quot;teal_200&quot;>#FF03DAC5&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-night/colors.xml"
+            line="6"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The color &quot;teal_700&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier"
+        errorLine1="    &lt;color name=&quot;teal_700&quot;>#FF018786&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-night/colors.xml"
+            line="7"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The color &quot;black&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier"
+        errorLine1="    &lt;color name=&quot;black&quot;>#FF000000&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-night/colors.xml"
+            line="8"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The color &quot;white&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier"
+        errorLine1="    &lt;color name=&quot;white&quot;>#FFFFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-night/colors.xml"
+            line="9"
+            column="12"/>
+    </issue>
+
+    <issue
         id="PrivateApi"
         message="Accessing internal APIs via reflection is not supported and may not work on all devices or in the future"
         errorLine1="            val hapticManagerClass = Class.forName(&quot;android.os.HapticFeedbackManager&quot;)"
@@ -526,7 +603,7 @@
         errorLine1="    &lt;color name=&quot;purple_200&quot;>#FFBB86FC&lt;/color>"
         errorLine2="           ~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/colors.xml"
+            file="src/main/res/values-night/colors.xml"
             line="3"
             column="12"/>
     </issue>
@@ -537,7 +614,7 @@
         errorLine1="    &lt;color name=&quot;purple_500&quot;>#FF6200EE&lt;/color>"
         errorLine2="           ~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/colors.xml"
+            file="src/main/res/values-night/colors.xml"
             line="4"
             column="12"/>
     </issue>
@@ -548,7 +625,7 @@
         errorLine1="    &lt;color name=&quot;purple_700&quot;>#FF3700B3&lt;/color>"
         errorLine2="           ~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/colors.xml"
+            file="src/main/res/values-night/colors.xml"
             line="5"
             column="12"/>
     </issue>
@@ -559,7 +636,7 @@
         errorLine1="    &lt;color name=&quot;teal_200&quot;>#FF03DAC5&lt;/color>"
         errorLine2="           ~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/colors.xml"
+            file="src/main/res/values-night/colors.xml"
             line="6"
             column="12"/>
     </issue>
@@ -570,7 +647,7 @@
         errorLine1="    &lt;color name=&quot;teal_700&quot;>#FF018786&lt;/color>"
         errorLine2="           ~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/colors.xml"
+            file="src/main/res/values-night/colors.xml"
             line="7"
             column="12"/>
     </issue>
@@ -581,7 +658,7 @@
         errorLine1="    &lt;color name=&quot;black&quot;>#FF000000&lt;/color>"
         errorLine2="           ~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/colors.xml"
+            file="src/main/res/values-night/colors.xml"
             line="8"
             column="12"/>
     </issue>
@@ -592,31 +669,9 @@
         errorLine1="    &lt;color name=&quot;white&quot;>#FFFFFFFF&lt;/color>"
         errorLine2="           ~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/colors.xml"
+            file="src/main/res/values-night/colors.xml"
             line="9"
             column="12"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.drawable.ic_globe_24` appears to be unused"
-        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
-        errorLine2="^">
-        <location
-            file="src/main/res/drawable/ic_globe_24.xml"
-            line="2"
-            column="1"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.drawable.ic_keyboard_hide_24` appears to be unused"
-        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
-        errorLine2="^">
-        <location
-            file="src/main/res/drawable/ic_keyboard_hide_24.xml"
-            line="2"
-            column="1"/>
     </issue>
 
     <issue
